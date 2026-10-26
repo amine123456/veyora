@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard | Proxora</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#04222A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
+<script src="auth.js" defer></script>
+</head>
+<body>
+<main class="dash" data-dashboard>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand__mark" aria-hidden="true">P</span>Proxora</a>
+    <div class="topbar__right">
+      <span class="topbar__email" data-field="email"></span>
+      <button class="btn btn--ghost" type="button" data-logout>Log out</button>
+    </div>
+  </header>
+
+  <h1 class="dash__title">Dashboard</h1>
+
+  <section class="card" aria-labelledby="traffic-title">
+    <h2 class="card__label" id="traffic-title">Traffic left</h2>
+    <p class="balance" data-field="remaining">…</p>
+    <div class="meter" role="progressbar" aria-label="Traffic used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-meter>
+      <span class="meter__fill" data-meter-fill></span>
+    </div>
+    <p class="card__note" data-field="usage"></p>
+    <p class="empty" data-empty hidden>You have no traffic yet. Buy GB to start using the proxy.</p>
+    <a class="btn" href="/#pricing">Buy traffic</a>
+  </section>
+
+  <section class="card" aria-labelledby="connect-title">
+    <h2 class="card__label" id="connect-title">Connection details</h2>
+    <dl class="rows rows--copy">
+      <div>
+        <dt>Endpoint</dt>
+        <dd><code data-field="endpoint">…</code><button class="copy" type="button" data-copy="endpoint">Copy</button></dd>
+      </div>
+      <div>
+        <dt>Username</dt>
+        <dd><code data-field="username">…</code><button class="copy" type="button" data-copy="username">Copy</button></dd>
+      </div>
+      <div>
+        <dt>Password</dt>
+        <dd>
+          <span class="muted" data-password-hidden>Hidden</span>
+          <code data-field="password" hidden></code><button class="copy" type="button" data-copy="password" hidden>Copy</button>
+        </dd>
+      </div>
+    </dl>
+    <p class="notice" data-password-notice hidden role="status">Save this password now. It will not be shown again, and your previous password no longer works.</p>
+    <p class="form__error" data-password-error role="alert" hidden></p>
+    <button class="btn btn--outline" type="button" data-regenerate>Generate new password</button>
+    <p class="card__note">We only store a fingerprint of your proxy password, so we can't show an old one. Generating a new password signs out tools using the old one.</p>
+  </section>
+
+  <section class="card" aria-labelledby="options-title">
+    <h2 class="card__label" id="options-title">Country and sticky IPs</h2>
+    <p class="card__note">Add options to your username. The password stays the same.</p>
+    <dl class="rows rows--options">
+      <div><dt><code data-example=""></code></dt><dd>New IP on every request</dd></div>
+      <div><dt><code data-example="-country-gr"></code></dt><dd>IP in Greece. Use any two-letter country code.</dd></div>
+      <div><dt><code data-example="-session-job1"></code></dt><dd>Same IP for <span data-field="sticky">10 minutes</span>. Pick any name of up to 32 letters and digits.</dd></div>
+      <div><dt><code data-example="-country-gr-session-job1"></code></dt><dd>Both: a Greek IP that stays the same</dd></div>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="test-title">
+    <h2 class="card__label" id="test-title">Test it</h2>
+    <p class="card__note">Run this in a terminal. It prints the IP address sites see.</p>
+    <div class="code">
+      <pre><code data-field="curl">…</code></pre>
+      <button class="copy" type="button" data-copy="curl">Copy</button>
+    </div>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in | Proxora</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#04222A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
+<script src="auth.js" defer></script>
+</head>
+<body>
+<main class="auth">
+  <a class="brand" href="/"><span class="brand__mark" aria-hidden="true">P</span>Proxora</a>
+  <section class="card" aria-labelledby="auth-title">
+    <h1 id="auth-title">Log in</h1>
+    <p class="card__sub">Check your traffic and buy more GB.</p>
+    <form class="form" data-auth="login" novalidate>
+      <label class="field">
+        <span>Email</span>
+        <input type="email" name="email" autocomplete="email" required maxlength="254">
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" name="password" autocomplete="current-password" required maxlength="256">
+      </label>
+      <p class="form__error" role="alert" hidden></p>
+      <button class="btn" type="submit">Log in</button>
+    </form>
+    <p class="card__switch">New to Proxora? <a href="/signup">Create an account</a></p>
+  </section>
+</main>
+</body>
+</html>

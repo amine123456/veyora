@@ -1,0 +1,16 @@
+{
+  "name": "private-proxy-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authenticated quota gateway over an upstream HTTP proxy",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "admin": "node --env-file=.env src/admin.js",
+    "test": "node --test --test-concurrency=1",
+    "smoke:live": "node scripts/live-smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

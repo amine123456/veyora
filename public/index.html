@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proxora | Residential proxies</title>
+<meta name="description" content="Proxora gives you 5 million residential IPs from real home ISPs in 195 countries for scraping, ad verification, AI data collection and e-commerce.">
+<meta name="theme-color" content="#04222A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="is-dark">
+
+<!-- ============ SVG SPRITE (icons, flags, tool marks) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs><clipPath id="cc"><circle cx="12" cy="12" r="12"/></clipPath></defs>
+
+  <symbol id="i-mark" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="26" height="26" rx="8"/><path d="M12 22V10h6a4 4 0 0 1 0 8h-6"/><path d="M8 3v-1M16 3V2M24 3V2M8 30v-1M16 30v-1M24 30v-1" opacity=".5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H16"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.2 3.5 14.8 0 18M12 3c-3.5 3.2-3.5 14.8 0 18"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="2.5"/><rect x="3" y="13" width="18" height="7" rx="2.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 13h6l-1 8 8-10h-6z"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9.5 2.5h5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.9-4.7 4.5 1.2 6.4L12 17.4 6.3 20.5l1.2-6.4L2.800 9.600l6.400-.9z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16M20 4L4 20"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 11v6M8 7.500v.01M12 17v-6M12 13.500a2.500 2.500 0 0 1 5 0V17"/></symbol>
+  <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.500" y="5.500" width="19" height="13" rx="4"/><path d="M10 9.500l5 2.500-5 2.500z"/></symbol>
+  <symbol id="i-gh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.500-5-2.500-7-3m14 6v-3.870a3.370 3.370 0 0 0-.940-2.610c3.140-.350 6.440-1.540 6.440-7A5.440 5.440 0 0 0 20 4.770 5.070 5.070 0 0 0 19.910 1S18.730.650 16 2.480a13.380 13.380 0 0 0-7 0C6.270.650 5.090 1 5.090 1A5.070 5.070 0 0 0 5 4.770a5.440 5.440 0 0 0-1.500 3.780c0 5.420 3.300 6.610 6.440 7A3.370 3.370 0 0 0 9 18.130V22"/></symbol>
+
+  <!-- abstract flag badges -->
+  <symbol id="f-us" viewBox="0 0 24 24"><g clip-path="url(#cc)"><rect width="24" height="24" fill="#fff"/><rect y="0" width="24" height="2.400" fill="#D8334A"/><rect y="4.800" width="24" height="2.400" fill="#D8334A"/><rect y="9.600" width="24" height="2.400" fill="#D8334A"/><rect y="14.400" width="24" height="2.400" fill="#D8334A"/><rect y="19.200" width="24" height="2.400" fill="#D8334A"/><rect width="11" height="12.500" fill="#2458F5"/></g></symbol>
+  <symbol id="f-de" viewBox="0 0 24 24"><g clip-path="url(#cc)"><rect width="24" height="8" fill="#14171c"/><rect y="8" width="24" height="8" fill="#E0392D"/><rect y="16" width="24" height="8" fill="#F5B73C"/></g></symbol>
+  <symbol id="f-fr" viewBox="0 0 24 24"><g clip-path="url(#cc)"><rect width="8" height="24" fill="#2458F5"/><rect x="8" width="8" height="24" fill="#fff"/><rect x="16" width="8" height="24" fill="#E0392D"/></g></symbol>
+  <symbol id="f-jp" viewBox="0 0 24 24"><g clip-path="url(#cc)"><rect width="24" height="24" fill="#fff"/><circle cx="12" cy="12" r="5.500" fill="#E0392D"/></g></symbol>
+  <symbol id="f-br" viewBox="0 0 24 24"><g clip-path="url(#cc)"><rect width="24" height="24" fill="#1FA45B"/><path d="M12 4l9 8-9 8-9-8z" fill="#F5C83C"/><circle cx="12" cy="12" r="4" fill="#2458F5"/></g></symbol>
+  <symbol id="f-es" viewBox="0 0 24 24"><g clip-path="url(#cc)"><rect width="24" height="24" fill="#D8334A"/><rect y="6" width="24" height="12" fill="#F5C83C"/></g></symbol>
+
+  <!-- tool marks (geometric, no trademarks) -->
+  <symbol id="t-python" viewBox="0 0 32 32"><rect x="5" y="4" width="15" height="15" rx="5.500" fill="#3A74B8"/><rect x="12" y="13" width="15" height="15" rx="5.500" fill="#F2C94C"/><circle cx="10.500" cy="9" r="1.700" fill="#fff"/><circle cx="21.500" cy="23" r="1.700" fill="#fff"/></symbol>
+  <symbol id="t-node" viewBox="0 0 32 32"><path d="M16 3l11 6.500v13L16 29 5 22.500v-13z" fill="#3FA34D"/><path d="M12 21V11l8 10V11" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="t-selenium" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="8" fill="#43B02A"/><path d="M10.500 16.500l3.500 3.500 7.500-8" fill="none" stroke="#fff" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="t-puppeteer" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="8" fill="#1B2430"/><circle cx="16" cy="16" r="6" fill="none" stroke="#35D0A6" stroke-width="2.200"/><circle cx="16" cy="16" r="1.900" fill="#35D0A6"/></symbol>
+  <symbol id="t-playwright" viewBox="0 0 32 32"><circle cx="12" cy="16" r="9" fill="#2EAD33"/><circle cx="20" cy="16" r="9" fill="#E2574C" opacity=".85"/><circle cx="16" cy="16" r="2.200" fill="#fff"/></symbol>
+  <symbol id="t-scrapy" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#23282F"/><circle cx="16" cy="16" r="3.500" fill="#7CE0B4"/><path d="M13 14L8 9M19 14l5-5M13 18l-5 5M19 18l5 5M12.500 16H7M19.500 16H25" stroke="#7CE0B4" stroke-width="1.800" stroke-linecap="round"/></symbol>
+  <symbol id="t-curl" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="8" fill="#0E1116"/><path d="M13 9c-2.500 0-2.500 2-2.500 4s-1 2.500-2.500 3c1.500.5 2.500 1 2.500 3s0 4 2.500 4M19 9c2.500 0 2.500 2 2.500 4s1 2.500 2.500 3c-1.500.5-2.500 1-2.500 3s0 4-2.500 4" fill="none" stroke="#fff" stroke-width="1.900" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="t-postman" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#FF6C37"/><path d="M9 17.500l14-7-5 12-3-5z" fill="#fff"/></symbol>
+  <symbol id="t-chrome" viewBox="0 0 32 32"><path d="M16 16L16 4A12 12 0 0 1 26.390 22Z" fill="#EA4335"/><path d="M16 16L26.390 22A12 12 0 0 1 5.610 22Z" fill="#34A853"/><path d="M16 16L5.610 22A12 12 0 0 1 16 4Z" fill="#FBBC05"/><circle cx="16" cy="16" r="5.500" fill="#fff"/><circle cx="16" cy="16" r="4" fill="#4285F4"/></symbol>
+</svg>
+
+<!-- 3D chip template (mounted by JS into [data-chip-slot]) -->
+<template id="chipTpl">
+  <div class="chip">
+    <i class="chip__layer" style="--i:0"></i>
+    <i class="chip__layer" style="--i:1"></i>
+    <i class="chip__layer" style="--i:2"></i>
+    <i class="chip__layer" style="--i:3"></i>
+    <div class="chip__top glass glass--dark" style="--i:4">
+      <svg class="chip__mark" role="img" aria-label="Proxora mark"><use href="#i-mark"/></svg>
+      <span class="chip__pins" aria-hidden="true"></span>
+    </div>
+  </div>
+</template>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ============ HEADER ============ -->
+<header class="nav" id="nav">
+  <nav class="nav__pill glass glass--pill" aria-label="Primary">
+    <a class="nav__brand" href="#hero" aria-label="Proxora, back to top">
+      <svg class="icon nav__mark" aria-hidden="true"><use href="#i-mark"/></svg>
+      <span>Proxora</span>
+    </a>
+    <ul class="nav__links" id="navMenu">
+      <li><a href="#products" data-spy>Products</a></li>
+      <li><a href="#network" data-spy>Network</a></li>
+      <li><a href="#pricing" data-spy>Pricing</a></li>
+      <li><a href="#developers" data-spy>Docs</a></li>
+      <li><a href="#faq" data-spy>FAQ</a></li>
+      <li class="nav__mobile-actions">
+        <a class="btn btn--ghost" href="/login">Log in</a>
+        <a class="btn btn--dark" href="#pricing">Get proxies</a>
+      </li>
+    </ul>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/login">Log in</a>
+      <a class="btn btn--dark btn--sm" href="#pricing" data-magnetic>Get proxies</a>
+    </div>
+    <button class="nav__toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Toggle menu">
+      <i></i><i></i>
+    </button>
+    <span class="nav__progress" aria-hidden="true"><i id="progressBar"></i></span>
+  </nav>
+</header>
+
+<main id="main">
+
+<!-- ============ S1 HERO ============ -->
+<section class="section hero" id="hero" aria-labelledby="hero-title">
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="container hero__inner">
+    <a class="announce glass glass--dark glass--pill" href="#products" data-reveal style="--d:0ms">
+      <span class="dot dot--live" aria-hidden="true"></span>
+      <span>Real ISP addresses, not datacenter ranges</span>
+      <span class="announce__sep" aria-hidden="true">·</span>
+      <span class="announce__link">See what's new</span>
+    </a>
+
+    <h1 class="hero__title display split" id="hero-title">Proxies that look like real people, <em class="grad-text">at any scale.</em></h1>
+
+    <p class="hero__sub" data-reveal style="--d:500ms">Tap into 5 million residential IPs across 195 countries, with sticky sessions or a fresh IP on every request.</p>
+
+    <div class="hero__cta" data-reveal style="--d:620ms">
+      <a class="btn btn--lilac btn--lg" href="#pricing" data-magnetic>Get proxies</a>
+      <a class="btn btn--glass btn--lg" href="#pricing" data-magnetic>View pricing</a>
+    </div>
+    <p class="hero__note" data-reveal style="--d:700ms">No contract · 3-day refund</p>
+  </div>
+
+  <!-- 3D proxy chip scene -->
+  <div class="scene" id="scene" role="img" aria-label="Isometric illustration of a Proxora proxy chip routing requests to six feature tiles: countries, HTTP and SOCKS5, sticky sessions, geo-targeting, rotation and IPv4 or IPv6.">
+    <div class="scene__stage" id="sceneStage">
+      <div class="scene__board" id="sceneBoard">
+        <div class="scene__floor" aria-hidden="true"></div>
+
+        <svg class="scene__traces" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
+          <g class="trace"><path class="trace__base" d="M440 270H320L240 132H140"/><path class="trace__glow" pathLength="1" d="M440 270H320L240 132H140"/><circle class="trace__node" cx="140" cy="132" r="6"/><circle class="trace__dot" r="4"><animateMotion dur="3.4s" begin="2s" repeatCount="indefinite" path="M440 270H320L240 132H140"/></circle></g>
+          <g class="trace"><path class="trace__base" d="M440 300H80"/><path class="trace__glow" pathLength="1" d="M440 300H80"/><circle class="trace__node" cx="80" cy="300" r="6"/><circle class="trace__dot" r="4"><animateMotion dur="3s" begin="2.4s" repeatCount="indefinite" path="M440 300H80"/></circle></g>
+          <g class="trace"><path class="trace__base" d="M440 330H320L240 504H160"/><path class="trace__glow" pathLength="1" d="M440 330H320L240 504H160"/><circle class="trace__node" cx="160" cy="504" r="6"/><circle class="trace__dot" r="4"><animateMotion dur="3.6s" begin="2.8s" repeatCount="indefinite" path="M440 330H320L240 504H160"/></circle></g>
+          <g class="trace"><path class="trace__base" d="M560 270H680L760 132H860"/><path class="trace__glow" pathLength="1" d="M560 270H680L760 132H860"/><circle class="trace__node" cx="860" cy="132" r="6"/><circle class="trace__dot" r="4"><animateMotion dur="3.4s" begin="2.2s" repeatCount="indefinite" path="M560 270H680L760 132H860"/></circle></g>
+          <g class="trace"><path class="trace__base" d="M560 300H920"/><path class="trace__glow" pathLength="1" d="M560 300H920"/><circle class="trace__node" cx="920" cy="300" r="6"/><circle class="trace__dot" r="4"><animateMotion dur="3s" begin="2.6s" repeatCount="indefinite" path="M560 300H920"/></circle></g>
+          <g class="trace"><path class="trace__base" d="M560 330H680L760 504H840"/><path class="trace__glow" pathLength="1" d="M560 330H680L760 504H840"/><circle class="trace__node" cx="840" cy="504" r="6"/><circle class="trace__dot" r="4"><animateMotion dur="3.6s" begin="3s" repeatCount="indefinite" path="M560 330H680L760 504H840"/></circle></g>
+          <!-- decorative circuit lines -->
+          <g class="trace trace--soft"><path class="trace__base" d="M470 240V120H560L600 80H700"/><path class="trace__glow" pathLength="1" d="M470 240V120H560L600 80H700"/><circle class="trace__node" cx="700" cy="80" r="4"/></g>
+          <g class="trace trace--soft"><path class="trace__base" d="M530 360V470H440L400 520H300"/><path class="trace__glow" pathLength="1" d="M530 360V470H440L400 520H300"/><circle class="trace__node" cx="300" cy="520" r="4"/></g>
+          <g class="trace trace--soft"><path class="trace__base" d="M380 250L330 200H260V60"/><path class="trace__glow" pathLength="1" d="M380 250L330 200H260V60"/><circle class="trace__node" cx="260" cy="60" r="4"/></g>
+          <g class="trace trace--soft"><path class="trace__base" d="M620 350L670 400H740V540"/><path class="trace__glow" pathLength="1" d="M620 350L670 400H740V540"/><circle class="trace__node" cx="740" cy="540" r="4"/></g>
+        </svg>
+
+        <div class="scene__chip" data-chip-slot></div>
+
+        <div class="tile glass glass--dark" style="left:14%;top:22%;--z:72px;--n:0">
+          <span class="tile__flags"><svg class="flag"><use href="#f-us"/></svg><svg class="flag"><use href="#f-de"/></svg><svg class="flag"><use href="#f-jp"/></svg><svg class="flag"><use href="#f-br"/></svg></span>
+          <b class="tile__v">195 countries</b>
+        </div>
+        <div class="tile glass glass--dark" style="left:8%;top:50%;--z:48px;--n:1">
+          <span class="tile__k">Protocol</span><b class="tile__v">HTTP / SOCKS5</b>
+        </div>
+        <div class="tile glass glass--dark" style="left:16%;top:84%;--z:90px;--n:2">
+          <span class="tile__k">Session</span><b class="tile__v">Sticky or rotating</b>
+        </div>
+        <div class="tile glass glass--dark" style="left:86%;top:22%;--z:58px;--n:3">
+          <span class="tile__k">Targeting</span><b class="tile__v"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> Geo-target</b>
+        </div>
+        <div class="tile glass glass--dark" style="left:92%;top:50%;--z:84px;--n:4">
+          <span class="tile__k">Mode</span><b class="tile__v"><svg class="icon" aria-hidden="true"><use href="#i-rotate"/></svg> Rotating</b>
+        </div>
+        <div class="tile glass glass--dark" style="left:84%;top:84%;--z:52px;--n:5">
+          <span class="tile__k">Stack</span><b class="tile__v">IPv4 / IPv6</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="live live--a glass glass--dark glass--pill" data-depth="1.2" aria-hidden="true">
+      <span class="dot dot--live"></span><span class="live__k">Request</span><b id="liveStatus">200 OK</b><span class="live__v" id="liveMs">412ms</span>
+    </div>
+    <div class="live live--b glass glass--dark glass--pill" data-depth="-1" aria-hidden="true">
+      <svg class="flag" id="liveFlag"><use href="#f-de"/></svg><span class="live__k">IP rotated</span><b id="liveCity">Berlin, DE</b>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S2 PRODUCTS ============ -->
+<section class="section products" id="products" aria-labelledby="products-title">
+  <div class="dotgrid" aria-hidden="true"></div>
+  <div class="container">
+    <header class="section__head section__head--center">
+      <p class="tag" data-reveal><span>Products</span></p>
+      <h2 class="h2 split" id="products-title">Real home IPs. <em class="c-blue">Real results.</em></h2>
+      <p class="lead" data-reveal>These come from real ISPs. Not a datacenter pretending to be residential.</p>
+    </header>
+
+    <div class="bento" id="bento">
+      <!-- Residential -->
+      <article class="card bento__res" data-tilt data-card>
+        <div class="card__frame"><div class="card__inner">
+          <div class="card__head">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg></span>
+            <div><h3>5 million residential IPs</h3><p>Home ISP addresses. Rotate each request or keep the same one.</p></div>
+          </div>
+          <div class="card__viz card__viz--res">
+            <div class="minimap" id="miniMap" aria-hidden="true">
+              <span class="minimap__pulse" style="left:22%;top:34%"></span>
+              <span class="minimap__pulse" style="left:49%;top:26%"></span>
+              <span class="minimap__pulse" style="left:72%;top:40%"></span>
+            </div>
+            <ul class="iplist" data-ticker aria-label="Live rotating IPs, demo data">
+              <li><svg class="flag"><use href="#f-es"/></svg><span class="mono">82.14.xx.201</span><em>Madrid</em></li>
+              <li><svg class="flag"><use href="#f-de"/></svg><span class="mono">91.37.xx.58</span><em>Berlin</em></li>
+              <li><svg class="flag"><use href="#f-us"/></svg><span class="mono">73.221.xx.9</span><em>Austin</em></li>
+              <li><svg class="flag"><use href="#f-jp"/></svg><span class="mono">126.44.xx.130</span><em>Osaka</em></li>
+            </ul>
+          </div>
+          <ul class="specs">
+            <li><span>Pool size</span><b>5M IPs</b></li>
+            <li><span>Targeting</span><b>Any of 195 countries</b></li>
+            <li><span>Sessions</span><b>Rotating or sticky</b></li>
+            <li><span>Protocols</span><b>HTTP, HTTPS, SOCKS5</b></li>
+          </ul>
+          <a class="card__link" href="#pricing">See residential pricing <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div></div>
+        <span class="card__glare" aria-hidden="true"></span>
+      </article>
+    </div>
+    <div class="compare glass" data-reveal>
+      <table>
+        <caption class="sr-only">Datacenter proxies compared with Proxora residential IPs</caption>
+        <thead><tr><th scope="col"><span class="sr-only">Compared on</span></th><th scope="col">Datacenter</th><th scope="col" class="is-us">Proxora</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Address</th><td>Hosting ranges</td><td class="is-us">Home ISP addresses</td></tr>
+          <tr><th scope="row">How sites see you</th><td>A datacenter</td><td class="is-us">Someone on home wifi</td></tr>
+          <tr><th scope="row">Blocks</th><td>Pretty common</td><td class="is-us">Looks like a normal user</td></tr>
+          <tr><th scope="row">Targeting</th><td>Sometimes a region</td><td class="is-us">Any of 195 countries</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S3 STICKY FEATURES ============ -->
+<section class="section features" id="features" aria-labelledby="features-title">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="features__wrap" id="stickyWrap">
+    <div class="features__pin">
+      <div class="container features__grid">
+
+        <div class="features__left">
+          <h2 class="h2 split" id="features-title">Built for the way <em class="c-white">you scrape.</em></h2>
+          <ul class="fsteps">
+            <li><button class="fstep is-active" type="button" data-step="0" aria-current="step"><span class="fstep__icon glass glass--warm"><svg class="icon" aria-hidden="true"><use href="#i-rotate"/></svg></span><span class="fstep__label">Smart rotation</span></button></li>
+            <li><button class="fstep" type="button" data-step="1"><span class="fstep__icon glass glass--warm"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span><span class="fstep__label">Country targeting</span></button></li>
+            <li><button class="fstep" type="button" data-step="2"><span class="fstep__icon glass glass--warm"><svg class="icon" aria-hidden="true"><use href="#i-timer"/></svg></span><span class="fstep__label">Sticky sessions</span></button></li>
+            <li><button class="fstep" type="button" data-step="3"><span class="fstep__icon glass glass--warm"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="fstep__label">Unblocking engine</span></button></li>
+          </ul>
+        </div>
+
+        <div class="features__curve" aria-hidden="true">
+          <svg viewBox="0 0 260 640" preserveAspectRatio="xMidYMid meet">
+            <path class="curve__base" id="curvePath" d="M70 10C70 110 160 120 160 220S50 330 60 430S130 530 100 630"/>
+            <path class="curve__glow" id="curveGlow" d="M70 10C70 110 160 120 160 220S50 330 60 430S130 530 100 630"/>
+            <g id="curveStations"></g>
+            <g id="curveNode" transform="translate(70 10)">
+              <circle class="curve__halo" r="16"/>
+              <circle class="curve__core" r="6"/>
+              <text class="curve__label" id="nodeLabel" x="26" y="5">Step 1</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="features__right">
+          <div class="panel glass glass--warm" id="fpanel" aria-live="polite">
+            <div class="panel__slide is-active" data-step="0">
+              <p class="panel__step mono">Step 1 of 4</p>
+              <h3>Smart rotation</h3>
+              <p class="panel__desc">A fresh IP on every request, or hold one for as long as you need.</p>
+              <ul class="checks">
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Rotate per request, per minute or on demand</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Automatic retry on a clean IP after a block</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Pool health scoring removes flagged IPs</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>No repeated IPs inside your chosen window</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>One username flag controls it all</li>
+              </ul>
+              <ul class="iplist iplist--warm" data-ticker aria-label="Rotating IP demo">
+                <li><svg class="flag"><use href="#f-fr"/></svg><span class="mono">78.201.xx.33</span><em>Lyon</em></li>
+                <li><svg class="flag"><use href="#f-br"/></svg><span class="mono">187.54.xx.171</span><em>Recife</em></li>
+                <li><svg class="flag"><use href="#f-us"/></svg><span class="mono">68.12.xx.90</span><em>Austin</em></li>
+              </ul>
+            </div>
+
+            <div class="panel__slide" data-step="1" aria-hidden="true">
+              <p class="panel__step mono">Step 2 of 4</p>
+              <h3>Country targeting</h3>
+              <p class="panel__desc">Pick a country or use the whole pool.</p>
+              <ul class="checks">
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Any of 195 countries</li>
+                                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Change country per request, no new login</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Or skip targeting and use the whole pool</li>
+                              </ul>
+              <div class="chips" id="geoChips" role="group" aria-label="City picker demo">
+                <button type="button" aria-pressed="true">United States</button><button type="button" aria-pressed="false">United Kingdom</button><button type="button" aria-pressed="false">Japan</button><button type="button" aria-pressed="false">Brazil</button><button type="button" aria-pressed="false">Singapore</button><button type="button" aria-pressed="false">Germany</button><button type="button" aria-pressed="false">India</button><button type="button" aria-pressed="false">Canada</button>
+              </div>
+            </div>
+
+            <div class="panel__slide" data-step="2" aria-hidden="true">
+              <p class="panel__step mono">Step 3 of 4</p>
+              <h3>Sticky sessions</h3>
+              <p class="panel__desc">Keep one identity across logins, carts and multi-step flows.</p>
+              <ul class="checks">
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Keep the same IP for a whole session</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Session IDs you define yourself</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Auto-replace if the IP drops</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Unlimited parallel sessions</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Remaining lifetime shown in the dashboard</li>
+              </ul>
+              <div class="session">
+                <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="session__track" cx="40" cy="40" r="34" pathLength="100"/><circle class="session__ring" id="sessRing" cx="40" cy="40" r="34" pathLength="100"/></svg>
+                <div><span class="mono">Session time left</span><b class="mono" id="sessTime">23:59:59</b></div>
+              </div>
+            </div>
+
+            <div class="panel__slide" data-step="3" aria-hidden="true">
+              <p class="panel__step mono">Step 4 of 4</p>
+              <h3>Unblocking engine</h3>
+              <p class="panel__desc">We handle the fingerprint, the retries and the routing so you get the page.</p>
+              <ul class="checks">
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Browser-grade TLS and HTTP/2 fingerprints</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Header and cookie hygiene handled for you</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Automatic retries on 403 and 429</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>CAPTCHA-aware routing</li>
+                <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Success-rate analytics per target</li>
+              </ul>
+              <ul class="waterfall" aria-label="Request waterfall demo">
+                <li style="--w:14%;--d:0"><span>DNS</span><i></i><em>18ms</em></li>
+                <li style="--w:24%;--d:1"><span>TLS</span><i></i><em>46ms</em></li>
+                <li style="--w:20%;--d:2"><span>Fingerprint</span><i></i><em>31ms</em></li>
+                <li style="--w:36%;--d:3"><span>Route</span><i></i><em>128ms</em></li>
+                <li style="--w:62%;--d:4"><span>Response</span><i></i><em>166ms</em></li>
+              </ul>
+            </div>
+          </div>
+          <div class="features__foot">
+            <p>Every feature ships on every plan. No add-ons, no surprise fees.</p>
+            <span class="pill-note glass glass--warm glass--pill">Unlimited requests on every plan</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S4 GLOBAL NETWORK ============ -->
+<section class="section network" id="network" aria-labelledby="network-title">
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="network__top">
+      <div class="network__left">
+        <h2 class="h2 display split" id="network-title"><em class="c-lilac">Real IPs</em> in every corner of the map.</h2>
+        <div class="appcard glass" data-reveal>
+          <span class="appcard__icon"><svg class="icon" aria-hidden="true"><use href="#i-mark"/></svg></span>
+          <div class="appcard__body">
+            <b>Proxora network</b>
+            <span>Real-time coverage in 195 countries</span>
+            <span class="appcard__meta"><span>5M IPs · 195 countries</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="network__right">
+        <div class="wordarc" id="wordArc" aria-hidden="true"></div>
+        <p class="sr-only">Residential, rotating, sticky, geo-aware, clean, fast, private, reliable, global.</p>
+      </div>
+    </div>
+
+    <ul class="stats">
+      <li class="stat glass" data-reveal><b data-count="5" data-suffix="M">5M</b><span>Residential IPs</span></li>
+      <li class="stat glass" data-reveal style="--d:80ms"><b data-count="195">195</b><span>Countries</span></li>
+      <li class="stat glass" data-reveal style="--d:160ms"><b>Rotating</b><span>or sticky sessions</span></li>
+      <li class="stat glass" data-reveal style="--d:240ms"><b>SOCKS5</b><span>plus HTTP and HTTPS</span></li>
+    </ul>
+
+    <figure class="map" id="worldMap" data-reveal>
+      <div class="map__dots" id="mapDots" aria-hidden="true"></div>
+      <svg class="map__arcs" id="mapArcs" viewBox="0 0 1000 389" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="map__nodes" id="mapNodes"></div>
+      <figcaption class="sr-only">Dotted world map with 12 city nodes: Los Angeles, New York, São Paulo, London, Berlin, Paris, Dubai, Mumbai, Singapore, Tokyo, Sydney and Johannesburg.</figcaption>
+    </figure>
+    <ul class="cities" aria-label="Some of the locations in the pool" data-reveal>
+      <li>New York</li>
+      <li>London</li>
+      <li>Tokyo</li>
+      <li>São Paulo</li>
+      <li>Singapore</li>
+      <li>Berlin</li>
+      <li>Mumbai</li>
+      <li>Los Angeles</li>
+      <li>Sydney</li>
+      <li>Toronto</li>
+      <li>Paris</li>
+      <li>Seoul</li>
+      <li>Dubai</li>
+      <li>Mexico City</li>
+      <li>Johannesburg</li>
+      <li>Jakarta</li>
+      <li class="cities__more">and 180 more</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ S5 DEVELOPER EXPERIENCE ============ -->
+<section class="section dev" id="developers" aria-labelledby="dev-title">
+  <div class="dotgrid" aria-hidden="true"></div>
+  <div class="container">
+    <header class="section__head">
+      <p class="tag" data-reveal><span>Integrations</span></p>
+      <h2 class="h2 split" id="dev-title">Drop in. <em class="c-blue">Ship in minutes.</em></h2>
+      <p class="lead" data-reveal>Works with any HTTP client, headless browser or scraper. Change one proxy string and you are live.</p>
+    </header>
+
+    <div class="dev__grid">
+      <div class="terminal glass glass--dark" id="terminal" data-reveal>
+        <div class="terminal__bar">
+          <span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div class="terminal__tabs" role="tablist" aria-label="Code language">
+            <button type="button" role="tab" id="tab-curl" aria-selected="true" aria-controls="codeOut" data-lang="curl" tabindex="0">cURL</button>
+            <button type="button" role="tab" id="tab-python" aria-selected="false" aria-controls="codeOut" data-lang="python" tabindex="-1">Python</button>
+            <button type="button" role="tab" id="tab-node" aria-selected="false" aria-controls="codeOut" data-lang="node" tabindex="-1">Node</button>
+          </div>
+          <button class="terminal__copy" id="copyBtn" type="button" aria-label="Copy code"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg><span id="copyTxt">Copy</span></button>
+        </div>
+        <pre class="terminal__code" id="codeOut" role="tabpanel" tabindex="0" aria-labelledby="tab-curl"><code id="codeEl"></code></pre>
+        <div class="terminal__resp" id="codeResp">
+          <span class="dot dot--live" aria-hidden="true"></span>
+          <b>200 OK</b><span>·</span><span id="respMs">389ms</span><span>·</span><span class="mono" id="respIp">IP 82.xx.xx.14 (Madrid)</span>
+        </div>
+        <span class="sr-only" id="copyStatus" role="status" aria-live="polite"></span>
+      </div>
+
+      <svg class="dev__link" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20H120" fill="none" stroke="currentColor" stroke-width="1.500" stroke-dasharray="4 6"/></svg>
+
+      <div class="orbit" data-reveal style="--d:120ms">
+        <div class="orbit__track glass glass--pill" id="orbit" aria-hidden="true">
+          <ul class="orbit__list">
+            <li class="orbit__item" data-name="Python"><svg viewBox="0 0 32 32"><use href="#t-python"/></svg></li>
+            <li class="orbit__item" data-name="Node.js"><svg viewBox="0 0 32 32"><use href="#t-node"/></svg></li>
+            <li class="orbit__item" data-name="Selenium"><svg viewBox="0 0 32 32"><use href="#t-selenium"/></svg></li>
+            <li class="orbit__item" data-name="Puppeteer"><svg viewBox="0 0 32 32"><use href="#t-puppeteer"/></svg></li>
+            <li class="orbit__item" data-name="Playwright"><svg viewBox="0 0 32 32"><use href="#t-playwright"/></svg></li>
+            <li class="orbit__item" data-name="Scrapy"><svg viewBox="0 0 32 32"><use href="#t-scrapy"/></svg></li>
+            <li class="orbit__item" data-name="cURL"><svg viewBox="0 0 32 32"><use href="#t-curl"/></svg></li>
+            <li class="orbit__item" data-name="Postman"><svg viewBox="0 0 32 32"><use href="#t-postman"/></svg></li>
+            <li class="orbit__item" data-name="Chrome"><svg viewBox="0 0 32 32"><use href="#t-chrome"/></svg></li>
+          </ul>
+        </div>
+        <p class="orbit__name mono" id="orbitName" aria-hidden="true">Python</p>
+        <p class="orbit__caption">Works with Python, Node.js, Selenium, Puppeteer, Playwright, Scrapy, cURL, Postman and Chrome. If it speaks HTTP or SOCKS5, it works with Proxora.</p>
+      </div>
+    </div>
+
+    <div class="dsteps-wrap">
+      <svg class="dsteps__line" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="2" x2="1000" y2="2" vector-effect="non-scaling-stroke"/></svg>
+      <ol class="dsteps">
+        <li class="dstep glass" data-reveal><span class="dstep__n mono">1</span><h3>Create user</h3><p>Generate credentials in the dashboard or through the API.</p></li>
+        <li class="dstep glass" data-reveal style="--d:100ms"><span class="dstep__n mono">2</span><h3>Choose a country</h3><p>Add a country flag to your username, or leave it off for the whole pool.</p></li>
+        <li class="dstep glass" data-reveal style="--d:200ms"><span class="dstep__n mono">3</span><h3>Send request</h3><p>Point your client at the gateway and read the response.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S6 PRICING + FAQ ============ -->
+<section class="section pricing" id="pricing" aria-labelledby="pricing-title">
+  <div class="container">
+    <header class="section__head section__head--center">
+      <p class="tag" data-reveal><span>Pricing</span></p>
+      <h2 class="h2 display split" id="pricing-title"><em class="c-indigo">Pay for traffic,</em> not for promises.</h2>
+      <p class="lead" data-reveal>Simple per-GB plans on residential traffic. Upgrade, downgrade or cancel whenever you want.</p>
+      <div class="seg" id="billing" role="radiogroup" aria-label="Billing period" data-reveal>
+        <i class="seg__thumb" aria-hidden="true"></i>
+        <button type="button" role="radio" aria-checked="true" data-period="monthly" tabindex="0">Monthly</button>
+        <button type="button" role="radio" aria-checked="false" data-period="annual" tabindex="-1">Annual <em>Save 20%</em></button>
+      </div>
+    </header>
+
+    <div class="plans">
+      <article class="plan" data-monthly="29" data-annual="23" data-gb="8" data-reveal>
+        <h3 class="plan__name">Starter</h3>
+        <p class="plan__tag">For side projects and first tests.</p>
+        <p class="plan__price"><span class="plan__cur">$</span><span class="odo" data-odo aria-hidden="true"></span><span class="plan__per">/mo</span><span class="sr-only plan__sr">$29 per month</span></p>
+        <p class="plan__billed" data-monthly-t="Billed monthly" data-annual-t="Billed $276 yearly">Billed monthly</p>
+        <p class="plan__rate mono">About $3.63 per GB</p>
+        <ul class="checks checks--plan">
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>8 GB residential traffic</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>195 countries</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Rotating and sticky sessions</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>HTTP and SOCKS5</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Country targeting</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Email support</li>
+        </ul>
+        <a class="btn btn--dark btn--block" href="/signup" data-magnetic>Get Starter</a>
+      </article>
+
+      <article class="plan plan--pro" data-tilt data-monthly="99" data-annual="79" data-gb="40" data-reveal style="--d:80ms">
+        <span class="plan__badge">Most popular</span>
+        <h3 class="plan__name">Pro</h3>
+        <p class="plan__tag">For teams that scrape every day.</p>
+        <p class="plan__price"><span class="plan__cur">$</span><span class="odo" data-odo aria-hidden="true"></span><span class="plan__per">/mo</span><span class="sr-only plan__sr">$99 per month</span></p>
+        <p class="plan__billed" data-monthly-t="Billed monthly" data-annual-t="Billed $948 yearly">Billed monthly</p>
+        <p class="plan__rate mono">About $2.48 per GB</p>
+        <ul class="checks checks--plan">
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>40 GB residential traffic</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Unlimited concurrent sessions</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Unlimited IP whitelisting</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Priority chat support, 24/7</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>API access and sub-users</li>
+        </ul>
+        <a class="btn btn--blue btn--block" href="/signup" data-magnetic>Get Pro</a>
+      </article>
+
+      <article class="plan" data-reveal style="--d:160ms">
+        <h3 class="plan__name">Enterprise</h3>
+        <p class="plan__tag">For large-scale, mission-critical data.</p>
+        <p class="plan__price plan__price--text"><span class="plan__custom">Custom</span></p>
+        <p class="plan__billed">Volume pricing and invoicing</p>
+        <p class="plan__rate mono">Tailored to your traffic</p>
+        <ul class="checks checks--plan">
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Custom volume pricing</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Dedicated account manager</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Volume pricing</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Private IP pools</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Custom integrations</li>
+          <li><span class="check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Invoicing and SSO</li>
+        </ul>
+        <a class="btn btn--ghost-dark btn--block" href="#cta" data-magnetic>Talk to sales</a>
+      </article>
+    </div>
+
+    <div class="estimator glass" data-reveal>
+      <div class="estimator__head">
+        <label for="gb"><b>Estimate your cost</b><span>Drag to see the monthly price for your traffic.</span></label>
+        <output class="estimator__gb mono" id="gbOut" for="gb">40 GB</output>
+      </div>
+      <input type="range" id="gb" min="1" max="500" step="1" value="40" aria-describedby="estNote">
+      <div class="estimator__scale mono" aria-hidden="true"><span>1 GB</span><span>250 GB</span><span>500 GB</span></div>
+      <div class="estimator__out">
+        <span class="estimator__price" id="estPrice" aria-live="polite">$99</span><span class="estimator__per">/mo</span>
+        <span class="estimator__rate mono" id="estRate">$2.48 per GB</span>
+        <span class="estimator__note" id="estNote">Pro plan includes this much traffic.</span>
+      </div>
+    </div>
+
+    <div class="faq" id="faq">
+      <h3 class="faq__title display split">Questions, answered.</h3>
+      <div class="faq__cols">
+        <div class="faq__col">
+          <details class="qa" data-state="open" open><summary><span>Are the IPs ethically sourced?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>Yes. Every residential IP comes from a user who opted in, is paid for sharing bandwidth and can leave at any time. We audit our partners and enforce an acceptable use policy on all traffic.</p></div></div></details>
+          <details class="qa" data-state="closed"><summary><span>Which countries can I target?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>Any of 195. Add a country flag to your username, for example USER-country-de, or leave it off to use the whole pool. Every plan includes it.</p></div></div></details>
+          <details class="qa" data-state="closed"><summary><span>Do GB expire?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>Not inside your billing term. Monthly plans roll unused traffic over for 30 days, and annual plans keep it for the full 12 months.</p></div></div></details>
+          <details class="qa" data-state="closed"><summary><span>Which protocols do you support?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>HTTP, HTTPS and SOCKS5 on every plan. Authenticate with a username and password, or by whitelisting your server IPs.</p></div></div></details>
+        </div>
+        <div class="faq__col">
+          <details class="qa" data-state="closed"><summary><span>Do you offer a trial?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>We offer a 3-day refund instead of a trial. Start on Starter, test on your real targets and get your money back if it is not a fit.</p></div></div></details>
+          <details class="qa" data-state="closed"><summary><span>Do you support unlimited threads?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>Yes. We never cap concurrent connections or threads. Only traffic is metered, so you can scale your scrapers freely.</p></div></div></details>
+          <details class="qa" data-state="closed"><summary><span>What is your refund policy?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>Ask for a full refund within 3 days of your first purchase if you have used less than 2 GB. Contact support and we will process it.</p></div></div></details>
+          <details class="qa" data-state="closed"><summary><span>Can I whitelist IPs?</span><i class="qa__icon" aria-hidden="true"></i></summary><div class="qa__body"><div class="qa__inner"><p>Yes. Add up to 20 IPs per user on Starter, and unlimited IPs on Pro and Enterprise, from the dashboard or the API.</p></div></div></details>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ S7 FINAL CTA ============ -->
+<section class="section cta" id="cta" aria-labelledby="cta-title">
+  <div class="container">
+    <div class="frame" id="ctaFrame">
+      <div class="frame__chip" data-chip-slot aria-hidden="true"></div>
+      <div class="frame__content">
+        <h2 class="display split" id="cta-title">Ready for traffic that <em class="c-lilac">never gets blocked?</em></h2>
+        <p class="lead" data-reveal>Start with 8 GB and add more when you need it. Your first 3 days are covered by our refund.</p>
+        <div class="frame__cta" data-reveal>
+          <a class="btn btn--lilac btn--lg" href="#pricing" data-magnetic>Get proxies</a>
+          <a class="btn btn--glass btn--lg" href="mailto:sales@proxora.example" data-magnetic>Talk to sales</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer" id="footer">
+  <div class="container footer__inner">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="nav__brand" href="#hero" aria-label="Proxora, back to top"><svg class="icon nav__mark" aria-hidden="true"><use href="#i-mark"/></svg><span>Proxora</span></a>
+        <p>Premium proxies for teams that need real data at real scale.</p>
+        <form class="news glass glass--pill" id="newsForm" novalidate>
+          <label class="sr-only" for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="you@company.com" autocomplete="email" required>
+          <button class="btn btn--lilac btn--sm" type="submit">Subscribe</button>
+        </form>
+        <p class="news__msg" id="newsMsg" role="status" aria-live="polite"></p>
+      </div>
+      <nav class="footer__cols" aria-label="Footer">
+        <div><h4>Products</h4><ul><li><a href="#products">Residential proxies</a></li><li><a href="#pricing">Pricing</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="#hero">About</a></li><li><a href="#hero">Careers</a></li><li><a href="#hero">Customers</a></li><li><a href="#hero">Blog</a></li><li><a href="#cta">Contact</a></li></ul></div>
+        <div><h4>Resources</h4><ul><li><a href="#developers">Docs</a></li><li><a href="#developers">API reference</a></li><li><a href="#network">Network status</a></li><li><a href="#developers">Proxy checker</a></li><li><a href="#hero">Changelog</a></li></ul></div>
+        <div><h4>Legal</h4><ul><li><a href="#hero">Terms of service</a></li><li><a href="#hero">Privacy policy</a></li><li><a href="#hero">Acceptable use</a></li><li><a href="#faq">Refund policy</a></li><li><a href="#hero">Cookie settings</a></li></ul></div>
+      </nav>
+    </div>
+    <div class="footer__bar">
+      <p class="status"><span class="dot dot--live" aria-hidden="true"></span> All systems operational</p>
+      <ul class="social" aria-label="Social links">
+        <li><a href="#hero" aria-label="Proxora on X"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></a></li>
+        <li><a href="#hero" aria-label="Proxora on LinkedIn"><svg class="icon" aria-hidden="true"><use href="#i-in"/></svg></a></li>
+        <li><a href="#hero" aria-label="Proxora on YouTube"><svg class="icon" aria-hidden="true"><use href="#i-yt"/></svg></a></li>
+        <li><a href="#hero" aria-label="Proxora on GitHub"><svg class="icon" aria-hidden="true"><use href="#i-gh"/></svg></a></li>
+      </ul>
+      <p class="footer__copy">&copy; 2026 Proxora Inc. All rights reserved.</p>
+    </div>
+  </div>
+  <div class="wordmark" aria-hidden="true" data-speed="-0.1">Proxora</div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
+
+
+

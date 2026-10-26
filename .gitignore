@@ -1,0 +1,8 @@
+.env
+data/
+node_modules/
+npm-debug.log*
+
+# Not part of Proxora
+eng.traineddata
+.claude/
