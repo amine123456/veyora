@@ -161,7 +161,7 @@ export function paymentConfig() {
   if (Boolean(nowpaymentsApiKey) !== Boolean(nowpaymentsIpnSecret)) {
     throw new Error('NOWPAYMENTS_API_KEY and NOWPAYMENTS_IPN_SECRET must be configured together');
   }
-  const payCurrency = (process.env.NOWPAYMENTS_PAY_CURRENCY?.trim() || 'usdttrc20').toLowerCase();
+  const payCurrency = (process.env.NOWPAYMENTS_PAY_CURRENCY?.trim() || 'usdtbsc').toLowerCase();
   if (!/^[a-z0-9]{2,20}$/.test(payCurrency)) throw new Error('NOWPAYMENTS_PAY_CURRENCY is not a valid currency code');
   return {
     host,
