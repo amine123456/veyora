@@ -80,6 +80,16 @@ Sessions use an `HttpOnly`, `Secure`, `SameSite=Lax` cookie named `__Host-proxor
 
 `/account` is the customer dashboard: traffic left and used, the proxy endpoint, the proxy username, and a ready-to-run `curl` test. `POST /api/proxy-password` issues a new random proxy password, returns it once, and stores only its hash, so the old password stops working immediately. Set `PUBLIC_PROXY_URL` (for example `https://gate.proxora.io:8080`) to the address customers should use; it defaults to `PROXY_HOST`/`PROXY_PORT`.
 
+## USDT top-ups (NOWPayments)
+
+Customers buy GB packs (`PACKAGES`, priced in USD) from the dashboard and pay a NOWPayments USDT invoice. The server credits the pack only when a correctly signed IPN reports `finished` for the exact purchase and USD amount; replays and second payments on the same invoice credit nothing. Partial payments and signed payments that cannot be matched are logged (`journalctl -u proxora`) for manual handling.
+
+1. Create a NOWPayments account, set your USDT payout wallet, and generate an API key and an IPN secret.
+2. In `/opt/proxora/.env`: `NOWPAYMENTS_API_KEY`, `NOWPAYMENTS_IPN_SECRET`, and `CHECKOUT_SUCCESS_URL=https://<site>/account?paid=1`. Start with `NOWPAYMENTS_SANDBOX=true` (sandbox keys) to test with fake payments, then switch to live keys.
+3. `systemctl restart proxora`. Payment notices arrive at `https://<site>/nowpayments/ipn`.
+
+Manual top-ups keep working alongside: `node --env-file=.env src/admin.js credit <email> <gb>`.
+
 ## Stripe top-ups (optional)
 
 Set a Stripe secret key and webhook signing secret. Package definitions use `id:bytes:price_in_cents:currency`; the defaults charge $2 per GiB.

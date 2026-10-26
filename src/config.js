@@ -156,6 +156,13 @@ export function paymentConfig() {
   if (Boolean(stripeKey) !== Boolean(webhookSecret)) {
     throw new Error('STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET must be configured together');
   }
+  const nowpaymentsApiKey = process.env.NOWPAYMENTS_API_KEY?.trim() || '';
+  const nowpaymentsIpnSecret = process.env.NOWPAYMENTS_IPN_SECRET?.trim() || '';
+  if (Boolean(nowpaymentsApiKey) !== Boolean(nowpaymentsIpnSecret)) {
+    throw new Error('NOWPAYMENTS_API_KEY and NOWPAYMENTS_IPN_SECRET must be configured together');
+  }
+  const payCurrency = (process.env.NOWPAYMENTS_PAY_CURRENCY?.trim() || 'usdttrc20').toLowerCase();
+  if (!/^[a-z0-9]{2,20}$/.test(payCurrency)) throw new Error('NOWPAYMENTS_PAY_CURRENCY is not a valid currency code');
   return {
     host,
     port: integer('PAYMENTS_PORT', 3000, { max: 65535 }),
@@ -167,6 +174,13 @@ export function paymentConfig() {
     maxConcurrentAuth: integer('PAYMENT_MAX_CONCURRENT_AUTH', 8, { max: 128 }),
     requestTimeoutMs: integer('PAYMENT_REQUEST_TIMEOUT_MS', 15_000, { max: 120_000 }),
     stripeTimeoutMs: integer('STRIPE_TIMEOUT_MS', 10_000, { max: 120_000 }),
+    nowpayments: nowpaymentsApiKey ? {
+      apiKey: nowpaymentsApiKey,
+      ipnSecret: nowpaymentsIpnSecret,
+      // The sandbox takes fake payments, for testing the whole flow end to end.
+      sandbox: boolean('NOWPAYMENTS_SANDBOX', false),
+      payCurrency,
+    } : null,
     maxBodyBytes: integer('PAYMENT_MAX_BODY_BYTES', 1024 * 1024, { max: 10 * 1024 * 1024 }),
     proxyEndpoint: proxyEndpoint(),
     stickySessionSeconds: integer('UPSTREAM_SESSION_TTL_SECONDS', 600, { min: 60, max: 86_400 }),

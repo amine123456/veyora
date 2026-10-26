@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClientAuthParser } from './auth.js';
 import { packages } from './config.js';
+import { createInvoice, finishedPayment, validIpnSignature } from './nowpayments.js';
 import {
   bindPaymentSession,
   cancelPendingPayment,
@@ -268,7 +269,8 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
   const hashing = concurrencyLimit(config.maxConcurrentAuth);
   const server = http.createServer(async (request, response) => {
     try {
-      const asset = publicFiles.get(request.url);
+      // Pages are looked up by path alone, so /account?paid=1 and /?utm_source=x still resolve.
+      const asset = publicFiles.get(new URL(request.url, 'http://local').pathname);
       if ((request.method === 'GET' || request.method === 'HEAD') && asset) {
         if (asset.session) {
           const signedIn = Boolean(await getSessionClient(sessionToken(request)));
@@ -325,6 +327,67 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
         const client = await getSessionClient(sessionToken(request));
         if (!client) return json(response, 401, { error: 'Not signed in' });
         return json(response, 200, accountView(client, config.proxyEndpoint, config.stickySessionSeconds));
+      }
+
+      if (request.method === 'POST' && request.url === '/api/checkout') {
+        assertSameOrigin(request);
+        if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+          throw new PublicError(415, 'Content-Type must be application/json');
+        }
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        if (!config.nowpayments) return json(response, 503, { error: 'Online payment is not set up yet' });
+        const input = parseJson(await readBody(request, config.maxBodyBytes));
+        const selected = availablePackages.get(input?.packageId);
+        if (!selected) throw new PublicError(400, 'Unknown package');
+
+        let pending;
+        try {
+          pending = await createPendingPayment(client.username, selected);
+        } catch (error) {
+          if (error.message === 'Too many pending purchases') throw new PublicError(429, 'Too many unpaid checkouts. Finish or wait for one to expire.');
+          throw error;
+        }
+        const invoice = await createInvoice(config.nowpayments, {
+          purchaseId: pending.purchaseId,
+          pkg: selected,
+          ipnUrl: new URL('/nowpayments/ipn', config.successUrl).toString(),
+          successUrl: config.successUrl,
+          cancelUrl: config.cancelUrl,
+        }, { fetchImpl, timeoutMs: config.stripeTimeoutMs });
+        if (!invoice) {
+          await cancelPendingPayment(pending.purchaseId).catch(() => {});
+          throw new PublicError(502, 'Payment provider unavailable. Try again in a minute.');
+        }
+        await bindPaymentSession(pending.purchaseId, invoice.invoiceRef);
+        return json(response, 200, { checkoutUrl: invoice.invoiceUrl });
+      }
+
+      if (request.method === 'POST' && request.url === '/nowpayments/ipn') {
+        if (!config.nowpayments) return json(response, 503, { error: 'Payments are not configured' });
+        const raw = await readBody(request, config.maxBodyBytes);
+        const body = parseJson(raw);
+        if (!validIpnSignature(body, request.headers['x-nowpayments-sig'], config.nowpayments.ipnSecret)) {
+          throw new PublicError(401, 'Invalid signature');
+        }
+        const paid = finishedPayment(body);
+        // Only fully paid invoices credit traffic. Other statuses (waiting, confirming,
+        // partially_paid, expired...) are acknowledged so the provider stops retrying.
+        if (!paid) {
+          if (body?.payment_status === 'partially_paid') {
+            console.error(`NOWPayments partial payment for order ${String(body.order_id).slice(0, 64)}: needs manual review`);
+          }
+          return json(response, 200, { received: true, credited: false });
+        }
+        try {
+          const result = await completePayment(paid);
+          return json(response, 200, { received: true, credited: result.credited });
+        } catch (error) {
+          // A signed "finished" payment we cannot match (amount, expired purchase...) is
+          // real money: keep a log line for manual handling instead of failing silently.
+          console.error(`NOWPayments payment ${paid.eventId} for order ${paid.purchaseId.slice(0, 64)} not credited: ${error.message}`);
+          return json(response, 200, { received: true, credited: false });
+        }
       }
 
       if (request.method === 'GET' && request.url === '/health') {

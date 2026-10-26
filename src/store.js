@@ -60,6 +60,17 @@ function validTimestamp(value) {
     && new Date(value).toISOString() === value;
 }
 
+// Payment references from each provider: a checkout session (or invoice) and the
+// event (or payment) that completed it.
+const PAYMENT_REF_PREFIXES = {
+  session: ["cs_", "npinv_"],
+  event: ["evt_", "nppay_"],
+};
+
+function validPaymentRef(value, kind) {
+  return PAYMENT_REF_PREFIXES[kind].some((prefix) => validProviderId(value, prefix));
+}
+
 function validProviderId(value, prefix) {
   return typeof value === "string"
     && value.startsWith(prefix)
@@ -157,16 +168,16 @@ function normalizeState(parsed) {
       && validTimestamp(payment.createdAt)
       && Number.isSafeInteger(payment.expiresAt)
       && payment.expiresAt > 0
-      && (payment.sessionId === null || validProviderId(payment.sessionId, "cs_"));
+      && (payment.sessionId === null || validPaymentRef(payment.sessionId, "session"));
     if (!valid) throw new Error(`Invalid pending payment record: ${purchaseId}`);
   }
 
   for (const [eventId, payment] of Object.entries(parsed.processedPayments)) {
-    const valid = validProviderId(eventId, "evt_")
+    const valid = validPaymentRef(eventId, "event")
       && isRecord(payment)
       && payment.eventId === eventId
       && validPurchaseId(payment.purchaseId)
-      && validProviderId(payment.sessionId, "cs_")
+      && validPaymentRef(payment.sessionId, "session")
       && typeof payment.username === "string"
       && hasOwn(parsed.clients, payment.username)
       && /^[A-Za-z0-9_-]{1,40}$/.test(payment.packageId)
@@ -569,7 +580,7 @@ export async function createPendingPayment(username, packageInfo) {
 }
 
 export async function bindPaymentSession(purchaseId, sessionId) {
-  if (!validPurchaseId(purchaseId) || !validProviderId(sessionId, "cs_")) {
+  if (!validPurchaseId(purchaseId) || !validPaymentRef(sessionId, "session")) {
     throw new Error("Invalid payment session");
   }
   return mutate(async (state) => {
@@ -590,9 +601,9 @@ export async function cancelPendingPayment(purchaseId) {
 }
 
 export async function completePayment({ eventId, purchaseId, sessionId, amountTotal, currency }) {
-  if (!validProviderId(eventId, "evt_")
+  if (!validPaymentRef(eventId, "event")
     || !validPurchaseId(purchaseId)
-    || !validProviderId(sessionId, "cs_")
+    || !validPaymentRef(sessionId, "session")
     || !Number.isSafeInteger(amountTotal)
     || amountTotal <= 0
     || typeof currency !== "string"

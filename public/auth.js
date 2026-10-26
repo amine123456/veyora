@@ -98,6 +98,49 @@ if (dash) {
     })
     .catch(() => set('remaining', 'Could not load'));
 
+  // Buy traffic: GB packs paid with USDT through a hosted invoice.
+  const packs = $('[data-packs]');
+  const buyError = $('[data-buy-error]');
+  if (new URLSearchParams(location.search).has('paid')) $('[data-paid]').hidden = false;
+  fetch('/packages')
+    .then(response => response.json())
+    .then(list => {
+      list.forEach(pack => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pack';
+        button.dataset.pack = pack.id;
+        const size = pack.bytes / 1024 ** 3;
+        button.innerHTML = '<b></b><span></span>';
+        button.querySelector('b').textContent = `${Number.isInteger(size) ? size : size.toFixed(1)} GB`;
+        button.querySelector('span').textContent = `$${(pack.cents / 100).toFixed(2)}`;
+        packs.append(button);
+      });
+    })
+    .catch(() => { buyError.textContent = 'Could not load the packs. Refresh the page.'; buyError.hidden = false; });
+
+  packs.addEventListener('click', async event => {
+    const button = event.target.closest('[data-pack]');
+    if (!button) return;
+    buyError.hidden = true;
+    packs.querySelectorAll('button').forEach(b => { b.disabled = true; });
+    const label = button.querySelector('span').textContent;
+    button.querySelector('span').textContent = 'Opening…';
+    try {
+      const { ok, data } = await post('/api/checkout', { packageId: button.dataset.pack });
+      if (ok && data.checkoutUrl) { location.assign(data.checkoutUrl); return; }
+      throw new Error(data.error || 'Could not start the payment. Try again.');
+    } catch (error) {
+      buyError.textContent = error.message === 'Online payment is not set up yet'
+        ? 'Online payment is not available yet. Ask us and we will add GB manually.'
+        : error.message;
+      buyError.hidden = false;
+    } finally {
+      button.querySelector('span').textContent = label;
+      packs.querySelectorAll('button').forEach(b => { b.disabled = false; });
+    }
+  });
+
   // Copy buttons
   dash.addEventListener('click', async event => {
     const button = event.target.closest('[data-copy]');

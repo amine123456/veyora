@@ -116,6 +116,9 @@ test('account pages redirect by session state', async () => {
     const signup = await request(port, { path: '/api/signup', body: { email: 'linus@example.com', password: 'linus password 1' } });
     const cookie = cookieOf(signup);
     assert.equal((await request(port, { path: '/account', method: 'GET', headers: { cookie } })).status, 200);
+    // Query strings (payment return, tracking links) must not break page lookup.
+    assert.equal((await request(port, { path: '/account?paid=1', method: 'GET', headers: { cookie } })).status, 200);
+    assert.equal((await request(port, { path: '/?utm_source=test', method: 'GET' })).status, 200);
     const signedInLogin = await request(port, { path: '/login', method: 'GET', headers: { cookie } });
     assert.equal(signedInLogin.status, 302);
     assert.equal(signedInLogin.headers.location, '/account');

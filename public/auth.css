@@ -90,6 +90,19 @@ a { color: var(--lilac); }
 .code { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 14px; border-radius: 14px; background: rgba(4, 34, 42, .7); border: 1px solid var(--line); }
 .code pre { flex: 1; min-width: 0; margin: 0; white-space: pre-wrap; }
 
+/* GB packs */
+.packs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; width: 100%; margin-top: 4px; }
+.pack {
+  display: grid; gap: 4px; min-height: 76px; padding: 14px 16px; border-radius: 14px; text-align: left; cursor: pointer;
+  background: rgba(4, 34, 42, .6); border: 1px solid var(--surface-line); color: var(--text); font: 400 .9375rem var(--font-ui);
+  transition: border-color .2s ease, transform .2s ease;
+}
+.pack b { font: 400 1.5rem/1 var(--font-display); letter-spacing: -.02em; }
+.pack span { color: var(--lilac); font-weight: 500; }
+.pack:hover { border-color: var(--lilac); transform: translateY(-1px); }
+.pack:focus-visible { outline: 2px solid var(--lilac); outline-offset: 2px; }
+.pack:disabled { opacity: .6; cursor: wait; transform: none; }
+
 /* username option examples */
 .rows--options { width: 100%; margin: 4px 0 0; }
 .rows--options div { align-items: baseline; }
