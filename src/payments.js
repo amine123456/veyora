@@ -12,11 +12,14 @@ import {
   cancelPendingPayment,
   completePayment,
   createAccount,
+  createApiKey,
   createPendingPayment,
   createSession,
   deleteSession,
   getSessionClient,
+  listApiKeys,
   regenerateProxyPassword,
+  revokeApiKey,
   verifyAccount,
 } from './store.js';
 
@@ -274,6 +277,7 @@ function accountView(client, proxyEndpoint, stickySessionSeconds) {
     quotaBytes: client.quotaBytes,
     usedBytes: client.usedBytes,
     remainingBytes: client.remainingBytes,
+    balanceMicros: client.balanceMicros ?? 0,
     proxy: proxyEndpoint ?? null,
     stickySessionSeconds: stickySessionSeconds ?? 600,
   };
@@ -380,6 +384,33 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
         const client = await getSessionClient(sessionToken(request));
         if (!client) return json(response, 401, { error: 'Not signed in' });
         return json(response, 200, accountView(client, config.proxyEndpoint, config.stickySessionSeconds));
+      }
+
+      if (request.url === '/api/keys' || request.url === '/api/keys/revoke') {
+        const post = request.method === 'POST';
+        if (!post && !(request.method === 'GET' && request.url === '/api/keys')) {
+          return json(response, 405, { error: 'Method not allowed' });
+        }
+        if (post) {
+          assertSameOrigin(request);
+          if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+            throw new PublicError(415, 'Content-Type must be application/json');
+          }
+        }
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        if (!post) return json(response, 200, { keys: await listApiKeys(client.username) });
+        const input = parseJson(await readBody(request, config.maxBodyBytes));
+        if (request.url === '/api/keys/revoke') {
+          if (!(await revokeApiKey(client.username, input?.id))) return json(response, 404, { error: 'Unknown API key' });
+          return json(response, 200, { ok: true });
+        }
+        try {
+          return json(response, 201, await createApiKey(client.username, input?.name));
+        } catch (error) {
+          if (error.code) throw new PublicError(error.code === 'TOO_MANY_KEYS' ? 409 : 400, error.message);
+          throw error;
+        }
       }
 
       if (request.method === 'POST' && request.url === '/api/checkout') {

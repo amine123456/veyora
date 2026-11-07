@@ -15,6 +15,9 @@ const MAX_PENDING_PAYMENTS_PER_CLIENT = 10;
 const PENDING_PAYMENT_TTL_MS = 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_SESSIONS_PER_CLIENT = 10;
+const MAX_API_KEYS_PER_CLIENT = 10;
+const API_KEY_NAME_MAX = 40;
+const API_KEY_PATTERN = /^vy_live_[A-Za-z0-9_-]{43}$/;
 
 // Proxy clients send their password on every request, and scrypt costs tens of
 // milliseconds of CPU. Remember credentials that verified recently, keyed by an HMAC
@@ -56,6 +59,7 @@ function blankState() {
     processedPayments: {},
     pendingPayments: {},
     sessions: {},
+    apiKeys: {},
     lastUsageSeq: 0,
   };
 }
@@ -139,8 +143,10 @@ function normalizeState(parsed) {
   if (!isRecord(parsed) || (parsed.version !== 2 && parsed.version !== 3)) throw new Error("Invalid or unsupported state file");
   // Version 2 predates web accounts; it upgrades by gaining an empty session table.
   if (parsed.version === 2) parsed = { ...parsed, version: 3, sessions: {} };
+  // API keys were added within version 3; older files simply have none.
+  if (parsed.apiKeys === undefined) parsed = { ...parsed, apiKeys: {} };
   if (!isRecord(parsed.clients) || !isRecord(parsed.processedPayments) || !isRecord(parsed.pendingPayments)
-    || !isRecord(parsed.sessions)) {
+    || !isRecord(parsed.sessions) || !isRecord(parsed.apiKeys)) {
     throw new Error("Invalid state collections");
   }
   if (!Number.isSafeInteger(parsed.lastUsageSeq) || parsed.lastUsageSeq < 0) {
@@ -183,6 +189,19 @@ function normalizeState(parsed) {
     if (!valid) throw new Error("Invalid session record");
   }
 
+  for (const [key, apiKey] of Object.entries(parsed.apiKeys)) {
+    const valid = /^[0-9a-f]{64}$/.test(key)
+      && isRecord(apiKey)
+      && /^key_[0-9a-f]{16}$/.test(apiKey.id)
+      && typeof apiKey.username === "string"
+      && hasOwn(parsed.clients, apiKey.username)
+      && typeof apiKey.name === "string"
+      && apiKey.name.length <= API_KEY_NAME_MAX
+      && /^vy_live_[A-Za-z0-9_-]{4}$/.test(apiKey.prefix)
+      && validTimestamp(apiKey.createdAt);
+    if (!valid) throw new Error("Invalid API key record");
+  }
+
 
   for (const [purchaseId, payment] of Object.entries(parsed.pendingPayments)) {
     const valid = validPurchaseId(purchaseId)
@@ -222,6 +241,7 @@ function normalizeState(parsed) {
     processedPayments: pruneProcessedPayments(parsed.processedPayments),
     pendingPayments: { ...parsed.pendingPayments },
     sessions: { ...parsed.sessions },
+    apiKeys: { ...parsed.apiKeys },
     lastUsageSeq: parsed.lastUsageSeq,
   };
 }
@@ -704,6 +724,70 @@ export async function deleteSession(token) {
     delete state.sessions[key];
     await saveSnapshot(state);
   });
+}
+
+// API keys authenticate the unlocker API. The key itself is 256 random bits, so a
+// SHA-256 digest is enough to store it (no slow hash needed, unlike passwords); it is
+// shown once at creation and never again.
+function apiKeyView(apiKey) {
+  return { id: apiKey.id, name: apiKey.name, prefix: apiKey.prefix, createdAt: apiKey.createdAt };
+}
+
+export async function createApiKey(username, name = "") {
+  const label = String(name ?? "").trim();
+  if (label.length > API_KEY_NAME_MAX || /[\u0000-\u001f\u007f]/.test(label)) {
+    throw accountError("INVALID_NAME", `Key name must be at most ${API_KEY_NAME_MAX} printable characters`);
+  }
+  const key = `vy_live_${crypto.randomBytes(32).toString("base64url")}`;
+  return mutate(async (state) => {
+    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+    if (!client || client.enabled === false) throw new Error("Unknown client");
+    const own = Object.values(state.apiKeys).filter((apiKey) => apiKey.username === username);
+    if (own.length >= MAX_API_KEYS_PER_CLIENT) {
+      throw accountError("TOO_MANY_KEYS", `At most ${MAX_API_KEYS_PER_CLIENT} API keys per account. Revoke one first.`);
+    }
+    const record = {
+      id: `key_${crypto.randomBytes(8).toString("hex")}`,
+      username,
+      name: label,
+      prefix: key.slice(0, 12),
+      createdAt: new Date().toISOString(),
+    };
+    state.apiKeys[sessionKey(key)] = record;
+    await saveSnapshot(state);
+    return { ...apiKeyView(record), key };
+  });
+}
+
+export async function listApiKeys(username) {
+  const state = await readState();
+  return Object.values(state.apiKeys)
+    .filter((apiKey) => apiKey.username === username)
+    .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+    .map(apiKeyView);
+}
+
+export async function revokeApiKey(username, id) {
+  if (typeof id !== "string") return false;
+  return mutate(async (state) => {
+    const entry = Object.entries(state.apiKeys).find(([, apiKey]) => apiKey.id === id && apiKey.username === username);
+    if (!entry) return false;
+    delete state.apiKeys[entry[0]];
+    await saveSnapshot(state);
+    return true;
+  });
+}
+
+// Returns the account behind a key, or null for unknown, revoked or disabled.
+export async function authenticateApiKey(key) {
+  if (typeof key !== "string" || !API_KEY_PATTERN.test(key)) return null;
+  const state = await readState();
+  const digest = sessionKey(key);
+  const apiKey = hasOwn(state.apiKeys, digest) ? state.apiKeys[digest] : undefined;
+  if (!apiKey) return null;
+  const client = hasOwn(state.clients, apiKey.username) ? state.clients[apiKey.username] : undefined;
+  if (!client || client.enabled === false) return null;
+  return { ...publicClient(apiKey.username, client), apiKeyId: apiKey.id };
 }
 
 export async function createPendingPayment(username, packageInfo) {
