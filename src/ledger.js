@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { appendFile, mkdir, open, readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, open, readFile, readdir, rename, stat, unlink } from "node:fs/promises";
 import path from "node:path";
 import readline from "node:readline";
 
@@ -35,6 +35,20 @@ function applyTo(sites, entry) {
   return site;
 }
 
+// Windows cannot fsync a directory; everywhere else a failure is a real error.
+export async function syncDirectory(directory, { openFile = open } = {}) {
+  let handle;
+  try {
+    handle = await openFile(directory, "r");
+    await handle.sync();
+  } catch (error) {
+    const unsupportedOnWindows = process.platform === "win32" && ["EINVAL", "EPERM", "EISDIR", "EBADF"].includes(error?.code);
+    if (!unsupportedOnWindows) throw error;
+  } finally {
+    await handle?.close().catch(() => {});
+  }
+}
+
 const clone = (sites) => new Map([...sites].map(([name, totals]) => [name, { ...totals }]));
 
 export function createLedger(file, {
@@ -45,6 +59,7 @@ export function createLedger(file, {
   snapshotIntervalMs = 60_000,
   now = Date.now,
   log = console,
+  openFile = open, // for tests: observes the snapshot fsyncs
 } = {}) {
   const directory = path.dirname(file);
   const base = path.basename(file, ".jsonl");
@@ -69,9 +84,18 @@ export function createLedger(file, {
       offset,
       sites: Object.fromEntries(durable),
     });
+    // Same durability as the store: fsync the temp file, rename it over the snapshot,
+    // then fsync the directory so the rename itself survives a power loss.
     const temporary = `${snapshotFile}.${process.pid}.tmp`;
-    await writeFile(temporary, body, { mode: 0o600 });
+    const handle = await openFile(temporary, "w", 0o600);
+    try {
+      await handle.writeFile(body, "utf8");
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
     await rename(temporary, snapshotFile);
+    await syncDirectory(directory, { openFile });
     unsnapshotted = 0;
   }
 

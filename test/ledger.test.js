@@ -136,3 +136,32 @@ test('a ledger from before snapshots is replayed in full, with no size limit', a
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test('a snapshot is fsynced before its rename and the directory after it', async () => {
+  const directory = await folder();
+  try {
+    const file = path.join(directory, 'unlocker-ledger.jsonl');
+    const { open: realOpen } = await import('node:fs/promises');
+    const events = [];
+    const openFile = async (target, ...rest) => {
+      const handle = await realOpen(target, ...rest);
+      const label = target === directory ? 'directory' : path.basename(target).endsWith('.tmp') ? 'temp' : 'other';
+      const sync = handle.sync.bind(handle);
+      handle.sync = async () => {
+        events.push(label);
+        return sync();
+      };
+      return handle;
+    };
+    const ledger = open(file, { snapshotEvery: 1, openFile });
+    await ledger.record(entry('a.example'));
+    await ledger.close();
+    assert.deepEqual(events.slice(0, 2), ['temp', 'directory']);
+    assert.equal(events.filter((label) => label === 'temp').length, events.filter((label) => label === 'directory').length);
+    const names = await readdir(directory);
+    assert.ok(names.includes('unlocker-ledger.stats.json'));
+    assert.ok(!names.some((name) => name.endsWith('.tmp')));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
