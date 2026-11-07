@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { authenticate } from "./store.js";
+import { authenticate, authenticateCached } from "./store.js";
 
 // Customers add routing options to their username: USER, USER-country-gr,
 // USER-session-abc123 or USER-country-gr-session-abc123.
@@ -34,7 +34,18 @@ export function decodeCredentials(header) {
   }
 }
 
-export function createClientAuthParser(maxConcurrent = 16, authenticateClient = authenticate) {
+// Returned instead of null when every password-verification slot is taken. The
+// credentials were never checked, so callers must not count it as a failed login.
+export const AUTH_BUSY = Object.freeze({ busy: true });
+
+// The concurrency limit guards the expensive scrypt check only. Credentials that
+// verified recently are answered from the cache without taking a slot, so a burst of
+// requests from a paying customer is never turned away as "busy".
+export function createClientAuthParser(
+  maxConcurrent = 16,
+  authenticateClient = authenticate,
+  cachedAuthenticate = authenticateClient === authenticate ? authenticateCached : null,
+) {
   if (!Number.isSafeInteger(maxConcurrent) || maxConcurrent < 1) {
     throw new Error("maxConcurrent must be a positive safe integer");
   }
@@ -45,13 +56,19 @@ export function createClientAuthParser(maxConcurrent = 16, authenticateClient = 
 
   return async function parseClientAuth(header) {
     const credentials = decodeCredentials(header);
-    if (!credentials || active >= maxConcurrent) return null;
+    if (!credentials) return null;
+    const routed = parseRoutedUsername(credentials.username);
+    if (!routed) return null;
+    const withRouting = (client) => ({ ...client, routing: { country: routed.country, session: routed.session } });
+    if (cachedAuthenticate) {
+      const cached = await cachedAuthenticate(routed.username, credentials.password).catch(() => null);
+      if (cached) return withRouting(cached);
+    }
+    if (active >= maxConcurrent) return AUTH_BUSY;
     active += 1;
     try {
-      const routed = parseRoutedUsername(credentials.username);
-      if (!routed) return null;
       const client = await authenticateClient(routed.username, credentials.password);
-      return client ? { ...client, routing: { country: routed.country, session: routed.session } } : null;
+      return client ? withRouting(client) : null;
     } catch {
       return null;
     } finally {

@@ -22,6 +22,28 @@ test('creates, authenticates, meters, releases, and credits a client', async () 
   assert.equal((await store.credit('cousin', 500)).remainingBytes, 1200);
 });
 
+test('remembers verified proxy credentials without outliving a disable or new password', async () => {
+  const username = 'cached-client';
+  const password = 'cached client test password';
+  await store.createClient(username, password, 1000);
+
+  assert.equal((await store.authenticate(username, password)).username, username);
+  const started = process.hrtime.bigint();
+  for (let i = 0; i < 50; i += 1) assert.equal((await store.authenticate(username, password)).username, username);
+  // 50 scrypt runs would take seconds; cached checks take a few milliseconds.
+  assert.ok(Number(process.hrtime.bigint() - started) / 1e6 < 1000, 'repeat logins should skip scrypt');
+  assert.equal(await store.authenticate(username, 'wrong password for cached'), null);
+
+  await store.setEnabled(username, false);
+  assert.equal(await store.authenticate(username, password), null);
+  await store.setEnabled(username, true);
+  assert.equal((await store.authenticate(username, password)).username, username);
+
+  const replacement = await store.regenerateProxyPassword(username);
+  assert.equal(await store.authenticate(username, password), null);
+  assert.equal((await store.authenticate(username, replacement)).username, username);
+});
+
 test('serializes concurrent reservations so quota cannot be overspent', async () => {
   const username = 'parallel-client';
   await store.createClient(username, 'another strong test password', 1000);

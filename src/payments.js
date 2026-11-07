@@ -1,9 +1,10 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
+import net from 'node:net';
 import { appendFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createClientAuthParser } from './auth.js';
+import { AUTH_BUSY, createClientAuthParser } from './auth.js';
 import { packages } from './config.js';
 import { createInvoice, finishedPayment, validIpnSignature } from './nowpayments.js';
 import {
@@ -237,6 +238,22 @@ function assertSameOrigin(request) {
   if (host !== request.headers.host) throw new PublicError(403, 'Cross-site request blocked');
 }
 
+// PAYMENTS_HOST must be loopback, so in production every connection comes from the
+// nginx reverse proxy and the socket address is always 127.0.0.1. Rate limits keyed on
+// it would be shared by every visitor. Trust the forwarded client address only from a
+// loopback peer: X-Real-IP if nginx sets it, else the last X-Forwarded-For entry, which
+// is the one nginx appended (earlier entries come from the client and can be forged).
+const LOOPBACK_PEERS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+
+export function clientAddress(request) {
+  const peer = request.socket.remoteAddress ?? 'unknown';
+  if (!LOOPBACK_PEERS.has(peer)) return peer;
+  const realIp = String(request.headers['x-real-ip'] ?? '').trim();
+  if (net.isIP(realIp)) return realIp;
+  const forwarded = String(request.headers['x-forwarded-for'] ?? '').split(',').pop().trim();
+  return net.isIP(forwarded) ? forwarded : peer;
+}
+
 function concurrencyLimit(max) {
   let active = 0;
   return async (work) => {
@@ -294,7 +311,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
         if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
           throw new PublicError(415, 'Content-Type must be application/json');
         }
-        const key = request.socket.remoteAddress ?? 'unknown';
+        const key = clientAddress(request);
         if (!supportAttempts.allowed(key)) return json(response, 429, { error: 'Too many requests. Wait a minute and try again.' });
         supportAttempts.fail(key);
         const input = parseJson(await readBody(request, config.maxBodyBytes));
@@ -333,7 +350,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
 
         const signup = request.url === '/api/signup';
         const limiter = signup ? signupAttempts : accountAttempts;
-        const key = request.socket.remoteAddress ?? 'unknown';
+        const key = clientAddress(request);
         if (!limiter.allowed(key)) return json(response, 429, { error: 'Too many attempts. Wait a minute and try again.' });
         const input = parseJson(await readBody(request, config.maxBodyBytes));
         let client;
@@ -442,11 +459,12 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
           throw new PublicError(415, 'Content-Type must be application/json');
         }
 
-        const authKey = request.socket.remoteAddress ?? 'unknown';
+        const authKey = clientAddress(request);
         if (!authAttempts.allowed(authKey)) {
           return json(response, 429, { error: 'Too many authentication attempts' });
         }
         const client = await parseClientAuth(request.headers.authorization);
+        if (client === AUTH_BUSY) throw new PublicError(503, 'Server busy, try again');
         if (!client) {
           authAttempts.fail(authKey);
           response.setHeader('WWW-Authenticate', 'Basic realm="proxy-payments", charset="UTF-8"');

@@ -16,6 +16,28 @@ const PENDING_PAYMENT_TTL_MS = 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_SESSIONS_PER_CLIENT = 10;
 
+// Proxy clients send their password on every request, and scrypt costs tens of
+// milliseconds of CPU. Remember credentials that verified recently, keyed by an HMAC
+// with a per-process key so the plaintext is never held. An entry is only honoured
+// while the client's stored hash is unchanged and the account is enabled, so a new
+// proxy password or a disable takes effect immediately.
+const AUTH_CACHE_TTL_MS = 5 * 60 * 1000;
+const AUTH_CACHE_MAX_ENTRIES = 10_000;
+const authCacheKey = crypto.randomBytes(32);
+const verifiedCredentials = new Map();
+
+function credentialDigest(username, password) {
+  return crypto.createHmac("sha256", authCacheKey).update(`${username}\0${password}`).digest("base64url");
+}
+
+function rememberCredentials(digest, username, hash) {
+  verifiedCredentials.delete(digest);
+  if (verifiedCredentials.size >= AUTH_CACHE_MAX_ENTRIES) {
+    verifiedCredentials.delete(verifiedCredentials.keys().next().value);
+  }
+  verifiedCredentials.set(digest, { username, hash, expiresAt: Date.now() + AUTH_CACHE_TTL_MS });
+}
+
 let statePromise;
 let mutationQueue = Promise.resolve();
 
@@ -341,7 +363,28 @@ export async function createClient(username, password, quotaBytes) {
   });
 }
 
+// Cheap check against recently verified credentials: the client, or null on a miss.
+// A miss says nothing about the password; call authenticate for the full check.
+export async function authenticateCached(username, password) {
+  if (typeof username !== "string" || typeof password !== "string") return null;
+  const digest = credentialDigest(username, password);
+  const cached = verifiedCredentials.get(digest);
+  if (!cached) return null;
+  const clients = (await readState()).clients;
+  const current = hasOwn(clients, username) ? clients[username] : undefined;
+  if (cached.expiresAt > Date.now() && cached.username === username
+    && current && current.enabled !== false && current.hash === cached.hash) {
+    return publicClient(username, current);
+  }
+  verifiedCredentials.delete(digest);
+  return null;
+}
+
 export async function authenticate(username, password) {
+  const fast = await authenticateCached(username, password);
+  if (fast) return fast;
+  const digest = credentialDigest(username, password);
+
   const state = await readState();
   const candidate = hasOwn(state.clients, username) ? state.clients[username] : undefined;
   const salt = candidate?.salt ?? DUMMY_SALT;
@@ -358,6 +401,7 @@ export async function authenticate(username, password) {
     || current.enabled === false
     || current.salt !== salt
     || current.hash !== expectedHex) return null;
+  rememberCredentials(digest, username, current.hash);
   return publicClient(username, current);
 }
 

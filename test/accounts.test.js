@@ -155,6 +155,22 @@ test('signups are capped per address per minute', async () => {
   });
 });
 
+test('behind nginx, signup caps apply per visitor address, not to everyone', async () => {
+  await withServer(async (port) => {
+    const signup = (index, headers) => request(port, {
+      path: '/api/signup', headers, body: { email: `proxied${index}@example.com`, password: 'proxied password 1' },
+    });
+    const statuses = [];
+    for (let index = 0; index < 6; index += 1) statuses.push((await signup(index, { 'x-real-ip': '203.0.113.7' })).status);
+    assert.deepEqual(statuses, [201, 201, 201, 201, 201, 429]);
+    // A different visitor still gets in.
+    assert.equal((await signup(10, { 'x-real-ip': '198.51.100.9' })).status, 201);
+    // Without X-Real-IP the last X-Forwarded-For entry (the one nginx appended) counts,
+    // so a client-supplied earlier entry cannot dodge the cap.
+    assert.equal((await signup(11, { 'x-forwarded-for': '192.0.2.1, 203.0.113.7' })).status, 429);
+  });
+});
+
 test('version 2 state files upgrade with an empty session table', async () => {
   const legacyDirectory = await mkdtemp(path.join(os.tmpdir(), 'proxy-legacy-'));
   const legacyFile = path.join(legacyDirectory, 'state.json');

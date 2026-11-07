@@ -5,7 +5,7 @@ import https from "node:https";
 import net from "node:net";
 import tls from "node:tls";
 import { domainToASCII } from "node:url";
-import { createClientAuthParser, upstreamAuthorization } from "./auth.js";
+import { AUTH_BUSY, createClientAuthParser, upstreamAuthorization } from "./auth.js";
 import { meter } from "./meter.js";
 
 const FIXED_HOP_HEADERS = new Set([
@@ -202,6 +202,7 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
   const handleRequest = async (request, response) => {
     if (!authAttempts.allowed(request.socket.remoteAddress)) return reject(response, 429, "Too many authentication attempts");
     const client = await parseClientAuth(request.headers["proxy-authorization"]);
+    if (client === AUTH_BUSY) return reject(response, 503, "Gateway busy, retry shortly");
     if (!client) {
       authAttempts.fail(request.socket.remoteAddress);
       return reject(response);
@@ -301,6 +302,7 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
     void (async () => {
       if (!authAttempts.allowed(clientSocket.remoteAddress)) return reject(clientSocket, 429, "Too many authentication attempts");
       const client = await parseClientAuth(request.headers["proxy-authorization"]);
+      if (client === AUTH_BUSY) return reject(clientSocket, 503, "Gateway busy, retry shortly");
       if (!client) {
         authAttempts.fail(clientSocket.remoteAddress);
         return reject(clientSocket);

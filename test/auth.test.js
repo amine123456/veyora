@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  AUTH_BUSY,
   createClientAuthParser,
   decodeCredentials,
   parseRoutedUsername,
@@ -50,7 +51,7 @@ test("auth parser delegates valid credentials and absorbs backend failures", asy
   assert.deepEqual(seen.map(({ username }) => username), ["valid-user", "broken-user"]);
 });
 
-test("auth parser fails closed when its expensive-auth concurrency limit is full", async () => {
+test("auth parser reports busy, not a failed login, when its concurrency limit is full", async () => {
   let releaseFirst;
   let calls = 0;
   const firstAuthentication = new Promise((resolve) => { releaseFirst = resolve; });
@@ -63,7 +64,7 @@ test("auth parser fails closed when its expensive-auth concurrency limit is full
   const first = parser(basic("first-user", "correct horse battery staple"));
   assert.equal(
     await parser(basic("second-user", "another correct horse battery")),
-    null,
+    AUTH_BUSY,
   );
   assert.equal(calls, 1);
 
@@ -126,4 +127,23 @@ test("translates routing into the upstream provider login", () => {
   // Same customer and session name: same sticky IP. Different customers: different sessions.
   assert.equal(login({ username: "px1", session: "job" }), login({ username: "px1", session: "job" }));
   assert.notEqual(login({ username: "px1", session: "job" }), login({ username: "px2", session: "job" }));
+});
+
+test("auth parser answers cached credentials without taking a scrypt slot", async () => {
+  let releaseSlow;
+  const slow = new Promise((resolve) => { releaseSlow = resolve; });
+  const parser = createClientAuthParser(
+    1,
+    async (username) => { await slow; return { username }; },
+    async (username) => (username === "cached-user" ? { username } : null),
+  );
+
+  const pending = parser(basic("slow-user", "correct horse battery staple"));
+  assert.deepEqual(
+    await parser(basic("cached-user-country-de", "correct horse battery staple")),
+    { username: "cached-user", routing: { country: "DE", session: null } },
+  );
+  assert.equal(await parser(basic("other-user", "correct horse battery staple")), AUTH_BUSY);
+  releaseSlow();
+  assert.equal((await pending).username, "slow-user");
 });
