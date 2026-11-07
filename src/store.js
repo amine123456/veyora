@@ -246,6 +246,40 @@ function normalizeState(parsed) {
   };
 }
 
+// Reads the usage journal's lines. A crash (OOM kill, power loss) during an append can
+// leave a last line without its newline. That append never reached its fsync, so the
+// operation never succeeded: an unparsable unterminated last line is dropped and the
+// file truncated back to the last complete line. A parsable one was written in full and
+// only lacks its newline, which is added so the next append starts on its own line.
+// Any bad line before the end is real corruption and still refuses to start.
+async function readJournal() {
+  const raw = await fs.readFile(usageJournal);
+  const end = raw.lastIndexOf(0x0a) + 1; // bytes up to and including the last newline
+  const lines = raw.subarray(0, end).toString("utf8").split("\n").filter(Boolean);
+  if (end === raw.length) return lines;
+
+  const tail = raw.subarray(end).toString("utf8");
+  let parsed = false;
+  try {
+    JSON.parse(tail);
+    parsed = true;
+  } catch { /* torn */ }
+  const handle = await fs.open(usageJournal, "r+");
+  try {
+    if (parsed) {
+      await handle.write("\n", raw.length);
+      lines.push(tail);
+    } else {
+      await handle.truncate(end);
+      console.warn(`Usage journal: dropped an unfinished last line (${raw.length - end} bytes) left by a crash`);
+    }
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+  return lines;
+}
+
 async function loadState() {
   await fs.mkdir(path.dirname(file), { recursive: true });
   let state;
@@ -257,7 +291,7 @@ async function loadState() {
   }
 
   try {
-    const records = (await fs.readFile(usageJournal, "utf8")).split("\n").filter(Boolean);
+    const records = await readJournal();
     for (const line of records) {
       const record = JSON.parse(line);
       if (!Number.isSafeInteger(record.seq) || record.seq <= state.lastUsageSeq) continue;
