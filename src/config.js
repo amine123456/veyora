@@ -232,6 +232,28 @@ export function paymentConfig() {
   };
 }
 
+// USD wallet top-ups: id:cents[:bonusPercent]. usd100:10000:5 charges $100 and credits $105.
+export function topups() {
+  const raw = process.env.TOPUPS ?? 'usd10:1000,usd25:2500,usd50:5000,usd100:10000:5,usd500:50000:10';
+  const configured = new Map();
+  for (const rawEntry of raw.split(',')) {
+    const entry = rawEntry.trim();
+    const [id, centsRaw, bonusRaw = '0', extra] = entry.split(':').map((value) => value.trim());
+    const cents = Number(centsRaw);
+    const bonusPercent = Number(bonusRaw);
+    if (extra !== undefined
+        || !/^[a-zA-Z0-9_-]{1,40}$/.test(id ?? '')
+        || !Number.isSafeInteger(cents) || cents < 100
+        || !Number.isFinite(bonusPercent) || bonusPercent < 0 || bonusPercent > 50) {
+      throw new Error(`Invalid top-up definition: ${entry}`);
+    }
+    if (configured.has(id)) throw new Error(`Duplicate top-up id: ${id}`);
+    const micros = Math.round((cents * 10_000 * (100 + bonusPercent)) / 100);
+    configured.set(id, Object.freeze({ id, cents, currency: 'usd', bonusPercent, micros, bytes: 0 }));
+  }
+  return configured;
+}
+
 export function packages() {
   const raw = process.env.PACKAGES ?? 'gb1:1073741824:200';
   const configured = new Map();

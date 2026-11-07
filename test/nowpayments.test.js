@@ -8,6 +8,7 @@ import test from 'node:test';
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-nowpayments-'));
 process.env.DATA_FILE = path.join(directory, 'state.json');
 process.env.PACKAGES = 'gb1:1073741824:200:usd,gb5:5368709120:1000:usd';
+process.env.TOPUPS = 'usd10:1000,usd100:10000:5';
 const store = await import('../src/store.js');
 const { createPaymentServer } = await import('../src/payments.js');
 const { finishedPayment, signIpn, validIpnSignature } = await import('../src/nowpayments.js');
@@ -39,8 +40,8 @@ async function withServer({ nowpayments = { apiKey: 'np-test-key', ipnSecret: IP
   let nextInvoiceId = 5500;
   const fetchImpl = async (url, options) => {
     const body = JSON.parse(options.body);
-    invoices.push({ url, headers: options.headers, body });
     const id = nextInvoiceId++;
+    invoices.push({ url, headers: options.headers, body, id });
     const payload = invoiceResponse ? invoiceResponse(id, body) : { id, order_id: body.order_id, invoice_url: `https://sandbox.nowpayments.io/payment/?iid=${id}` };
     return new Response(JSON.stringify(payload), { status: 200, headers: { 'content-type': 'application/json' } });
   };
@@ -95,24 +96,24 @@ test('only finished payments are treated as paid', () => {
 
 test('checkout needs a session and configured payments', async () => {
   await withServer({}, async (port) => {
-    assert.equal((await request(port, { path: '/api/checkout', body: { packageId: 'gb1' } })).status, 401);
+    assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'usd10' } })).status, 401);
     const { cookie } = await signedUp(port, 'nocsrf@example.com');
-    const crossSite = await request(port, { path: '/api/checkout', body: { packageId: 'gb1' }, headers: { cookie, origin: 'https://evil.example' } });
+    const crossSite = await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie, origin: 'https://evil.example' } });
     assert.equal(crossSite.status, 403);
-    assert.equal((await request(port, { path: '/api/checkout', body: { packageId: 'nope' }, headers: { cookie } })).status, 400);
+    assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'nope' }, headers: { cookie } })).status, 400);
   });
   await withServer({ nowpayments: null }, async (port) => {
     const { cookie } = await signedUp(port, 'unconfigured@example.com');
-    const response = await request(port, { path: '/api/checkout', body: { packageId: 'gb1' }, headers: { cookie } });
+    const response = await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } });
     assert.equal(response.status, 503);
     assert.equal(response.json.error, 'Online payment is not set up yet');
   });
 });
 
-test('a finished USDT payment credits the pack exactly once', async () => {
+test('a finished USDT payment credits the wallet exactly once', async () => {
   await withServer({}, async (port, invoices) => {
     const { cookie, username } = await signedUp(port, 'buyer@example.com');
-    const checkout = await request(port, { path: '/api/checkout', body: { packageId: 'gb5' }, headers: { cookie } });
+    const checkout = await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } });
     assert.equal(checkout.status, 200);
     assert.match(checkout.json.checkoutUrl, /^https:\/\/sandbox\.nowpayments\.io\//);
 
@@ -134,38 +135,59 @@ test('a finished USDT payment credits the pack exactly once', async () => {
     // Unsigned or forged notices are refused and credit nothing.
     const forged = await request(port, { path: '/nowpayments/ipn', raw: JSON.stringify(paidBody), headers: { 'x-nowpayments-sig': signIpn(paidBody, 'attacker-secret') } });
     assert.equal(forged.status, 401);
-    assert.equal((await store.getClient(username)).quotaBytes, 0);
+    assert.equal((await store.getClient(username)).balanceMicros, 0);
 
     // Partial payment: acknowledged, not credited.
     const partial = await ipn(port, { ...paidBody, payment_id: 9000, payment_status: 'partially_paid', actually_paid: 4 });
     assert.deepEqual(partial.json, { received: true, credited: false });
-    assert.equal((await store.getClient(username)).quotaBytes, 0);
+    assert.equal((await store.getClient(username)).balanceMicros, 0);
 
     // Signed but for a different amount: not credited.
     const wrongAmount = await ipn(port, { ...paidBody, payment_id: 8999, price_amount: 2 });
     assert.deepEqual(wrongAmount.json, { received: true, credited: false });
-    assert.equal((await store.getClient(username)).quotaBytes, 0);
+    assert.equal((await store.getClient(username)).balanceMicros, 0);
 
-    // The real one credits 5 GB.
+    // The real one credits $10 to the wallet.
     const paid = await ipn(port, paidBody);
     assert.deepEqual(paid.json, { received: true, credited: true });
-    assert.equal((await store.getClient(username)).quotaBytes, 5368709120);
+    assert.equal((await store.getClient(username)).balanceMicros, 10_000_000);
 
     // Replays and a second payment on the same invoice do not credit again.
     assert.equal((await ipn(port, paidBody)).json.credited, false);
     assert.equal((await ipn(port, { ...paidBody, payment_id: 9002 })).json.credited, false);
-    assert.equal((await store.getClient(username)).quotaBytes, 5368709120);
+    assert.equal((await store.getClient(username)).balanceMicros, 10_000_000);
   });
 });
 
 test('an invoice link pointing anywhere but NOWPayments is refused', async () => {
   await withServer({ invoiceResponse: (id) => ({ id, invoice_url: 'https://evil.example/pay' }) }, async (port) => {
     const { cookie } = await signedUp(port, 'phish@example.com');
-    const response = await request(port, { path: '/api/checkout', body: { packageId: 'gb1' }, headers: { cookie } });
+    const response = await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } });
     assert.equal(response.status, 502);
     // The failed checkout does not leave a pending purchase behind.
     for (let index = 0; index < 10; index += 1) {
-      assert.equal((await request(port, { path: '/api/checkout', body: { packageId: 'gb1' }, headers: { cookie } })).status, 502);
+      assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } })).status, 502);
     }
+  });
+});
+
+test('top-ups are listed with their bonus, and a bonus top-up credits the extra', async () => {
+  await withServer({}, async (port, invoices) => {
+    const listed = await request(port, { path: '/packages', method: 'GET' });
+    assert.deepEqual(listed.json, [
+      { id: 'usd10', cents: 1000, currency: 'usd', bonusPercent: 0, creditMicros: 10_000_000 },
+      { id: 'usd100', cents: 10000, currency: 'usd', bonusPercent: 5, creditMicros: 105_000_000 },
+    ]);
+    const { cookie, username } = await signedUp(port, 'bonus@example.com');
+    assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'usd100' }, headers: { cookie } })).status, 200);
+    const sent = invoices.at(-1);
+    assert.equal(sent.body.price_amount, 100);
+    const paid = await ipn(port, {
+      payment_id: 7001, invoice_id: sent.id, order_id: sent.body.order_id, payment_status: 'finished',
+      price_amount: 100, price_currency: 'usd', pay_currency: 'usdttrc20',
+    });
+    assert.equal(paid.json.credited, true);
+    assert.equal((await store.getClient(username)).balanceMicros, 105_000_000);
+    assert.equal((await store.getClient(username)).quotaBytes, 0);
   });
 });

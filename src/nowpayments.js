@@ -57,7 +57,7 @@ export async function createInvoice(settings, { purchaseId, pkg, ipnUrl, success
         price_currency: pkg.currency,
         pay_currency: settings.payCurrency,
         order_id: purchaseId,
-        order_description: `${pkg.id} proxy traffic`,
+        order_description: pkg.micros ? `Veyora balance top-up ${pkg.id}` : `${pkg.id} proxy traffic`,
         ipn_callback_url: ipnUrl,
         success_url: successUrl,
         cancel_url: cancelUrl,

@@ -106,12 +106,19 @@ function validPurchaseId(value) {
     && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+// A purchase credits either prepaid GB (bytes) or the USD wallet (micros), never both.
+function validCredit(bytes, micros) {
+  const wallet = micros !== undefined && micros !== 0;
+  return wallet
+    ? Number.isSafeInteger(micros) && micros > 0 && (bytes === undefined || bytes === 0)
+    : Number.isSafeInteger(bytes) && bytes > 0;
+}
+
 function validPackageInfo(value) {
   return isRecord(value)
     && typeof value.id === "string"
     && /^[A-Za-z0-9_-]{1,40}$/.test(value.id)
-    && Number.isSafeInteger(value.bytes)
-    && value.bytes > 0
+    && validCredit(value.bytes, value.micros)
     && Number.isSafeInteger(value.cents)
     && value.cents >= 50
     && typeof value.currency === "string"
@@ -184,8 +191,7 @@ function normalizeState(parsed) {
       && typeof payment.username === "string"
       && hasOwn(parsed.clients, payment.username)
       && /^[A-Za-z0-9_-]{1,40}$/.test(payment.packageId)
-      && Number.isSafeInteger(payment.bytes)
-      && payment.bytes > 0
+      && validCredit(payment.bytes, payment.micros)
       && Number.isSafeInteger(payment.cents)
       && payment.cents >= 50
       && /^[a-z]{3}$/.test(payment.currency)
@@ -205,8 +211,7 @@ function normalizeState(parsed) {
       && typeof payment.username === "string"
       && hasOwn(parsed.clients, payment.username)
       && /^[A-Za-z0-9_-]{1,40}$/.test(payment.packageId)
-      && Number.isSafeInteger(payment.bytes)
-      && payment.bytes > 0
+      && validCredit(payment.bytes, payment.micros)
       && validTimestamp(payment.processedAt);
     if (!valid) throw new Error(`Invalid processed payment record: ${eventId}`);
   }
@@ -720,7 +725,8 @@ export async function createPendingPayment(username, packageInfo) {
       purchaseId,
       username,
       packageId: packageInfo.id,
-      bytes: packageInfo.bytes,
+      bytes: packageInfo.micros ? 0 : packageInfo.bytes,
+      ...(packageInfo.micros ? { micros: packageInfo.micros } : {}),
       cents: packageInfo.cents,
       currency: packageInfo.currency.toLowerCase(),
       createdAt: new Date(now).toISOString(),
@@ -773,8 +779,14 @@ export async function completePayment({ eventId, purchaseId, sessionId, amountTo
     }
     const client = hasOwn(state.clients, pending.username) ? state.clients[pending.username] : undefined;
     if (!client) throw new Error("Unknown client");
-    if (!Number.isSafeInteger(client.quotaBytes + pending.bytes)) throw new Error("Quota is too large");
-    client.quotaBytes += pending.bytes;
+    if (pending.micros) {
+      const nextBalance = (client.balanceMicros ?? 0) + pending.micros;
+      if (!Number.isSafeInteger(nextBalance)) throw new Error("Balance is too large");
+      client.balanceMicros = nextBalance;
+    } else {
+      if (!Number.isSafeInteger(client.quotaBytes + pending.bytes)) throw new Error("Quota is too large");
+      client.quotaBytes += pending.bytes;
+    }
     state.processedPayments = pruneProcessedPayments(
       state.processedPayments,
       Math.max(0, processedPaymentLimit - 1),
@@ -786,10 +798,11 @@ export async function completePayment({ eventId, purchaseId, sessionId, amountTo
       username: pending.username,
       packageId: pending.packageId,
       bytes: pending.bytes,
+      ...(pending.micros ? { micros: pending.micros } : {}),
       processedAt: new Date().toISOString(),
     };
     delete state.pendingPayments[purchaseId];
     await saveSnapshot(state);
-    return { credited: true, username: pending.username, bytes: pending.bytes };
+    return { credited: true, username: pending.username, bytes: pending.bytes, micros: pending.micros ?? 0 };
   });
 }

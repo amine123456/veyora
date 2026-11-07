@@ -5,7 +5,7 @@ import { appendFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AUTH_BUSY, createClientAuthParser } from './auth.js';
-import { packages } from './config.js';
+import { packages, topups } from './config.js';
 import { createInvoice, finishedPayment, validIpnSignature } from './nowpayments.js';
 import {
   bindPaymentSession,
@@ -287,6 +287,8 @@ function redirect(response, location) {
 export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {}) {
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
   const availablePackages = packages();
+  // Crypto checkout sells USD wallet top-ups; the optional Stripe path keeps GB packs.
+  const availableTopups = topups();
   const authAttempts = authLimiter(config.authAttemptsPerMinute);
   const parseClientAuth = createClientAuthParser(config.maxConcurrentAuth);
   const accountAttempts = authLimiter(config.authAttemptsPerMinute);
@@ -389,8 +391,8 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
         if (!client) return json(response, 401, { error: 'Not signed in' });
         if (!config.nowpayments) return json(response, 503, { error: 'Online payment is not set up yet' });
         const input = parseJson(await readBody(request, config.maxBodyBytes));
-        const selected = availablePackages.get(input?.packageId);
-        if (!selected) throw new PublicError(400, 'Unknown package');
+        const selected = availableTopups.get(input?.topupId ?? input?.packageId);
+        if (!selected) throw new PublicError(400, 'Unknown top-up');
 
         let pending;
         try {
@@ -446,8 +448,8 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
       }
 
       if (request.method === 'GET' && request.url === '/packages') {
-        return json(response, 200, [...availablePackages.values()].map(({ id, bytes, cents, currency }) => ({
-          id, bytes, cents, currency,
+        return json(response, 200, [...availableTopups.values()].map(({ id, cents, currency, bonusPercent, micros }) => ({
+          id, cents, currency, bonusPercent, creditMicros: micros,
         })));
       }
 
