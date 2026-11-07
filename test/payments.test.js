@@ -184,7 +184,7 @@ test('landing page serves only allowlisted assets with browser security headers'
     assert.match(page.headers['content-security-policy'], /default-src 'none'/);
     assert.match(page.headers['content-security-policy'], /script-src 'self';/);
     assert.equal(page.headers['x-frame-options'], 'DENY');
-    assert.match(page.body, /<title>Proxora \|/);
+    assert.match(page.body, /<title>Veyora \|/);
     assert.match(page.body, /<script src="app\.js" defer><\/script>/);
     assert.doesNotMatch(page.body, /<script>/);
 

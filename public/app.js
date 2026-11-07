@@ -274,7 +274,7 @@ function initScene() {
     board.style.setProperty('--rz', rz.toFixed(2));
   });
   // signature load sequence
-  document.addEventListener('proxora:ready', () => {
+  document.addEventListener('veyora:ready', () => {
     setTimeout(() => scene.classList.add('is-assembled'), 700);
     setTimeout(() => scene.classList.add('is-lit'), 1700);
   });
@@ -502,9 +502,9 @@ function initOrbit() {
 
 /* ================= initCode (S5 terminal) ================= */
 const SNIPPETS = {
-  curl: 'curl -x "http://USER-country-es:PASS@gate.proxora.io:7777" \\\n  -H "Accept: application/json" \\\n  "https://api.ipify.org?format=json"',
-  python: 'import requests\n\nproxy = "http://USER-country-es:PASS@gate.proxora.io:7777"\nr = requests.get(\n    "https://api.ipify.org?format=json",\n    proxies={"http": proxy, "https": proxy},\n    timeout=15,\n)\nprint(r.status_code, r.json())',
-  node: 'import { ProxyAgent, fetch } from "undici";\n\nconst agent = new ProxyAgent("http://USER-country-es:PASS@gate.proxora.io:7777");\nconst res = await fetch("https://api.ipify.org?format=json", { dispatcher: agent });\nconsole.log(res.status, await res.json());'
+  curl: 'curl -x "http://USER-country-es:PASS@gate.veyora.io:7777" \\\n  -H "Accept: application/json" \\\n  "https://api.ipify.org?format=json"',
+  python: 'import requests\n\nproxy = "http://USER-country-es:PASS@gate.veyora.io:7777"\nr = requests.get(\n    "https://api.ipify.org?format=json",\n    proxies={"http": proxy, "https": proxy},\n    timeout=15,\n)\nprint(r.status_code, r.json())',
+  node: 'import { ProxyAgent, fetch } from "undici";\n\nconst agent = new ProxyAgent("http://USER-country-es:PASS@gate.veyora.io:7777");\nconst res = await fetch("https://api.ipify.org?format=json", { dispatcher: agent });\nconsole.log(res.status, await res.json());'
 };
 const TOK = /("(?:[^"\\]|\\.)*")|(\b(?:import|from|const|await|print|as|curl)\b)|(\s-[xH]\b)|(\b\d+\b)|(\b(?:requests|ProxyAgent|fetch|console)\b)/g;
 function tokenize(code) {
@@ -670,27 +670,6 @@ function initFAQ() {
   });
 }
 
-/* ================= newsletter ================= */
-function initNewsletter() {
-  const f = $('#newsForm'), msg = $('#newsMsg'), input = $('#email');
-  if (!f) return;
-  f.addEventListener('submit', e => {
-    e.preventDefault();
-    const v = input.value.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-      msg.textContent = 'Enter a valid email address.';
-      msg.className = 'news__msg is-error';
-      input.setAttribute('aria-invalid', 'true');
-      input.focus();
-      return;
-    }
-    input.removeAttribute('aria-invalid');
-    msg.textContent = 'Thanks, you are subscribed. Check your inbox to confirm.';
-    msg.className = 'news__msg is-ok';
-    f.reset();
-  });
-}
-
 /* ================= boot ================= */
 function boot() {
   // DOM that other modules depend on
@@ -719,7 +698,6 @@ function boot() {
   initCode();
   initPricing();
   initFAQ();
-  initNewsletter();
 
   // keep anchors accurate when layout changes (accordion, fonts, images)
   if ('ResizeObserver' in window) new ResizeObserver(debouncedMeasure).observe(document.body);
@@ -738,7 +716,7 @@ function boot() {
     measureAll();
     requestAnimationFrame(() => {
       root.classList.add('is-ready');
-      document.dispatchEvent(new Event('proxora:ready'));
+      document.dispatchEvent(new Event('veyora:ready'));
     });
   });
 }

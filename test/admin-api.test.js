@@ -84,5 +84,9 @@ test('the admin CLI goes through the running server instead of the store file', 
     const { stdout } = await run(process.execPath, [adminScript, 'credit', 'cli-target', '0.5'], { env });
     assert.match(stdout, /Credited 0\.5 GB to cli-target/);
     assert.equal((await store.getClient('cli-target')).quotaBytes, Math.round(0.5 * 1024 ** 3));
+
+    await store.reserveUsage('cli-target', 1024);
+    const listed = await run(process.execPath, [adminScript, 'list'], { env });
+    assert.match(listed.stdout, /1\.00 KB/);
   });
 });

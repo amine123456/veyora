@@ -1,5 +1,5 @@
 [Unit]
-Description=Proxora proxy gateway and website
+Description=Veyora proxy gateway and website
 After=network-online.target
 Wants=network-online.target
 

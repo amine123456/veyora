@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
-import { createClient, credit, findUsername, listClients, setEnabled } from './store.js';
+import { createClient, credit, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -51,11 +51,12 @@ export function createAdminServer({ token }) {
         const client = await createClient(body.username, password, body.bytes ?? 0);
         return send(response, 201, { ...client, password });
       }
-      const action = /^\/clients\/([^/]+)\/(credit|enable|disable)$/.exec(pathname);
+      const action = /^\/clients\/([^/]+)\/(credit|enable|disable|password)$/.exec(pathname);
       if (action) {
         const username = await findUsername(decodeURIComponent(action[1]));
         if (!username) return send(response, 404, { error: 'Unknown client' });
         if (action[2] === 'credit') return send(response, 200, await credit(username, body.bytes));
+        if (action[2] === 'password') return send(response, 200, { username, password: await regenerateProxyPassword(username) });
         return send(response, 200, await setEnabled(username, action[2] === 'enable'));
       }
       return send(response, 404, { error: 'Not found' });

@@ -2,7 +2,8 @@
 data/
 node_modules/
 npm-debug.log*
+*-deploy.tar.gz
 
-# Not part of Proxora
+# Not part of Veyora
 eng.traineddata
 .claude/

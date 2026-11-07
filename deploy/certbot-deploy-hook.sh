@@ -3,7 +3,7 @@
 # Certbot runs it after every issue or renewal: copy the gateway certificate where the
 # service user can read it, then restart so the gateway loads it.
 set -eu
-DOMAIN="gate.proxora.example"
+DOMAIN="gate.157-230-28-253.sslip.io"
 case " ${RENEWED_DOMAINS:-$DOMAIN} " in
   *" $DOMAIN "*) ;;
   *) exit 0 ;;

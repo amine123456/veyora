@@ -212,8 +212,8 @@ test('PUBLIC_PROXY_URL sets the endpoint shown to customers', async () => {
   const { paymentConfig } = await import('../src/config.js');
   const saved = { ...process.env };
   try {
-    process.env.PUBLIC_PROXY_URL = 'https://gate.proxora.test:8443';
-    assert.deepEqual({ ...paymentConfig().proxyEndpoint }, { scheme: 'https', host: 'gate.proxora.test', port: 8443 });
+    process.env.PUBLIC_PROXY_URL = 'https://gate.veyora.test:8443';
+    assert.deepEqual({ ...paymentConfig().proxyEndpoint }, { scheme: 'https', host: 'gate.veyora.test', port: 8443 });
 
     delete process.env.PUBLIC_PROXY_URL;
     process.env.PROXY_HOST = '127.0.0.1';

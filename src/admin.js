@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 import { adminConfig } from './config.js';
-import { createClient, credit, findUsername, listClients, setEnabled } from './store.js';
+import { createClient, credit, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
 
 const [, , command, ...args] = process.argv;
 
@@ -14,12 +14,19 @@ function gb(value, { allowZero = false } = {}) {
   return bytes;
 }
 
-const display = (bytes) => `${(bytes / 1024 ** 3).toFixed(3)} GB`;
+const display = (bytes) => {
+  if (bytes === 0) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(2)} KB`;
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
+  return `${(bytes / 1024 ** 3).toFixed(3)} GB`;
+};
 
 function usage() {
   console.log('Usage:');
   console.log('  npm run admin -- create <username> [initial-gb]');
   console.log('  npm run admin -- credit <username|email> <gb>');
+  console.log('  npm run admin -- password <username|email>');
   console.log('  npm run admin -- enable|disable <username|email>');
   console.log('  npm run admin -- list');
 }
@@ -70,6 +77,16 @@ async function main() {
     const client = await api('POST', `/clients/${encodeURIComponent(args[0])}/credit`, { bytes })
       ?? await credit(await offlineUsername(args[0]), bytes);
     console.log(`Credited ${args[1]} GB to ${client.username}. Remaining: ${display(client.remainingBytes)}`);
+    return;
+  }
+
+  if (command === 'password' && args.length === 1) {
+    const username = await offlineUsername(args[0]);
+    const rotated = await api('POST', `/clients/${encodeURIComponent(username)}/password`, {})
+      ?? { username, password: await regenerateProxyPassword(username) };
+    console.log('Replaced proxy password. Save it now; it is not stored in plaintext.');
+    console.log(`Username: ${rotated.username}`);
+    console.log(`Password: ${rotated.password}`);
     return;
   }
 

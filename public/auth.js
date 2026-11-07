@@ -1,7 +1,13 @@
 (() => {
 'use strict';
 
-const gb = bytes => `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+const traffic = bytes => {
+  if (bytes === 0) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(2)} KB`;
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(2)} MB`;
+  return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+};
 
 async function post(path, body) {
   const response = await fetch(path, {
@@ -74,11 +80,12 @@ if (dash) {
       if (!data) return;
       me = data;
       set('email', me.email);
-      set('remaining', gb(me.remainingBytes));
-      const percent = me.quotaBytes > 0 ? Math.round((me.usedBytes / me.quotaBytes) * 100) : 0;
+      set('remaining', traffic(me.remainingBytes));
+      const rawPercent = me.quotaBytes > 0 ? (me.usedBytes / me.quotaBytes) * 100 : 0;
+      const percent = Math.min(100, Math.max(0, rawPercent));
       $('[data-meter-fill]').style.width = `${percent}%`;
-      $('[data-meter]').setAttribute('aria-valuenow', String(percent));
-      set('usage', me.quotaBytes > 0 ? `${gb(me.usedBytes)} used of ${gb(me.quotaBytes)}` : '');
+      $('[data-meter]').setAttribute('aria-valuenow', String(Math.round(percent)));
+      set('usage', me.quotaBytes > 0 ? `${traffic(me.usedBytes)} used of ${traffic(me.quotaBytes)}` : '');
       $('[data-empty]').hidden = me.quotaBytes > 0;
 
       values.username = me.username;

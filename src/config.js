@@ -182,6 +182,7 @@ export function paymentConfig() {
       payCurrency,
     } : null,
     maxBodyBytes: integer('PAYMENT_MAX_BODY_BYTES', 1024 * 1024, { max: 10 * 1024 * 1024 }),
+      supportFile: path.resolve(process.env.SUPPORT_FILE ?? './data/support-requests.jsonl'),
     proxyEndpoint: proxyEndpoint(),
     stickySessionSeconds: integer('UPSTREAM_SESSION_TTL_SECONDS', 600, { min: 60, max: 86_400 }),
   };

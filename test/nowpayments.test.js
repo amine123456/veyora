@@ -47,7 +47,7 @@ async function withServer({ nowpayments = { apiKey: 'np-test-key', ipnSecret: IP
   const server = createPaymentServer({
     stripeKey: '', webhookSecret: '', authAttemptsPerMinute: 30, maxConcurrentAuth: 4,
     maxBodyBytes: 32_768, stripeTimeoutMs: 1_000, requestTimeoutMs: 5_000,
-    successUrl: 'https://proxora.example.test/account?paid=1', cancelUrl: 'https://proxora.example.test/account',
+    successUrl: 'https://veyora.example.test/account?paid=1', cancelUrl: 'https://veyora.example.test/account',
     nowpayments,
   }, { fetchImpl });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -122,8 +122,8 @@ test('a finished USDT payment credits the pack exactly once', async () => {
     assert.equal(sent.body.price_amount, 10);
     assert.equal(sent.body.price_currency, 'usd');
     assert.equal(sent.body.pay_currency, 'usdttrc20');
-    assert.equal(sent.body.ipn_callback_url, 'https://proxora.example.test/nowpayments/ipn');
-    assert.equal(sent.body.success_url, 'https://proxora.example.test/account?paid=1');
+    assert.equal(sent.body.ipn_callback_url, 'https://veyora.example.test/nowpayments/ipn');
+    assert.equal(sent.body.success_url, 'https://veyora.example.test/account?paid=1');
     const purchaseId = sent.body.order_id;
     const invoiceId = 5500;
     const paidBody = {

@@ -78,7 +78,7 @@ The payment service also serves `/signup`, `/login` and `/account`. Signing up c
 
 Sessions use an `HttpOnly`, `Secure`, `SameSite=Lax` cookie named `__Host-proxora_session`, valid for 30 days. Only a SHA-256 hash of each session token is stored. Browsers accept `Secure` cookies on `http://localhost`; in production the site must be served over HTTPS. Account endpoints (`POST /api/signup`, `/api/login`, `/api/logout`, `GET /api/me`) accept JSON only and reject requests whose `Origin` does not match the host. Signups are capped at 5 per address per minute.
 
-`/account` is the customer dashboard: traffic left and used, the proxy endpoint, the proxy username, and a ready-to-run `curl` test. `POST /api/proxy-password` issues a new random proxy password, returns it once, and stores only its hash, so the old password stops working immediately. Set `PUBLIC_PROXY_URL` (for example `https://gate.proxora.io:8080`) to the address customers should use; it defaults to `PROXY_HOST`/`PROXY_PORT`.
+`/account` is the customer dashboard: traffic left and used, the proxy endpoint, the proxy username, and a ready-to-run `curl` test. `POST /api/proxy-password` issues a new random proxy password, returns it once, and stores only its hash, so the old password stops working immediately. Set `PUBLIC_PROXY_URL` (for example `https://gate.veyora.io:8080`) to the address customers should use; it defaults to `PROXY_HOST`/`PROXY_PORT`.
 
 ## USDT top-ups (NOWPayments)
 

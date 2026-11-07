@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClientAuthParser } from './auth.js';
@@ -31,6 +31,14 @@ const publicFiles = new Map([
   ['/account', { file: 'account.html', type: html, session: 'required' }],
   ['/auth.css', { file: 'auth.css', type: 'text/css; charset=utf-8' }],
   ['/auth.js', { file: 'auth.js', type: 'text/javascript; charset=utf-8' }],
+  ['/trust.css', { file: 'trust.css', type: 'text/css; charset=utf-8' }],
+  ['/support.js', { file: 'support.js', type: 'text/javascript; charset=utf-8' }],
+  ['/about', { file: 'about.html', type: html }],
+  ['/support', { file: 'support.html', type: html }],
+  ['/privacy', { file: 'privacy.html', type: html }],
+  ['/terms', { file: 'terms.html', type: html }],
+  ['/acceptable-use', { file: 'acceptable-use.html', type: html }],
+  ['/refund-policy', { file: 'refund-policy.html', type: html }],
 ]);
 
 async function staticFile(response, asset, headOnly = false) {
@@ -266,6 +274,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
   const parseClientAuth = createClientAuthParser(config.maxConcurrentAuth);
   const accountAttempts = authLimiter(config.authAttemptsPerMinute);
   const signupAttempts = authLimiter(SIGNUPS_PER_MINUTE);
+  const supportAttempts = authLimiter(5);
   const hashing = concurrencyLimit(config.maxConcurrentAuth);
   const server = http.createServer(async (request, response) => {
     try {
@@ -278,6 +287,31 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
           if (asset.session === 'guest' && signedIn) return redirect(response, '/account');
         }
         return await staticFile(response, asset, request.method === 'HEAD');
+      }
+
+      if (request.method === 'POST' && request.url === '/api/support') {
+        assertSameOrigin(request);
+        if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+          throw new PublicError(415, 'Content-Type must be application/json');
+        }
+        const key = request.socket.remoteAddress ?? 'unknown';
+        if (!supportAttempts.allowed(key)) return json(response, 429, { error: 'Too many requests. Wait a minute and try again.' });
+        supportAttempts.fail(key);
+        const input = parseJson(await readBody(request, config.maxBodyBytes));
+        const name = String(input?.name ?? '').trim();
+        const email = String(input?.email ?? '').trim().toLowerCase();
+        const topic = String(input?.topic ?? 'general');
+        const message = String(input?.message ?? '').trim();
+        const topics = new Set(['general', 'account', 'billing', 'technical', 'abuse']);
+        if (name.length > 80) throw new PublicError(400, 'Name is too long');
+        if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new PublicError(400, 'Enter a valid email address');
+        if (!topics.has(topic)) throw new PublicError(400, 'Choose a valid topic');
+        if (message.length < 20 || message.length > 4000) throw new PublicError(400, 'Message must be between 20 and 4000 characters');
+        const record = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), name, email, topic, message };
+        const supportFile = path.resolve(config.supportFile ?? './data/support-requests.jsonl');
+        await mkdir(path.dirname(supportFile), { recursive: true });
+        await appendFile(supportFile, `${JSON.stringify(record)}\n`, { encoding: 'utf8', mode: 0o600 });
+        return json(response, 201, { ok: true, id: record.id });
       }
 
       if (request.method === 'POST' && ['/api/signup', '/api/login', '/api/logout', '/api/proxy-password'].includes(request.url)) {
