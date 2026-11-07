@@ -88,6 +88,49 @@ function proxyEndpoint() {
   });
 }
 
+// Optional second upstream account for mobile IPs. Same provider format as the
+// residential one; host and port default to the residential endpoint.
+function mobileUpstream() {
+  const username = process.env.UPSTREAM_MOBILE_USERNAME?.trim();
+  if (!username) return null;
+  return {
+    username,
+    password: required('UPSTREAM_MOBILE_PASSWORD'),
+    host: process.env.UPSTREAM_MOBILE_HOST?.trim() || required('UPSTREAM_PROXY_HOST'),
+    port: process.env.UPSTREAM_MOBILE_PORT ? integer('UPSTREAM_MOBILE_PORT', 0, { max: 65535 }) : null,
+  };
+}
+
+function usdMicros(name, fallback, { min = 0, max = 1000 } = {}) {
+  const raw = process.env[name]?.trim();
+  const value = raw ? Number(raw) : fallback;
+  if (!Number.isFinite(value) || value < min || value > max) {
+    throw new Error(`${name} must be a USD amount between ${min} and ${max}`);
+  }
+  return Math.round(value * 1_000_000);
+}
+
+// Prices and upstream costs, all in integer micro-dollars (1 USD = 1,000,000).
+export function pricingConfig() {
+  const premiumDomains = new Map();
+  for (const entry of csv('UNLOCKER_PREMIUM_DOMAINS')) {
+    const [domain, multiplierRaw] = entry.split(':');
+    const multiplier = Number(multiplierRaw);
+    if (!/^[a-z0-9.-]+$/.test(domain ?? '') || !Number.isFinite(multiplier) || multiplier < 1 || multiplier > 20) {
+      throw new Error(`Invalid UNLOCKER_PREMIUM_DOMAINS entry: ${entry}`);
+    }
+    premiumDomains.set(domain, multiplier);
+  }
+  return {
+    residentialPerGbMicros: usdMicros('PRICE_RESIDENTIAL_PER_GB', 1.5, { min: 0.01 }),
+    mobilePerGbMicros: usdMicros('PRICE_MOBILE_PER_GB', 2.5, { min: 0.01 }),
+    unlockerPerRequestMicros: Math.round(usdMicros('PRICE_UNLOCKER_PER_1K', 0.8, { min: 0.01 }) / 1000),
+    costResidentialPerGbMicros: usdMicros('COST_RESIDENTIAL_PER_GB', 0.15),
+    costMobilePerGbMicros: usdMicros('COST_MOBILE_PER_GB', 0.29),
+    premiumDomains,
+  };
+}
+
 export function gatewayConfig() {
   const billingMode = process.env.BILLING_MODE ?? 'total';
   if (!['total', 'download'].includes(billingMode)) {
@@ -115,6 +158,7 @@ export function gatewayConfig() {
     upstreamUsername: required('UPSTREAM_PROXY_USERNAME'),
     upstreamPassword: required('UPSTREAM_PROXY_PASSWORD'),
     upstreamTls: !allowInsecureUpstream,
+    upstreamMobile: mobileUpstream(),
     upstreamSessionTtlSeconds: integer('UPSTREAM_SESSION_TTL_SECONDS', 600, { min: 60, max: 86_400 }),
     billingMode,
     destinationAllowlist: csv('DESTINATION_ALLOWLIST'),

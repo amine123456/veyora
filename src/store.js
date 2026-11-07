@@ -153,6 +153,8 @@ function normalizeState(parsed) {
       && client.usedBytes <= client.quotaBytes
       && typeof client.enabled === "boolean"
       && validTimestamp(client.createdAt)
+      && (client.balanceMicros === undefined
+        || (Number.isSafeInteger(client.balanceMicros) && client.balanceMicros >= 0))
       && (client.email === undefined
         || (validEmail(client.email)
           && /^[0-9a-f]{32}$/i.test(client.webSalt)
@@ -238,10 +240,21 @@ async function loadState() {
         || typeof record.username !== "string"
         || !hasOwn(state.clients, record.username)
         || !Number.isSafeInteger(record.delta)
-        || record.delta === 0) {
+        || record.delta === 0
+        || (record.unit !== undefined && record.unit !== "micros")) {
         throw new Error("Invalid usage journal record");
       }
       const client = state.clients[record.username];
+      if (record.unit === "micros") {
+        // Wallet movement: delta is added to the USD balance (micro-dollars).
+        const nextBalance = (client.balanceMicros ?? 0) + record.delta;
+        if (!Number.isSafeInteger(nextBalance) || nextBalance < 0) {
+          throw new Error("Usage journal drives a wallet below zero");
+        }
+        client.balanceMicros = nextBalance;
+        state.lastUsageSeq = record.seq;
+        continue;
+      }
       const nextUsage = client.usedBytes + record.delta;
       if (!Number.isSafeInteger(nextUsage) || nextUsage < 0 || nextUsage > client.quotaBytes) {
         throw new Error("Usage journal exceeds client quota bounds");
@@ -318,9 +331,10 @@ async function syncDataDirectory() {
   }
 }
 
-async function appendUsage(state, username, delta) {
+async function appendUsage(state, username, delta, unit) {
   state.lastUsageSeq += 1;
   const record = { seq: state.lastUsageSeq, username, delta, at: new Date().toISOString() };
+  if (unit) record.unit = unit;
   const handle = await fs.open(usageJournal, "a", 0o600);
   try {
     await handle.writeFile(`${JSON.stringify(record)}\n`, "utf8");
@@ -336,6 +350,7 @@ function publicClient(username, client) {
     quotaBytes: client.quotaBytes,
     usedBytes: client.usedBytes ?? 0,
     remainingBytes: Math.max(0, client.quotaBytes - (client.usedBytes ?? 0)),
+    balanceMicros: client.balanceMicros ?? 0,
     enabled: client.enabled !== false,
     createdAt: client.createdAt,
     email: client.email ?? null,
@@ -446,6 +461,100 @@ export async function credit(username, bytes) {
     await saveSnapshot(state);
     return publicClient(username, client);
   });
+}
+
+// ---- USD wallet ---------------------------------------------------------------
+// Balances are integer micro-dollars (1 USD = 1,000,000) so prices like $0.0008 per
+// request stay exact. Credits are snapshotted; per-request debits and releases go
+// through the fsynced usage journal like traffic does, so a crash never loses them.
+export const MICROS_PER_USD = 1_000_000;
+const GIB = 1024 ** 3;
+
+function walletClient(state, username) {
+  const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+  return client && client.enabled !== false ? client : undefined;
+}
+
+export async function creditWallet(username, micros) {
+  if (!Number.isSafeInteger(micros) || micros <= 0) throw new Error("Credit must be a positive integer");
+  return mutate(async (state) => {
+    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+    if (!client) throw new Error("Unknown client");
+    const next = (client.balanceMicros ?? 0) + micros;
+    if (!Number.isSafeInteger(next)) throw new Error("Balance is too large");
+    client.balanceMicros = next;
+    await saveSnapshot(state);
+    return publicClient(username, client);
+  });
+}
+
+// All-or-nothing hold for a fixed price (one unlocker request). Returns true when the
+// whole amount was taken from the balance.
+export async function reserveFunds(username, micros) {
+  if (!Number.isSafeInteger(micros) || micros <= 0) return false;
+  return mutate(async (state) => {
+    const client = walletClient(state, username);
+    if (!client || (client.balanceMicros ?? 0) < micros) return false;
+    client.balanceMicros -= micros;
+    await appendUsage(state, username, -micros, "micros");
+    return true;
+  });
+}
+
+export async function releaseFunds(username, micros) {
+  if (!Number.isSafeInteger(micros) || micros <= 0) return;
+  return mutate(async (state) => {
+    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+    if (!client) return;
+    client.balanceMicros = (client.balanceMicros ?? 0) + micros;
+    await appendUsage(state, username, micros, "micros");
+  });
+}
+
+const trafficCost = (bytes, pricePerGbMicros) => Math.ceil((bytes * pricePerGbMicros) / GIB);
+
+// Reserves proxy traffic: prepaid GB (legacy quota) first when allowed, then the wallet
+// at pricePerGbMicros. Returns how many bytes came from each source so the unused part
+// can be returned to the same place.
+export async function reserveTraffic(username, requestedBytes, { pricePerGbMicros = 0, allowQuota = true } = {}) {
+  const none = { bytes: 0, quotaBytes: 0, walletBytes: 0 };
+  if (!Number.isSafeInteger(requestedBytes) || requestedBytes <= 0) return none;
+  return mutate(async (state) => {
+    const client = walletClient(state, username);
+    if (!client) return none;
+    let quotaBytes = 0;
+    if (allowQuota) {
+      quotaBytes = Math.min(requestedBytes, Math.max(0, client.quotaBytes - client.usedBytes));
+      if (quotaBytes > 0) {
+        client.usedBytes += quotaBytes;
+        await appendUsage(state, username, quotaBytes);
+      }
+    }
+    let walletBytes = 0;
+    const wanted = requestedBytes - quotaBytes;
+    if (wanted > 0 && pricePerGbMicros > 0) {
+      const balance = client.balanceMicros ?? 0;
+      walletBytes = Math.min(wanted, Math.floor((balance * GIB) / pricePerGbMicros));
+      const cost = trafficCost(walletBytes, pricePerGbMicros);
+      if (walletBytes > 0 && cost > 0 && cost <= balance) {
+        client.balanceMicros = balance - cost;
+        await appendUsage(state, username, -cost, "micros");
+      } else {
+        walletBytes = 0;
+      }
+    }
+    return { bytes: quotaBytes + walletBytes, quotaBytes, walletBytes };
+  });
+}
+
+// Returns unused reserved traffic. Wallet refunds round down, so a customer is never
+// credited more than was charged.
+export async function releaseTraffic(username, { quotaBytes = 0, walletBytes = 0, pricePerGbMicros = 0 } = {}) {
+  if (quotaBytes > 0) await releaseUsage(username, quotaBytes);
+  if (walletBytes > 0 && pricePerGbMicros > 0) {
+    const refund = Math.floor((walletBytes * pricePerGbMicros) / GIB);
+    if (refund > 0) await releaseFunds(username, refund);
+  }
 }
 
 export async function setEnabled(username, enabled) {
