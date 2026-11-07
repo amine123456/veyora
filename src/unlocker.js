@@ -462,7 +462,31 @@ export function createUnlocker({
     };
   }
 
-  async function handle(request, response, clientIp) {
+  // In-flight /v1 requests, so shutdown can wait for them to settle their holds.
+  let inFlight = 0;
+  let stopping = false;
+  let idleWaiters = [];
+  const settleOne = () => {
+    inFlight -= 1;
+    if (inFlight === 0) {
+      for (const resolve of idleWaiters) resolve();
+      idleWaiters = [];
+    }
+  };
+
+  function handle(request, response, clientIp) {
+    if (stopping) return Promise.resolve(send(response, 503, { error: "Shutting down, retry shortly" }, { "Retry-After": "5", Connection: "close" }));
+    inFlight += 1;
+    return handleRequest(request, response, clientIp).finally(settleOne);
+  }
+
+  // Refuses new requests and resolves once the ones in flight have finished.
+  function stop() {
+    stopping = true;
+    return inFlight === 0 ? Promise.resolve() : new Promise((resolve) => idleWaiters.push(resolve));
+  }
+
+  async function handleRequest(request, response, clientIp) {
     try {
       const { pathname } = new URL(request.url, "http://local");
       if (pathname !== "/v1/unlock") return send(response, 404, { error: "Not found" });
@@ -557,5 +581,12 @@ export function createUnlocker({
     }
   }
 
-  return { handle, unlock, ledger, stats: () => ledger.stats(), memory: () => ({ bookedBytes, budgetBytes: memoryBudget, active }) };
+  return {
+    handle,
+    unlock,
+    ledger,
+    stop,
+    stats: () => ledger.stats(),
+    memory: () => ({ bookedBytes, budgetBytes: memoryBudget, active, inFlight }),
+  };
 }

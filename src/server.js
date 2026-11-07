@@ -2,6 +2,8 @@ import { createAdminServer } from './admin-api.js';
 import { adminConfig, gatewayConfig, paymentConfig, pricingConfig, unlockerConfig } from './config.js';
 import { createGateway } from './gateway.js';
 import { createPaymentServer } from './payments.js';
+import { createShutdown } from './shutdown.js';
+import { drain } from './store.js';
 import { createUnlocker } from './unlocker.js';
 
 function listen(server, port, host) {
@@ -58,12 +60,12 @@ async function main() {
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
 
-  // systemd stops the service with SIGTERM: write a last ledger snapshot first so the
-  // next start replays nothing. (Without it nothing is lost, only replayed.)
+  // systemd stops the service with SIGTERM: stop listening, let in-flight unlocks and
+  // store writes finish (at most 10 s), write the ledger snapshot, then exit.
+  const stop = createShutdown({ servers: [proxyServer, paymentServer, adminServer], unlocker, drainStore: drain });
   const shutdown = () => {
-    void (unlocker ? unlocker.ledger.close() : Promise.resolve())
-      .catch((error) => console.error(`Ledger snapshot on shutdown failed: ${error.message}`))
-      .finally(() => process.exit(0));
+    console.log('Shutting down: waiting for in-flight requests and store writes');
+    void stop().finally(() => process.exit(0));
   };
   process.once('SIGTERM', shutdown);
   process.once('SIGINT', shutdown);

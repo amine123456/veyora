@@ -314,6 +314,16 @@ function mutate(operation) {
   return result;
 }
 
+// Resolves once every mutation queued so far (and any queued while waiting) has been
+// written, for a clean shutdown.
+export async function drain() {
+  let seen;
+  do {
+    seen = mutationQueue;
+    await seen;
+  } while (seen !== mutationQueue);
+}
+
 async function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   const result = await scrypt(password, salt, 64, { N: 16_384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
   return { salt, hash: result.toString("hex") };

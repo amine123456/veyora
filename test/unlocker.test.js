@@ -442,3 +442,32 @@ test('unlocker defaults are sized for a small droplet', async () => {
     Object.assign(process.env, saved);
   }
 });
+
+test('shutdown refuses new requests, waits for the one in flight, then snapshots the ledger', async () => {
+  const { createShutdown } = await import('../src/shutdown.js');
+  let arrived;
+  const started = new Promise((resolve) => { arrived = resolve; });
+  await harness((req, res) => {
+    arrived();
+    setTimeout(() => {
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      res.end(PAGE);
+    }, 300);
+  }, {}, async ({ call, unlocker }) => {
+    const { username, key } = await customer();
+    const slow = call({ url: 'https://shop.example/slow' }, { key });
+    await started;
+
+    const stop = createShutdown({ unlocker, drainStore: store.drain, timeoutMs: 5_000, log: { warn() {}, error() {} } });
+    const stopping = stop();
+    const refused = await call({ url: 'https://shop.example/late' }, { key });
+    assert.equal(refused.status, 503);
+    assert.equal(refused.headers['retry-after'], '5');
+
+    assert.equal(await stopping, 'drained');
+    assert.equal(unlocker.memory().inFlight, 0);
+    assert.equal((await slow).status, 200);
+    assert.equal(await balance(username), 1_000_000 - 800); // the hold settled before stop resolved
+    assert.equal(unlocker.stats()[0].requests, 1);
+  });
+});
