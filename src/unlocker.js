@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
 import dns from "node:dns/promises";
-import { appendFile, mkdir, readFile, stat } from "node:fs/promises";
-import path from "node:path";
+import { StringDecoder } from "node:string_decoder";
 import { upstreamAuthorization, upstreamEndpoint } from "./auth.js";
 import { fetchThroughProxy } from "./fetcher.js";
+import { createLedger } from "./ledger.js";
 import { resolveTarget } from "./gateway.js";
 import { authenticateApiKey, releaseFunds, reserveFunds } from "./store.js";
 
@@ -47,6 +47,31 @@ class PublicError extends Error {
     this.status = status;
     this.extra = extra;
   }
+}
+
+// Writes a page response as JSON without building the whole document in memory: the
+// metadata first, then the body encoded and escaped in slices, honouring backpressure.
+// A 5 MB page then costs its buffer plus one slice, not three more full-size copies.
+const BODY_SLICE = 48 * 1024; // a multiple of 3, so base64 slices need no padding
+
+async function sendPage(response, value, body, encoding) {
+  if (response.headersSent) return response.destroy();
+  response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  const write = (chunk) => (response.write(chunk) || response.destroyed
+    ? undefined
+    : new Promise((resolve) => {
+        response.once("drain", resolve);
+        response.once("close", resolve);
+      }));
+  const head = JSON.stringify(value);
+  await write(`${head.slice(0, -1)},"body":"`);
+  const decoder = encoding === "base64" ? null : new StringDecoder(encoding);
+  for (let start = 0; start < body.length && !response.destroyed; start += BODY_SLICE) {
+    const slice = body.subarray(start, start + BODY_SLICE);
+    await write(decoder ? JSON.stringify(decoder.write(slice)).slice(1, -1) : slice.toString("base64"));
+  }
+  if (decoder) await write(JSON.stringify(decoder.end()).slice(1, -1));
+  response.end('"}');
 }
 
 function send(response, status, value, headers = {}) {
@@ -207,71 +232,7 @@ function bodyEncoding(headers) {
   return /charset=["']?(iso-8859-1|latin1|windows-1252|us-ascii)/.test(type) ? "latin1" : "utf8";
 }
 
-// The ledger keeps one JSON line per unlock and per-site totals in memory, rebuilt from
-// the file at start. A site whose upstream cost passes its revenue gets flagged.
-export function createLedger(file, { flagMinRequests = 20, log = console } = {}) {
-  const sites = new Map();
-  let writing = Promise.resolve();
-
-  function apply(entry) {
-    let site = sites.get(entry.site);
-    if (!site) {
-      site = { requests: 0, successes: 0, attempts: 0, revenueMicros: 0, costMicros: 0, wireBytes: 0, flagged: false };
-      sites.set(entry.site, site);
-    }
-    site.requests += 1;
-    site.successes += entry.billed ? 1 : 0;
-    site.attempts += entry.attempts;
-    site.revenueMicros += entry.priceMicros;
-    site.costMicros += entry.costMicros;
-    site.wireBytes += entry.wireBytes;
-    const losing = site.requests >= flagMinRequests && site.costMicros > site.revenueMicros;
-    const newlyFlagged = losing && !site.flagged;
-    site.flagged = losing;
-    return newlyFlagged;
-  }
-
-  return {
-    record(entry) {
-      if (apply(entry)) {
-        const site = sites.get(entry.site);
-        log.warn?.(`Unlocker: ${entry.site} is losing money (cost ${Math.round(site.costMicros)} > revenue ${site.revenueMicros} micros over ${site.requests} requests)`);
-      }
-      const line = `${JSON.stringify(entry)}\n`;
-      writing = writing
-        .then(() => mkdir(path.dirname(file), { recursive: true }))
-        .then(() => appendFile(file, line, { encoding: "utf8", mode: 0o600 }))
-        .catch((error) => log.error?.(`Unlocker ledger write failed: ${error.message}`));
-      return writing;
-    },
-    async load() {
-      let info;
-      try { info = await stat(file); } catch { return; }
-      if (info.size > 200 * 1024 * 1024) {
-        log.warn?.("Unlocker ledger is over 200 MB; per-site stats start empty. Rotate the file.");
-        return;
-      }
-      for (const line of (await readFile(file, "utf8")).split("\n")) {
-        if (!line) continue;
-        try { apply(JSON.parse(line)); } catch { /* a torn last line after a crash is skipped */ }
-      }
-    },
-    flush() {
-      return writing;
-    },
-    stats() {
-      return [...sites.entries()]
-        .map(([site, value]) => ({
-          site,
-          ...value,
-          costMicros: Math.round(value.costMicros),
-          successRate: value.requests ? value.successes / value.requests : 0,
-          marginMicros: Math.round(value.revenueMicros - value.costMicros),
-        }))
-        .sort((left, right) => right.requests - left.requests);
-    },
-  };
-}
+export { createLedger };
 
 export function createUnlocker({
   gateway,
@@ -283,7 +244,12 @@ export function createUnlocker({
   authenticate = authenticateApiKey,
   log = console,
 }) {
-  const ledger = createLedger(config.ledgerFile, { flagMinRequests: config.flagMinRequests, log });
+  const ledger = createLedger(config.ledgerFile, {
+    flagMinRequests: config.flagMinRequests,
+    maxBytes: config.ledgerMaxBytes,
+    keep: config.ledgerKeep,
+    log,
+  });
   const keyRequests = windowCounter(config.requestsPerMinutePerKey);
   const authFailures = windowCounter(30);
   const sessions = expiringMap(MAX_TRACKED);
@@ -396,6 +362,8 @@ export function createUnlocker({
         const result = await fetchOnExit(exit, username, country, url, deadline);
         wireByPool[exit.pool] += result.wireBytes;
         const outcome = classify(result, config.minBodyBytes);
+        // A blocked page is never returned, so its body need not stay in memory.
+        if (outcome === "blocked") result.body = Buffer.alloc(0);
         attempts.push({ pool: exit.pool, outcome, status: result.status, ms: Date.now() - attemptStarted });
         if (bestOutcome === null || rank[outcome] >= rank[bestOutcome]) {
           best = result;
@@ -468,16 +436,26 @@ export function createUnlocker({
     return Buffer.concat(chunks).toString("utf8");
   }
 
+  // Each request may hold up to two full-size bodies at once (the best page so far and
+  // the attempt in flight), so it books twice the response cap from the memory budget.
+  const bytesPerRequest = 2 * config.maxResponseBytes;
+  const memoryBudget = config.memoryBudgetBytes ?? Infinity;
+  let bookedBytes = 0;
+
   function acquire(username) {
     const mine = activeByAccount.get(username) ?? 0;
-    if (active >= config.maxConcurrent) throw new PublicError(503, "Unlocker busy, retry shortly", { headers: { "Retry-After": "5" } });
+    if (active >= config.maxConcurrent || bookedBytes + bytesPerRequest > memoryBudget) {
+      throw new PublicError(503, "Unlocker busy, retry shortly", { headers: { "Retry-After": "5" } });
+    }
     if (mine >= config.maxConcurrentPerAccount) {
       throw new PublicError(429, `At most ${config.maxConcurrentPerAccount} requests at a time per account`);
     }
     active += 1;
+    bookedBytes += bytesPerRequest;
     activeByAccount.set(username, mine + 1);
     return () => {
       active -= 1;
+      bookedBytes -= bytesPerRequest;
       const left = (activeByAccount.get(username) ?? 1) - 1;
       if (left > 0) activeByAccount.set(username, left);
       else activeByAccount.delete(username);
@@ -548,15 +526,14 @@ export function createUnlocker({
           const encoding = bodyEncoding(page.headers);
           const headers = { ...page.headers };
           delete headers["set-cookie"]; // cookies stay with the session's jar
-          return send(response, 200, {
+          return await sendPage(response, {
             success: outcome.billable,
             status: page.status,
             url: page.url.href,
             headers,
             encoding,
-            body: page.body.toString(encoding === "base64" ? "base64" : encoding),
             ...summary,
-          });
+          }, page.body, encoding);
         }
         if (outcome.outcome === "blocked") {
           return send(response, 502, { success: false, error: `The site blocked every attempt (${outcome.attempts.length}). You were not charged.`, ...summary });
@@ -580,5 +557,5 @@ export function createUnlocker({
     }
   }
 
-  return { handle, unlock, ledger, stats: () => ledger.stats() };
+  return { handle, unlock, ledger, stats: () => ledger.stats(), memory: () => ({ bookedBytes, budgetBytes: memoryBudget, active }) };
 }

@@ -189,18 +189,27 @@ export function unlockerConfig() {
   for (const domain of blocked) {
     if (!/^[a-z0-9.-]+$/.test(domain)) throw new Error(`Invalid UNLOCKER_BLOCKED_DOMAINS entry: ${domain}`);
   }
+  const maxResponseBytes = integer('UNLOCKER_MAX_RESPONSE_BYTES', 5 * 1024 * 1024, { min: 64 * 1024, max: 50 * 1024 * 1024 });
+  // Response bodies the unlocker may hold at once; each request books twice the cap.
+  const memoryBudgetBytes = integer('UNLOCKER_MEMORY_BUDGET_BYTES', 256 * 1024 * 1024, { min: 16 * 1024 * 1024, max: 64 * 1024 ** 3 });
+  if (memoryBudgetBytes < 2 * maxResponseBytes) {
+    throw new Error('UNLOCKER_MEMORY_BUDGET_BYTES must be at least twice UNLOCKER_MAX_RESPONSE_BYTES');
+  }
   return {
     enabled: boolean('UNLOCKER_ENABLED', true),
     maxAttempts: integer('UNLOCKER_MAX_ATTEMPTS', 4, { max: 8 }),
     attemptTimeoutMs: integer('UNLOCKER_ATTEMPT_TIMEOUT_MS', 30_000, { min: 1_000, max: 120_000 }),
     totalTimeoutMs: integer('UNLOCKER_TOTAL_TIMEOUT_MS', 90_000, { min: 1_000, max: 300_000 }),
-    maxResponseBytes: integer('UNLOCKER_MAX_RESPONSE_BYTES', 10 * 1024 * 1024, { min: 64 * 1024, max: 50 * 1024 * 1024 }),
+    maxResponseBytes,
     minBodyBytes: integer('UNLOCKER_MIN_BODY_BYTES', 512, { min: 0, max: 64 * 1024 }),
     requestsPerMinutePerKey: integer('UNLOCKER_REQUESTS_PER_MINUTE', 300, { max: 100_000 }),
     maxConcurrentPerAccount: integer('UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT', 10, { max: 1_000 }),
-    maxConcurrent: integer('UNLOCKER_MAX_CONCURRENT', 100, { max: 10_000 }),
+    maxConcurrent: integer('UNLOCKER_MAX_CONCURRENT', 30, { max: 10_000 }),
+    memoryBudgetBytes,
     flagMinRequests: integer('UNLOCKER_FLAG_MIN_REQUESTS', 20, { max: 1_000_000 }),
     blockedDomains: blocked,
+    ledgerMaxBytes: integer('UNLOCKER_LEDGER_MAX_BYTES', 50 * 1024 * 1024, { min: 64 * 1024, max: 1024 * 1024 * 1024 }),
+    ledgerKeep: integer('UNLOCKER_LEDGER_KEEP', 30, { max: 3650 }),
     ledgerFile: path.resolve(process.env.UNLOCKER_LEDGER_FILE?.trim() || path.join(path.dirname(dataFile()), 'unlocker-ledger.jsonl')),
   };
 }

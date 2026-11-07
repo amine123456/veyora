@@ -57,6 +57,16 @@ async function main() {
   console.log(unlocker ? 'Web Unlocker enabled at POST /v1/unlock' : 'Web Unlocker disabled (UNLOCKER_ENABLED=false)');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
+
+  // systemd stops the service with SIGTERM: write a last ledger snapshot first so the
+  // next start replays nothing. (Without it nothing is lost, only replayed.)
+  const shutdown = () => {
+    void (unlocker ? unlocker.ledger.close() : Promise.resolve())
+      .catch((error) => console.error(`Ledger snapshot on shutdown failed: ${error.message}`))
+      .finally(() => process.exit(0));
+  };
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
 }
 
 main().catch((error) => {
