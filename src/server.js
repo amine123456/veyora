@@ -1,5 +1,5 @@
 import { createAdminServer } from './admin-api.js';
-import { adminConfig, gatewayConfig, paymentConfig } from './config.js';
+import { adminConfig, gatewayConfig, paymentConfig, pricingConfig } from './config.js';
 import { createGateway } from './gateway.js';
 import { createPaymentServer } from './payments.js';
 
@@ -22,7 +22,8 @@ function close(server) {
 async function main() {
   const gateway = gatewayConfig();
   const payments = paymentConfig();
-  const proxyServer = await createGateway(gateway);
+  const pricing = pricingConfig();
+  const proxyServer = await createGateway(gateway, { pricing });
   const paymentServer = createPaymentServer(payments);
   const admin = adminConfig();
   const adminServer = admin.token ? createAdminServer(admin) : null;

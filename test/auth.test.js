@@ -7,6 +7,7 @@ import {
   decodeCredentials,
   parseRoutedUsername,
   upstreamAuthorization,
+  upstreamEndpoint,
 } from "../src/auth.js";
 
 function basic(username, password) {
@@ -45,7 +46,7 @@ test("auth parser delegates valid credentials and absorbs backend failures", asy
 
   assert.deepEqual(
     await parser(basic("valid-user", "correct horse battery staple")),
-    { username: "valid-user", routing: { country: null, session: null } },
+    { username: "valid-user", routing: { pool: "residential", country: null, session: null } },
   );
   assert.equal(await parser(basic("broken-user", "correct horse battery staple")), null);
   assert.deepEqual(seen.map(({ username }) => username), ["valid-user", "broken-user"]);
@@ -69,7 +70,7 @@ test("auth parser reports busy, not a failed login, when its concurrency limit i
   assert.equal(calls, 1);
 
   releaseFirst();
-  assert.deepEqual(await first, { username: "first-user", routing: { country: null, session: null } });
+  assert.deepEqual(await first, { username: "first-user", routing: { pool: "residential", country: null, session: null } });
 });
 
 test("builds the upstream Basic header without exposing plaintext credentials", () => {
@@ -90,17 +91,17 @@ test("rejects invalid authentication limiter configuration", () => {
 });
 
 test("parses country and session options from the customer username", () => {
-  assert.deepEqual(parseRoutedUsername("px390e56b610"), { username: "px390e56b610", country: null, session: null });
-  assert.deepEqual(parseRoutedUsername("px390e56b610-country-gr"), { username: "px390e56b610", country: "GR", session: null });
-  assert.deepEqual(parseRoutedUsername("px390e56b610-session-abc123"), { username: "px390e56b610", country: null, session: "abc123" });
+  assert.deepEqual(parseRoutedUsername("px390e56b610"), { username: "px390e56b610", pool: "residential", country: null, session: null });
+  assert.deepEqual(parseRoutedUsername("px390e56b610-country-gr"), { username: "px390e56b610", pool: "residential", country: "GR", session: null });
+  assert.deepEqual(parseRoutedUsername("px390e56b610-session-abc123"), { username: "px390e56b610", pool: "residential", country: null, session: "abc123" });
   assert.deepEqual(
     parseRoutedUsername("cousin.user-country-de-session-Job7"),
-    { username: "cousin.user", country: "DE", session: "Job7" },
+    { username: "cousin.user", pool: "residential", country: "DE", session: "Job7" },
   );
   // Hyphenated admin usernames still work when no options are given.
-  assert.deepEqual(parseRoutedUsername("parallel-client"), { username: "parallel-client", country: null, session: null });
+  assert.deepEqual(parseRoutedUsername("parallel-client"), { username: "parallel-client", pool: "residential", country: null, session: null });
   // Malformed options are not routing: they stay part of the username, which then fails to log in.
-  assert.deepEqual(parseRoutedUsername("px1-country-greece"), { username: "px1-country-greece", country: null, session: null });
+  assert.deepEqual(parseRoutedUsername("px1-country-greece"), { username: "px1-country-greece", pool: "residential", country: null, session: null });
   assert.equal(parseRoutedUsername("px1-session-has space"), null);
   assert.equal(parseRoutedUsername("ab"), null);
 });
@@ -110,7 +111,7 @@ test("auth parser authenticates the base username and returns the routing", asyn
   const parser = createClientAuthParser(2, async (username) => { seen.push(username); return { username }; });
   assert.deepEqual(
     await parser(basic("px390e56b610-country-gr-session-abc", "correct horse battery staple")),
-    { username: "px390e56b610", routing: { country: "GR", session: "abc" } },
+    { username: "px390e56b610", routing: { pool: "residential", country: "GR", session: "abc" } },
   );
   assert.deepEqual(seen, ["px390e56b610"]);
 });
@@ -120,8 +121,8 @@ test("translates routing into the upstream provider login", () => {
   const login = (options) => Buffer.from(upstreamAuthorization(config, options).slice(6), "base64").toString();
 
   assert.equal(login({ username: "px1" }), "base:secret");
-  assert.equal(login({ username: "px1", country: "GR" }), "base-cc-GR:secret");
-  assert.match(login({ username: "px1", country: "GR", session: "job" }), /^base-cc-GR-sid-[0-9a-f]{16}-ttl-600:secret$/);
+  assert.equal(login({ username: "px1", pool: "residential", country: "GR" }), "base-cc-GR:secret");
+  assert.match(login({ username: "px1", pool: "residential", country: "GR", session: "job" }), /^base-cc-GR-sid-[0-9a-f]{16}-ttl-600:secret$/);
   assert.match(login({ username: "px1", session: "job" }), /^base-sid-[0-9a-f]{16}-ttl-600:secret$/);
 
   // Same customer and session name: same sticky IP. Different customers: different sessions.
@@ -141,9 +142,26 @@ test("auth parser answers cached credentials without taking a scrypt slot", asyn
   const pending = parser(basic("slow-user", "correct horse battery staple"));
   assert.deepEqual(
     await parser(basic("cached-user-country-de", "correct horse battery staple")),
-    { username: "cached-user", routing: { country: "DE", session: null } },
+    { username: "cached-user", routing: { pool: "residential", country: "DE", session: null } },
   );
   assert.equal(await parser(basic("other-user", "correct horse battery staple")), AUTH_BUSY);
   releaseSlow();
   assert.equal((await pending).username, "slow-user");
+});
+
+test("the -mobile option selects the mobile pool and its upstream account", () => {
+  assert.deepEqual(parseRoutedUsername("px1-mobile"), { username: "px1", pool: "mobile", country: null, session: null });
+  assert.deepEqual(
+    parseRoutedUsername("px1-mobile-country-gr-session-s9"),
+    { username: "px1", pool: "mobile", country: "GR", session: "s9" },
+  );
+  const config = {
+    upstreamUsername: "resi", upstreamPassword: "resi-secret", upstreamHost: "gw.example", upstreamPort: 9999,
+    upstreamMobile: { username: "mob", password: "mob-secret", host: "gw.example", port: null },
+  };
+  const login = (options) => Buffer.from(upstreamAuthorization(config, options).slice(6), "base64").toString();
+  assert.equal(login({ username: "px1", pool: "mobile", country: "GR" }), "mob-cc-GR:mob-secret");
+  assert.equal(login({ username: "px1", country: "GR" }), "resi-cc-GR:resi-secret");
+  assert.deepEqual(upstreamEndpoint(config, "mobile"), { host: "gw.example", port: 9999 });
+  assert.throws(() => upstreamAuthorization({ ...config, upstreamMobile: null }, { pool: "mobile" }), /not configured/);
 });

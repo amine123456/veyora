@@ -1,14 +1,19 @@
 import crypto from "node:crypto";
 import { authenticate, authenticateCached } from "./store.js";
 
-// Customers add routing options to their username: USER, USER-country-gr,
-// USER-session-abc123 or USER-country-gr-session-abc123.
-const ROUTED_USERNAME = /^([A-Za-z0-9._-]{3,64}?)(?:-country-([A-Za-z]{2}))?(?:-session-([A-Za-z0-9]{1,32}))?$/;
+// Customers add routing options to their username, in this order:
+// USER[-mobile][-country-gr][-session-abc123]. "-mobile" selects the mobile IP pool.
+const ROUTED_USERNAME = /^([A-Za-z0-9._-]{3,64}?)(-mobile)?(?:-country-([A-Za-z]{2}))?(?:-session-([A-Za-z0-9]{1,32}))?$/;
 
 export function parseRoutedUsername(raw) {
   const match = typeof raw === "string" ? ROUTED_USERNAME.exec(raw) : null;
   if (!match) return null;
-  return { username: match[1], country: match[2]?.toUpperCase() ?? null, session: match[3] ?? null };
+  return {
+    username: match[1],
+    pool: match[2] ? "mobile" : "residential",
+    country: match[3]?.toUpperCase() ?? null,
+    session: match[4] ?? null,
+  };
 }
 
 export function decodeCredentials(header) {
@@ -59,7 +64,10 @@ export function createClientAuthParser(
     if (!credentials) return null;
     const routed = parseRoutedUsername(credentials.username);
     if (!routed) return null;
-    const withRouting = (client) => ({ ...client, routing: { country: routed.country, session: routed.session } });
+    const withRouting = (client) => ({
+      ...client,
+      routing: { pool: routed.pool, country: routed.country, session: routed.session },
+    });
     if (cachedAuthenticate) {
       const cached = await cachedAuthenticate(routed.username, credentials.password).catch(() => null);
       if (cached) return withRouting(cached);
@@ -83,12 +91,24 @@ export const parseClientAuth = createClientAuthParser();
 // BASE-cc-GR picks a country, BASE-sid-ID-ttl-SECONDS keeps the same IP for a while.
 // Session IDs are hashed with the customer username so two customers who pick the
 // same session name never share an exit IP.
-export function upstreamAuthorization(config, { username = "", country = null, session = null } = {}) {
-  let login = config.upstreamUsername;
+export function upstreamAuthorization(config, { username = "", country = null, session = null, pool = "residential" } = {}) {
+  const account = pool === "mobile" ? config.upstreamMobile : null;
+  if (pool === "mobile" && !account) throw new Error("Mobile upstream is not configured");
+  let login = account ? account.username : config.upstreamUsername;
   if (country) login += `-cc-${country}`;
   if (session) {
     const sid = crypto.createHash("sha256").update(`${username}:${session}`).digest("hex").slice(0, 16);
     login += `-sid-${sid}-ttl-${config.upstreamSessionTtlSeconds ?? 600}`;
   }
-  return `Basic ${Buffer.from(`${login}:${config.upstreamPassword}`).toString("base64")}`;
+  const password = account ? account.password : config.upstreamPassword;
+  return `Basic ${Buffer.from(`${login}:${password}`).toString("base64")}`;
+}
+
+// Where to connect for a pool: the mobile account may live on its own host or port.
+export function upstreamEndpoint(config, pool = "residential") {
+  const account = pool === "mobile" ? config.upstreamMobile : null;
+  return {
+    host: account?.host || config.upstreamHost,
+    port: account?.port || config.upstreamPort,
+  };
 }

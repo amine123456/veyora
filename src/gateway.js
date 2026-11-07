@@ -5,7 +5,7 @@ import https from "node:https";
 import net from "node:net";
 import tls from "node:tls";
 import { domainToASCII } from "node:url";
-import { AUTH_BUSY, createClientAuthParser, upstreamAuthorization } from "./auth.js";
+import { AUTH_BUSY, createClientAuthParser, upstreamAuthorization, upstreamEndpoint } from "./auth.js";
 import { meter } from "./meter.js";
 
 const FIXED_HOP_HEADERS = new Set([
@@ -181,19 +181,34 @@ function connectionLimiter(config) {
   };
 }
 
-function connectToUpstream(config) {
+function connectToUpstream(config, pool) {
+  const { host, port } = upstreamEndpoint(config, pool);
   return config.upstreamTls
     ? tls.connect({
-        host: config.upstreamHost,
-        port: config.upstreamPort,
-        servername: net.isIP(config.upstreamHost) ? undefined : config.upstreamHost,
+        host,
+        port,
+        servername: net.isIP(host) ? undefined : host,
         rejectUnauthorized: true,
         minVersion: "TLSv1.2",
       })
-    : net.connect(config.upstreamPort, config.upstreamHost);
+    : net.connect(port, host);
 }
 
-export async function createGateway(config, { lookup = dns.lookup } = {}) {
+// How a client's traffic is paid for. Residential spends prepaid GB first, then the
+// wallet; mobile is wallet-only, because prepaid GB were sold at the residential price.
+function billingFor(client, pricing) {
+  if (client.routing?.pool === "mobile") {
+    return { pool: "mobile", pricePerGbMicros: pricing?.mobilePerGbMicros ?? 0, allowQuota: false };
+  }
+  return { pool: "residential", pricePerGbMicros: pricing?.residentialPerGbMicros ?? 0, allowQuota: true };
+}
+
+function canPay(client, billing) {
+  return (billing.allowQuota && client.remainingBytes > 0)
+    || (billing.pricePerGbMicros > 0 && (client.balanceMicros ?? 0) > 0);
+}
+
+export async function createGateway(config, { lookup = dns.lookup, pricing = null } = {}) {
   if (typeof lookup !== "function") throw new TypeError("lookup must be a function");
   const parseClientAuth = createClientAuthParser(config.maxConcurrentAuth);
   const authAttempts = authLimiter(config.authAttemptsPerMinute);
@@ -207,7 +222,9 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
       authAttempts.fail(request.socket.remoteAddress);
       return reject(response);
     }
-    if (client.remainingBytes <= 0) return reject(response, 403, "Traffic quota exhausted");
+    const billing = billingFor(client, pricing);
+    if (billing.pool === "mobile" && !config.upstreamMobile) return reject(response, 403, "Mobile proxies are not available");
+    if (!canPay(client, billing)) return reject(response, 403, "Traffic quota exhausted");
     const upstreamAuth = upstreamAuthorization(config, { username: client.username, ...client.routing });
     const releaseConnection = acquireConnection(client.username);
     if (!releaseConnection) return reject(response, 429, "Connection limit reached");
@@ -232,16 +249,17 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
       connection: "close",
     });
     const requestModule = config.upstreamTls ? https : http;
+    const endpoint = upstreamEndpoint(config, billing.pool);
     let responseStartTimer;
     let down;
     const upstreamRequest = requestModule.request({
-      host: config.upstreamHost,
-      port: config.upstreamPort,
+      host: endpoint.host,
+      port: endpoint.port,
       method: request.method,
       path: upstreamUrl,
       headers,
-      servername: config.upstreamTls && !net.isIP(config.upstreamHost)
-        ? config.upstreamHost
+      servername: config.upstreamTls && !net.isIP(endpoint.host)
+        ? endpoint.host
         : undefined,
       rejectUnauthorized: config.upstreamTls ? true : undefined,
       minVersion: config.upstreamTls ? "TLSv1.2" : undefined,
@@ -251,7 +269,7 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
       upstreamResponse.on("error", fail);
       response.writeHead(upstreamResponse.statusCode ?? 502, sanitizeHeaders(upstreamResponse.headers, { connection: "close" }));
       const close = () => upstreamRequest.destroy();
-      down = meter(client.username, true, close, config.quotaReservationBytes);
+      down = meter(client.username, true, close, config.quotaReservationBytes, billing);
       down.on("error", () => response.destroy());
       upstreamResponse.pipe(down).pipe(response);
     });
@@ -270,7 +288,7 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
     request.on("aborted", () => upstreamRequest.destroy());
     request.on("error", () => upstreamRequest.destroy());
     response.on("error", () => upstreamRequest.destroy());
-    const up = meter(client.username, config.billingMode === "total", () => upstreamRequest.destroy(), config.quotaReservationBytes);
+    const up = meter(client.username, config.billingMode === "total", () => upstreamRequest.destroy(), config.quotaReservationBytes, billing);
     up.on("error", () => upstreamRequest.destroy());
     // Meters only return unused reservations when they end or are destroyed. An aborted
     // client never ends them, so destroy them when the response closes for any reason.
@@ -307,7 +325,9 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
         authAttempts.fail(clientSocket.remoteAddress);
         return reject(clientSocket);
       }
-      if (client.remainingBytes <= 0) return reject(clientSocket, 403, "Traffic quota exhausted");
+      const billing = billingFor(client, pricing);
+      if (billing.pool === "mobile" && !config.upstreamMobile) return reject(clientSocket, 403, "Mobile proxies are not available");
+      if (!canPay(client, billing)) return reject(clientSocket, 403, "Traffic quota exhausted");
       const upstreamAuth = upstreamAuthorization(config, { username: client.username, ...client.routing });
       const releaseConnection = acquireConnection(client.username);
       if (!releaseConnection) return reject(clientSocket, 429, "Connection limit reached");
@@ -319,7 +339,7 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
       if (!resolved) return reject(clientSocket, 403, "Destination blocked");
       const upstreamTarget = formatAuthority(resolved.hostname, authority.port);
 
-      const upstreamSocket = connectToUpstream(config);
+      const upstreamSocket = connectToUpstream(config, billing.pool);
       let handshake = Buffer.alloc(0);
       let handshakeTimer;
       let up;
@@ -375,8 +395,8 @@ export async function createGateway(config, { lookup = dns.lookup } = {}) {
 
         upstreamSocket.setTimeout(config.idleTimeoutMs, closeBoth);
         clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
-        up = meter(client.username, config.billingMode === "total", closeBoth, config.quotaReservationBytes);
-        down = meter(client.username, true, closeBoth, config.quotaReservationBytes);
+        up = meter(client.username, config.billingMode === "total", closeBoth, config.quotaReservationBytes, billing);
+        down = meter(client.username, true, closeBoth, config.quotaReservationBytes, billing);
         up.on("error", closeBoth);
         down.on("error", closeBoth);
         up.pipe(upstreamSocket);

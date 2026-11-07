@@ -314,3 +314,71 @@ test('aborted plain HTTP requests return their unused quota reservations', async
     await close(upstream);
   }
 });
+
+test('wallet pays for traffic when prepaid GB run out, and mobile uses its own account', async () => {
+  const seenLogins = [];
+  const upstream = http.createServer((req, res) => {
+    seenLogins.push(Buffer.from(String(req.headers['proxy-authorization']).slice(6), 'base64').toString());
+    res.writeHead(200, { 'content-type': 'text/plain' });
+    res.end('x'.repeat(5_000));
+  });
+  await listen(upstream);
+  const pricing = { residentialPerGbMicros: 1_500_000, mobilePerGbMicros: 2_500_000 };
+  const config = gatewayConfig(upstream.address().port, {
+    quotaReservationBytes: 64 * 1024,
+    upstreamMobile: { username: 'mobile-test-user', password: 'mobile-test-password', host: '127.0.0.1', port: null },
+  });
+  const gateway = await createGateway(config, { lookup: publicTestLookup, pricing });
+  await listen(gateway);
+  const basic = (user, pass) => `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
+  try {
+    // No prepaid GB, $1 in the wallet: residential traffic is charged to the wallet.
+    await store.createClient('wallet-proxy', 'wallet proxy password', 0);
+    await store.creditWallet('wallet-proxy', 1_000_000);
+    const resi = await proxyRequest(gateway.address().port, {
+      method: 'GET', path: 'http://example.test/page', headers: { 'proxy-authorization': basic('wallet-proxy', 'wallet proxy password') },
+    });
+    assert.equal(resi.status, 200);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const afterResi = (await store.getClient('wallet-proxy')).balanceMicros;
+    assert.ok(afterResi < 1_000_000, 'wallet was charged');
+    assert.ok(afterResi > 1_000_000 - 100, `charge matches a few KB at $1.50/GB, balance ${afterResi}`);
+    assert.match(seenLogins.at(-1), /^upstream-test-user:/);
+
+    // Mobile goes through the mobile account and never touches prepaid residential GB.
+    await store.createClient('mobile-proxy', 'mobile proxy password', 10_000_000);
+    await store.creditWallet('mobile-proxy', 1_000_000);
+    const mobile = await proxyRequest(gateway.address().port, {
+      method: 'GET', path: 'http://example.test/page', headers: { 'proxy-authorization': basic('mobile-proxy-mobile-country-gr', 'mobile proxy password') },
+    });
+    assert.equal(mobile.status, 200);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(seenLogins.at(-1), 'mobile-test-user-cc-GR:mobile-test-password');
+    const mobileClient = await store.getClient('mobile-proxy');
+    assert.equal(mobileClient.remainingBytes, 10_000_000, 'prepaid GB untouched by mobile');
+    assert.ok(mobileClient.balanceMicros < 1_000_000);
+
+    // Mobile with prepaid GB but an empty wallet is refused.
+    await store.createClient('mobile-broke', 'mobile broke password', 10_000_000);
+    const broke = await proxyRequest(gateway.address().port, {
+      method: 'GET', path: 'http://example.test/page', headers: { 'proxy-authorization': basic('mobile-broke-mobile', 'mobile broke password') },
+    });
+    assert.equal(broke.status, 403);
+  } finally {
+    await close(gateway);
+    await close(upstream);
+  }
+
+  // A gateway without a mobile account refuses mobile requests outright.
+  const plain = await createGateway(gatewayConfig(9), { lookup: publicTestLookup, pricing });
+  await listen(plain);
+  try {
+    const refused = await proxyRequest(plain.address().port, {
+      method: 'GET', path: 'http://example.test/', headers: { 'proxy-authorization': basic('wallet-proxy-mobile', 'wallet proxy password') },
+    });
+    assert.equal(refused.status, 403);
+    assert.match(refused.body, /Mobile proxies are not available/);
+  } finally {
+    await close(plain);
+  }
+});
