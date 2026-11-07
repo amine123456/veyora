@@ -1,2 +1,6 @@
+# Store and check out every text file with LF, whatever core.autocrlf says: deploys
+# tar the Windows working copy, and the server must not get CRLF files.
+* text=auto eol=lf
 *.sh text eol=lf
 deploy/* text eol=lf
+*.pem text eol=lf
