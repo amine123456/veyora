@@ -88,3 +88,42 @@ journalctl -u proxora -n 20 --no-pager
 ## Backups
 
 Everything lives in `/opt/proxora/data/` (accounts, quotas, sessions, payments). Copy that folder off the server regularly.
+
+## Production checks (Web Unlocker)
+
+Run these on the server as root. None of them change anything.
+
+```bash
+# nginx: the /v1/ block must show the 120 s timeout, and X-Real-IP must appear in both locations
+nginx -T 2>/dev/null | sed -n '/server_name veyora/,/^}/p' | grep -nE 'location|proxy_read_timeout|X-Real-IP'
+# Mobile upstream configured (prints the variable names only, never the values)
+grep -oE '^UPSTREAM_MOBILE_(USERNAME|PASSWORD|HOST|PORT)=.' /opt/proxora/.env | cut -d= -f1
+# Unlocker settings currently in effect (missing lines mean the defaults)
+grep -E '^UNLOCKER_' /opt/proxora/.env
+# RAM: "available" is what matters; the service's own use is the "Memory:" line
+free -m
+systemctl status proxora --no-pager | grep -E 'Memory|Active'
+# Disk
+df -h /
+du -sh /opt/proxora/data
+# The service started the unlocker
+journalctl -u proxora -n 20 --no-pager | grep -E 'Unlocker|listening|error'
+```
+
+Expected: `location /` and `location /v1/` each followed by `X-Real-IP`, `proxy_read_timeout 120s` under `/v1/`; `UPSTREAM_MOBILE_USERNAME` and `UPSTREAM_MOBILE_PASSWORD` listed.
+
+Sizing the memory budget from `free -m`: set `UNLOCKER_MEMORY_BUDGET_BYTES` to about a quarter of the "available" column. Each in-flight unlock books twice `UNLOCKER_MAX_RESPONSE_BYTES` (5 MB pages book 10 MB):
+
+| available RAM | UNLOCKER_MEMORY_BUDGET_BYTES | admits at 5 MB pages |
+|---|---|---|
+| ~1 GB | `268435456` (256 MB, the default) | 25 |
+| ~2 GB | `536870912` (512 MB) | 30 (then `UNLOCKER_MAX_CONCURRENT` limits) |
+| 3 GB+ | `805306368` (768 MB) with `UNLOCKER_MAX_CONCURRENT=60` | 60 |
+
+Pilot settings to add to `/opt/proxora/.env` (then `systemctl restart proxora`):
+
+```bash
+UNLOCKER_PREMIUM_DOMAINS=mobile.de:3
+```
+
+mobile.de then costs 3x the base price ($2.40 per 1,000 successful requests at the default $0.80).

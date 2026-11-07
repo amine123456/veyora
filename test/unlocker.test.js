@@ -374,3 +374,71 @@ test('the website server answers /v1/unlock when the unlocker is mounted', async
     await close(server);
   }
 });
+
+test('large pages stream back intact: multi-byte text across slices, escapes, binary', async () => {
+  // About 600 KB of text whose multi-byte characters straddle the 48 KB slice edges.
+  const text = `<html><body>${'é "quoted" \ back\nline € 😀 '.repeat(20_000)}</body></html>`;
+  const binary = Buffer.alloc(300_001, 0);
+  for (let index = 0; index < binary.length; index += 1) binary[index] = (index * 7) % 256;
+  await harness((req, res) => {
+    if (req.url === '/bin') {
+      res.writeHead(200, { 'content-type': 'application/octet-stream' });
+      return res.end(binary);
+    }
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    res.end(text);
+  }, {}, async ({ call }) => {
+    const { key } = await customer();
+    const page = await call({ url: 'https://shop.example/big' }, { key });
+    assert.equal(page.status, 200);
+    assert.equal(page.json.body, text);
+    assert.equal(page.json.billedMicros, 800); // metadata fields still present
+    const file = await call({ url: 'https://shop.example/bin' }, { key });
+    assert.equal(file.json.encoding, 'base64');
+    assert.ok(Buffer.from(file.json.body, 'base64').equals(binary));
+  });
+});
+
+test('the memory budget turns away requests it cannot hold', async () => {
+  let releaseFirst;
+  const firstArrived = new Promise((resolve) => {
+    releaseFirst = resolve;
+  });
+  let waiting;
+  await harness((req, res) => {
+    waiting = () => { res.writeHead(200, { 'content-type': 'text/html' }); res.end(PAGE); };
+    releaseFirst();
+  }, { config: { maxResponseBytes: 64 * 1024, memoryBudgetBytes: 128 * 1024 } }, async ({ call, unlocker }) => {
+    const { username, key } = await customer();
+    const first = call({ url: 'https://shop.example/slow' }, { key });
+    await firstArrived;
+    assert.equal(unlocker.memory().bookedBytes, 128 * 1024); // twice the 64 KB cap
+    const second = await call({ url: 'https://shop.example/other' }, { key });
+    assert.equal(second.status, 503);
+    assert.equal(second.headers['retry-after'], '5');
+    waiting();
+    assert.equal((await first).status, 200);
+    assert.equal(unlocker.memory().bookedBytes, 0);
+    assert.equal(await balance(username), 1_000_000 - 800); // the turned-away one cost nothing
+  });
+});
+
+test('unlocker defaults are sized for a small droplet', async () => {
+  const { unlockerConfig } = await import('../src/config.js');
+  const saved = { ...process.env };
+  try {
+    for (const name of ['UNLOCKER_MAX_RESPONSE_BYTES', 'UNLOCKER_MAX_CONCURRENT', 'UNLOCKER_MEMORY_BUDGET_BYTES']) delete process.env[name];
+    const defaults = unlockerConfig();
+    assert.equal(defaults.maxResponseBytes, 5 * 1024 * 1024);
+    assert.equal(defaults.maxConcurrent, 30);
+    assert.equal(defaults.memoryBudgetBytes, 256 * 1024 * 1024);
+    assert.equal(defaults.ledgerMaxBytes, 50 * 1024 * 1024);
+    assert.equal(defaults.ledgerKeep, 30);
+    process.env.UNLOCKER_MEMORY_BUDGET_BYTES = String(16 * 1024 * 1024);
+    process.env.UNLOCKER_MAX_RESPONSE_BYTES = String(10 * 1024 * 1024);
+    assert.throws(() => unlockerConfig(), /at least twice/);
+  } finally {
+    for (const name of Object.keys(process.env)) if (!(name in saved)) delete process.env[name];
+    Object.assign(process.env, saved);
+  }
+});
