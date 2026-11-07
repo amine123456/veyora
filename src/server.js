@@ -28,7 +28,7 @@ async function main() {
   const unlockerSettings = unlockerConfig();
   const unlocker = unlockerSettings.enabled ? createUnlocker({ gateway, pricing, config: unlockerSettings }) : null;
   await unlocker?.ledger.load();
-  const paymentServer = createPaymentServer(payments, { unlocker });
+  const paymentServer = createPaymentServer(payments, { unlocker, pricing, mobile: Boolean(gateway.upstreamMobile) });
   const admin = adminConfig();
   const adminServer = admin.token ? createAdminServer(admin, { unlocker }) : null;
   let startupComplete = false;

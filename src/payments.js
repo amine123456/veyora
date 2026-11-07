@@ -270,7 +270,7 @@ function concurrencyLimit(max) {
   };
 }
 
-function accountView(client, proxyEndpoint, stickySessionSeconds) {
+function accountView(client, proxyEndpoint, stickySessionSeconds, offer = {}) {
   return {
     email: client.email,
     username: client.username,
@@ -280,6 +280,9 @@ function accountView(client, proxyEndpoint, stickySessionSeconds) {
     balanceMicros: client.balanceMicros ?? 0,
     proxy: proxyEndpoint ?? null,
     stickySessionSeconds: stickySessionSeconds ?? 600,
+    prices: offer.prices ?? null,
+    mobile: Boolean(offer.mobile),
+    unlocker: Boolean(offer.unlocker),
   };
 }
 
@@ -288,7 +291,17 @@ function redirect(response, location) {
   response.end();
 }
 
-export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlocker = null } = {}) {
+export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlocker = null, pricing = null, mobile = false } = {}) {
+  // What the dashboard shows: list prices in micro-dollars and which products are on.
+  const offer = {
+    prices: pricing ? {
+      residentialPerGbMicros: pricing.residentialPerGbMicros,
+      mobilePerGbMicros: pricing.mobilePerGbMicros,
+      unlockerPerRequestMicros: pricing.unlockerPerRequestMicros,
+    } : null,
+    mobile,
+    unlocker: Boolean(unlocker),
+  };
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
   const availablePackages = packages();
   // Crypto checkout sells USD wallet top-ups; the optional Stripe path keeps GB packs.
@@ -380,13 +393,13 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
         }
         const session = await createSession(client.username);
         response.setHeader('Set-Cookie', sessionCookie(session.token, session.maxAgeSeconds));
-        return json(response, signup ? 201 : 200, accountView(client, config.proxyEndpoint, config.stickySessionSeconds));
+        return json(response, signup ? 201 : 200, accountView(client, config.proxyEndpoint, config.stickySessionSeconds, offer));
       }
 
       if (request.method === 'GET' && request.url === '/api/me') {
         const client = await getSessionClient(sessionToken(request));
         if (!client) return json(response, 401, { error: 'Not signed in' });
-        return json(response, 200, accountView(client, config.proxyEndpoint, config.stickySessionSeconds));
+        return json(response, 200, accountView(client, config.proxyEndpoint, config.stickySessionSeconds, offer));
       }
 
       if (request.url === '/api/keys' || request.url === '/api/keys/revoke') {

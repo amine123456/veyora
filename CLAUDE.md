@@ -1,8 +1,9 @@
 # Veyora
 
-Residential-proxy reseller: customers sign up on the website, buy GB packs (USDT via
-NOWPayments, optional Stripe), and use a metered, authenticated proxy gateway that forwards
-to an upstream provider (proxi.st format) without exposing its credentials.
+Residential/mobile proxy reseller: customers sign up on the website, top up a prepaid USD
+wallet (USDT via NOWPayments; legacy GB packs, optional Stripe), and use a metered,
+authenticated proxy gateway that forwards to an upstream provider (proxi.st format) without
+exposing its credentials, or the Web Unlocker API (`POST /v1/unlock`, API keys).
 
 ## Commands
 
@@ -16,10 +17,14 @@ to an upstream provider (proxi.st format) without exposing its credentials.
 - `src/server.js` starts three listeners: proxy gateway (`PROXY_PORT`), website + payments
   (`PAYMENTS_PORT`, loopback only, behind nginx), admin API (`ADMIN_PORT`, loopback only).
 - `src/gateway.js` HTTP proxy + CONNECT tunnels, SSRF blocklist, connection/auth limits.
-- `src/auth.js` Basic auth parsing, `USER-country-xx-session-id` routing, upstream login.
-- `src/meter.js` stream Transform that reserves quota before passing bytes.
+- `src/auth.js` Basic auth parsing, `USER[-mobile][-country-xx][-session-id]` routing, upstream login.
+- `src/meter.js` stream Transform that reserves prepaid GB, then wallet funds, before passing bytes.
+- `src/unlocker.js` `/v1/unlock`: validation, SSRF/blocklist, escalation ladder, per-site memory,
+  sessions and cookies, wallet billing, JSONL cost ledger. `src/fetcher.js` Chrome-shaped GET
+  through the upstream CONNECT tunnel (h2/HTTP 1.1, br/gzip, size cap).
 - `src/store.js` single-process JSON store: atomic snapshots + fsynced usage journal, all
   writes serialized through `mutate()`. scrypt password hashes, verified-credential cache.
+  Wallet balances are integer micro-dollars (`balanceMicros`); API keys are SHA-256 digests.
 - `src/payments.js` static site (`public/`), account API, sessions, checkout, IPN/webhooks.
 - `src/nowpayments.js`, `src/admin-api.js`, `src/admin.js`, `src/config.js` (env parsing).
 - `deploy/` nginx, systemd and certbot files. Production lives at `/opt/proxora` under the

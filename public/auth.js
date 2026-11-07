@@ -9,6 +9,9 @@ const traffic = bytes => {
   return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
 };
 
+// Balances are integer micro-dollars; sub-dollar amounts keep enough digits to be useful.
+const usd = micros => `$${(micros / 1e6).toFixed(micros > 0 && micros < 1e6 ? 4 : 2).replace(/(\.\d\d\d*?)0+$/, '$1')}`;
+
 async function post(path, body) {
   const response = await fetch(path, {
     method: 'POST',
@@ -80,13 +83,33 @@ if (dash) {
       if (!data) return;
       me = data;
       set('email', me.email);
-      set('remaining', traffic(me.remainingBytes));
-      const rawPercent = me.quotaBytes > 0 ? (me.usedBytes / me.quotaBytes) * 100 : 0;
-      const percent = Math.min(100, Math.max(0, rawPercent));
-      $('[data-meter-fill]').style.width = `${percent}%`;
-      $('[data-meter]').setAttribute('aria-valuenow', String(Math.round(percent)));
-      set('usage', me.quotaBytes > 0 ? `${traffic(me.usedBytes)} used of ${traffic(me.quotaBytes)}` : '');
-      $('[data-empty]').hidden = me.quotaBytes > 0;
+      set('wallet', usd(me.balanceMicros ?? 0));
+      if (me.prices) {
+        const { residentialPerGbMicros: res, mobilePerGbMicros: mob, unlockerPerRequestMicros: unl } = me.prices;
+        const parts = [`Residential ${usd(res)}/GB`];
+        if (me.mobile) parts.push(`mobile ${usd(mob)}/GB`);
+        if (me.unlocker) parts.push(`Web Unlocker ${usd(unl * 1000)} per 1,000 requests`);
+        set('prices', `${parts.join(', ')}.`);
+        set('mobile-price', `${usd(mob)}/GB`);
+        set('unlocker-price', `${usd(unl * 1000)} per 1,000 successful requests.`);
+      }
+      // Prepaid GB bought before the balance existed are still used first.
+      $('[data-prepaid]').hidden = me.quotaBytes === 0;
+      if (me.quotaBytes > 0) {
+        set('remaining', traffic(me.remainingBytes));
+        const percent = Math.min(100, Math.max(0, (me.usedBytes / me.quotaBytes) * 100));
+        $('[data-meter-fill]').style.width = `${percent}%`;
+        $('[data-meter]').setAttribute('aria-valuenow', String(Math.round(percent)));
+        set('usage', `${traffic(me.usedBytes)} used of ${traffic(me.quotaBytes)}`);
+      }
+      $('[data-empty]').hidden = (me.balanceMicros ?? 0) > 0 || me.remainingBytes > 0;
+      $('[data-mobile-option]').hidden = !me.mobile;
+      if (me.unlocker) {
+        $('[data-unlocker]').hidden = false;
+        values['unlock-curl'] = `curl -X POST ${location.origin}/v1/unlock \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url": "https://example.com/"}'`;
+        set('unlock-curl', values['unlock-curl']);
+        loadKeys();
+      }
 
       values.username = me.username;
       set('username', me.username);
@@ -105,26 +128,27 @@ if (dash) {
     })
     .catch(() => set('remaining', 'Could not load'));
 
-  // Buy traffic: GB packs paid with USDT through a hosted invoice.
+  // Add funds: USD top-ups paid with USDT through a hosted invoice.
   const packs = $('[data-packs]');
   const buyError = $('[data-buy-error]');
   if (new URLSearchParams(location.search).has('paid')) $('[data-paid]').hidden = false;
   fetch('/packages')
     .then(response => response.json())
     .then(list => {
-      list.forEach(pack => {
+      list.forEach(topup => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'pack';
-        button.dataset.pack = pack.id;
-        const size = pack.bytes / 1024 ** 3;
+        button.dataset.pack = topup.id;
         button.innerHTML = '<b></b><span></span>';
-        button.querySelector('b').textContent = `${Number.isInteger(size) ? size : size.toFixed(1)} GB`;
-        button.querySelector('span').textContent = `$${(pack.cents / 100).toFixed(2)}`;
+        button.querySelector('b').textContent = `$${(topup.cents / 100).toFixed(0)}`;
+        button.querySelector('span').textContent = topup.bonusPercent
+          ? `+${topup.bonusPercent}% · ${usd(topup.creditMicros)}`
+          : 'Pay with USDT';
         packs.append(button);
       });
     })
-    .catch(() => { buyError.textContent = 'Could not load the packs. Refresh the page.'; buyError.hidden = false; });
+    .catch(() => { buyError.textContent = 'Could not load the top-ups. Refresh the page.'; buyError.hidden = false; });
 
   packs.addEventListener('click', async event => {
     const button = event.target.closest('[data-pack]');
@@ -134,18 +158,84 @@ if (dash) {
     const label = button.querySelector('span').textContent;
     button.querySelector('span').textContent = 'Opening…';
     try {
-      const { ok, data } = await post('/api/checkout', { packageId: button.dataset.pack });
+      const { ok, data } = await post('/api/checkout', { topupId: button.dataset.pack });
       if (ok && data.checkoutUrl) { location.assign(data.checkoutUrl); return; }
       throw new Error(data.error || 'Could not start the payment. Try again.');
     } catch (error) {
       buyError.textContent = error.message === 'Online payment is not set up yet'
-        ? 'Online payment is not available yet. Ask us and we will add GB manually.'
+        ? 'Online payment is not available yet. Ask us and we will credit your account manually.'
         : error.message;
       buyError.hidden = false;
     } finally {
       button.querySelector('span').textContent = label;
       packs.querySelectorAll('button').forEach(b => { b.disabled = false; });
     }
+  });
+
+  // API keys for the Web Unlocker: list, create (shown once), revoke (click twice).
+  const keyList = $('[data-keys]');
+  const keyError = $('[data-key-error]');
+  const showKeyError = message => { keyError.textContent = message; keyError.hidden = false; };
+  function renderKeys(keys) {
+    keyList.replaceChildren();
+    $('[data-no-keys]').hidden = keys.length > 0;
+    keyList.hidden = keys.length === 0;
+    keys.forEach(key => {
+      const row = document.createElement('div');
+      const dt = document.createElement('dt');
+      dt.textContent = key.name || 'Unnamed key';
+      const dd = document.createElement('dd');
+      const code = document.createElement('code');
+      code.textContent = `${key.prefix}…`;
+      const revoke = document.createElement('button');
+      revoke.type = 'button';
+      revoke.className = 'copy';
+      revoke.dataset.revoke = key.id;
+      revoke.textContent = 'Revoke';
+      dd.append(code, ' ', revoke);
+      row.append(dt, dd);
+      keyList.append(row);
+    });
+  }
+  function loadKeys() {
+    fetch('/api/keys', { credentials: 'same-origin' })
+      .then(response => response.json())
+      .then(data => renderKeys(data.keys ?? []))
+      .catch(() => showKeyError('Could not load your API keys. Refresh the page.'));
+  }
+  $('[data-key-form]').addEventListener('submit', async event => {
+    event.preventDefault();
+    keyError.hidden = true;
+    const submit = event.target.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      const { ok, data } = await post('/api/keys', { name: event.target.name.value.trim() });
+      if (!ok) throw new Error(data.error || 'Could not create a key. Try again.');
+      values['new-key'] = data.key;
+      set('new-key', data.key);
+      $('[data-new-key]').hidden = false;
+      $('[data-key-notice]').hidden = false;
+      event.target.reset();
+      loadKeys();
+    } catch (error) {
+      showKeyError(error.message);
+    } finally {
+      submit.disabled = false;
+    }
+  });
+  keyList.addEventListener('click', async event => {
+    const button = event.target.closest('[data-revoke]');
+    if (!button) return;
+    if (button.dataset.armed !== 'yes') {
+      button.dataset.armed = 'yes';
+      button.textContent = 'Click again to revoke';
+      setTimeout(() => { button.dataset.armed = ''; button.textContent = 'Revoke'; }, 5000);
+      return;
+    }
+    button.disabled = true;
+    const { ok, data } = await post('/api/keys/revoke', { id: button.dataset.revoke }).catch(() => ({ ok: false, data: {} }));
+    if (!ok) showKeyError(data.error || 'Could not revoke the key. Try again.');
+    loadKeys();
   });
 
   // Copy buttons

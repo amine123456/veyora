@@ -27,9 +27,12 @@ Customers add options to their proxy username; the password stays the same:
 | Username | Result |
 |---|---|
 | `USER` | New exit IP on every request |
+| `USER-mobile` | Mobile carrier exit (needs `UPSTREAM_MOBILE_USERNAME`; wallet-only, `PRICE_MOBILE_PER_GB`) |
 | `USER-country-gr` | Exit IP in that country (any two-letter code) |
 | `USER-session-job1` | Same exit IP for `UPSTREAM_SESSION_TTL_SECONDS` (default 600) |
 | `USER-country-gr-session-job1` | Both |
+
+Options combine in the order `-mobile`, `-country-xx`, `-session-name`.
 
 The gateway authenticates `USER`, then logs in upstream as `UPSTREAM_PROXY_USERNAME-cc-GR-sid-<hash>-ttl-600` (the proxi.st format). The session name is hashed together with the customer's username, so two customers who pick the same name never share an exit IP, and gateway sessions cannot collide with other tools using the same provider account.
 
@@ -78,17 +81,35 @@ The payment service also serves `/signup`, `/login` and `/account`. Signing up c
 
 Sessions use an `HttpOnly`, `Secure`, `SameSite=Lax` cookie named `__Host-proxora_session`, valid for 30 days. Only a SHA-256 hash of each session token is stored. Browsers accept `Secure` cookies on `http://localhost`; in production the site must be served over HTTPS. Account endpoints (`POST /api/signup`, `/api/login`, `/api/logout`, `GET /api/me`) accept JSON only and reject requests whose `Origin` does not match the host. Signups are capped at 5 per address per minute.
 
-`/account` is the customer dashboard: traffic left and used, the proxy endpoint, the proxy username, and a ready-to-run `curl` test. `POST /api/proxy-password` issues a new random proxy password, returns it once, and stores only its hash, so the old password stops working immediately. Set `PUBLIC_PROXY_URL` (for example `https://gate.veyora.io:8080`) to the address customers should use; it defaults to `PROXY_HOST`/`PROXY_PORT`.
+`/account` is the customer dashboard: wallet balance and prices, USD top-ups, any prepaid GB left, API keys for the Web Unlocker, the proxy endpoint, the proxy username, and a ready-to-run `curl` test. `POST /api/proxy-password` issues a new random proxy password, returns it once, and stores only its hash, so the old password stops working immediately. Set `PUBLIC_PROXY_URL` (for example `https://gate.veyora.io:8080`) to the address customers should use; it defaults to `PROXY_HOST`/`PROXY_PORT`.
+
+## Wallet and pricing
+
+Each account has a prepaid USD balance (integer micro-dollars, `balanceMicros`). Residential traffic spends prepaid GB first (packs sold before the wallet), then the balance at `PRICE_RESIDENTIAL_PER_GB`; mobile traffic is paid from the balance only at `PRICE_MOBILE_PER_GB`. Traffic is reserved in chunks and unused reservations are refunded when a connection ends. `COST_RESIDENTIAL_PER_GB` and `COST_MOBILE_PER_GB` are the upstream costs used by the unlocker ledger.
+
+## Web Unlocker
+
+`POST /v1/unlock` on the website host, with `Authorization: Bearer vy_live_...` (keys are issued in the dashboard, up to 10 per account, stored as SHA-256 digests):
+
+```bash
+curl -X POST https://<site>/v1/unlock -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" -d '{"url": "https://example.com/", "country": "us", "session": "job1"}'
+```
+
+The answer is JSON with `success`, the target `status`, final `url`, `headers`, `body` (`encoding` is `utf8`, `latin1` or `base64`), `billedMicros` and the `attempts` made. Each request costs `PRICE_UNLOCKER_PER_1K`/1000 (times any `UNLOCKER_PREMIUM_DOMAINS` multiplier). It is held from the balance up front and refunded unless the page comes back (2xx/3xx, 404 or 410); blocked, failed and timed-out requests are free. `render` is not available yet.
+
+How it works: the fetcher goes through the upstream CONNECT tunnel with Chrome's TLS cipher/curve/signature order and Chrome's HTTP/2 settings, Chrome navigation headers and `Accept-Encoding: gzip, deflate, br`. Node cannot copy Chrome's TLS extension order, so the JA4 fingerprint is not Chrome's; the fetcher is pluggable for a curl-impersonate or browser tier later. A response counts as blocked on 403/429/503, `cf-mitigated: challenge`, challenge-page markers in small HTML, or HTML under `UNLOCKER_MIN_BODY_BYTES`. Up to `UNLOCKER_MAX_ATTEMPTS` (4) attempts: residential, a new residential IP, then mobile. Each site remembers the rung that worked for 30 minutes and tries a cheaper one every 20th request. A `session` keeps its exit and cookies for `UPSTREAM_SESSION_TTL_SECONDS`; without one, each customer keeps a warm exit per site. Redirects are followed (max 5) and every hop gets the gateway's SSRF check. Only ports 80/443, GET, and no customer cookies or headers. `UNLOCKER_BLOCKED_DOMAINS` adds to a built-in blocklist (ticket resale, sneaker launches, the upstream provider).
+
+Every request appends a line to `UNLOCKER_LEDGER_FILE` (default `unlocker-ledger.jsonl` next to the store) with price, upstream cost, bytes and attempts. Per-site totals are rebuilt from it at start; a site whose upstream cost exceeds its revenue after `UNLOCKER_FLAG_MIN_REQUESTS` requests is flagged and logged. See them with `npm run admin -- unlocker-stats` (needs the running server and `ADMIN_TOKEN`).
 
 ## USDT top-ups (NOWPayments)
 
-Customers buy GB packs (`PACKAGES`, priced in USD) from the dashboard and pay a NOWPayments USDT invoice. The server credits the pack only when a correctly signed IPN reports `finished` for the exact purchase and USD amount; replays and second payments on the same invoice credit nothing. Partial payments and signed payments that cannot be matched are logged (`journalctl -u proxora`) for manual handling.
+Customers add funds to their balance from the dashboard (`TOPUPS`, `id:cents[:bonusPercent]`; by default $10-$500 with +5% at $100 and +10% at $500) and pay a NOWPayments USDT invoice. The server credits the balance only when a correctly signed IPN reports `finished` for the exact purchase and USD amount; replays and second payments on the same invoice credit nothing. Partial payments and signed payments that cannot be matched are logged (`journalctl -u proxora`) for manual handling.
 
 1. Create a NOWPayments account, set your USDT payout wallet, and generate an API key and an IPN secret.
 2. In `/opt/proxora/.env`: `NOWPAYMENTS_API_KEY`, `NOWPAYMENTS_IPN_SECRET`, and `CHECKOUT_SUCCESS_URL=https://<site>/account?paid=1`. Start with `NOWPAYMENTS_SANDBOX=true` (sandbox keys) to test with fake payments, then switch to live keys.
 3. `systemctl restart proxora`. Payment notices arrive at `https://<site>/nowpayments/ipn`.
 
-Manual top-ups keep working alongside: `node --env-file=.env src/admin.js credit <email> <gb>`.
+Manual top-ups keep working alongside: `npm run admin -- credit-usd <email> <usd>` for the balance, or `credit <email> <gb>` for prepaid GB.
 
 ## Stripe top-ups (optional)
 

@@ -24,24 +24,28 @@
 
   <h1 class="dash__title">Dashboard</h1>
 
-  <section class="card" aria-labelledby="traffic-title">
-    <h2 class="card__label" id="traffic-title">Traffic left</h2>
-    <p class="balance" data-field="remaining">…</p>
-    <div class="meter" role="progressbar" aria-label="Traffic used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-meter>
-      <span class="meter__fill" data-meter-fill></span>
+  <section class="card" aria-labelledby="balance-title">
+    <h2 class="card__label" id="balance-title">Balance</h2>
+    <p class="balance" data-field="wallet">…</p>
+    <p class="card__note" data-field="prices"></p>
+    <div data-prepaid hidden>
+      <p class="card__note">Prepaid residential traffic, used before your balance: <b data-field="remaining"></b></p>
+      <div class="meter" role="progressbar" aria-label="Prepaid traffic used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-meter>
+        <span class="meter__fill" data-meter-fill></span>
+      </div>
+      <p class="card__note" data-field="usage"></p>
     </div>
-    <p class="card__note" data-field="usage"></p>
-    <p class="empty" data-empty hidden>You have no traffic yet. Buy GB to start using the proxy.</p>
-    <a class="btn" href="#buy-title">Buy traffic</a>
+    <p class="empty" data-empty hidden>Your balance is empty. Add funds to start using proxies and the Web Unlocker.</p>
+    <a class="btn" href="#funds-title">Add funds</a>
   </section>
 
-  <section class="card" aria-labelledby="buy-title">
-    <h2 class="card__label" id="buy-title">Buy traffic</h2>
-    <p class="card__note">Pay with USDT on BNB Smart Chain (BEP-20). Your GB are added automatically once the payment is confirmed, usually within a few minutes.</p>
-    <p class="notice" data-paid hidden role="status">Payment received. Your GB will appear above as soon as the network confirms it. You can refresh this page.</p>
+  <section class="card" aria-labelledby="funds-title">
+    <h2 class="card__label" id="funds-title">Add funds</h2>
+    <p class="card__note">Pay with USDT on BNB Smart Chain (BEP-20). The amount is added to your balance automatically once the payment is confirmed, usually within a few minutes. Larger top-ups include a bonus.</p>
+    <p class="notice" data-paid hidden role="status">Payment received. Your balance updates as soon as the network confirms it. You can refresh this page.</p>
     <div class="packs" data-packs></div>
     <p class="form__error" data-buy-error role="alert" hidden></p>
-    <p class="card__note">Want to pay another way? Ask us and we'll add the GB to your account manually.</p>
+    <p class="card__note">One balance pays for everything: residential and mobile traffic by the GB, and unlocker requests by the request. Want to pay another way? Ask us and we'll credit your account manually.</p>
   </section>
 
   <section class="card" aria-labelledby="connect-title">
@@ -70,14 +74,16 @@
   </section>
 
   <section class="card" aria-labelledby="options-title">
-    <h2 class="card__label" id="options-title">Country and sticky IPs</h2>
+    <h2 class="card__label" id="options-title">Country, mobile and sticky IPs</h2>
     <p class="card__note">Add options to your username. The password stays the same.</p>
     <dl class="rows rows--options">
-      <div><dt><code data-example=""></code></dt><dd>New IP on every request</dd></div>
+      <div><dt><code data-example=""></code></dt><dd>Residential IP, new on every request</dd></div>
+      <div data-mobile-option hidden><dt><code data-example="-mobile"></code></dt><dd>Mobile carrier IP (4G/5G), paid from your balance at <span data-field="mobile-price"></span></dd></div>
       <div><dt><code data-example="-country-gr"></code></dt><dd>IP in Greece. Use any two-letter country code.</dd></div>
       <div><dt><code data-example="-session-job1"></code></dt><dd>Same IP for <span data-field="sticky">10 minutes</span>. Pick any name of up to 32 letters and digits.</dd></div>
       <div><dt><code data-example="-country-gr-session-job1"></code></dt><dd>Both: a Greek IP that stays the same</dd></div>
     </dl>
+    <p class="card__note">Options combine in this order: <code>-mobile</code>, then <code>-country-xx</code>, then <code>-session-name</code>.</p>
   </section>
 
   <section class="card" aria-labelledby="test-title">
@@ -88,7 +94,32 @@
       <button class="copy" type="button" data-copy="curl">Copy</button>
     </div>
   </section>
-  <p class="card__note"><a href="/support">Support</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/refund-policy">Refund policy</a></p>
+
+  <section class="card" aria-labelledby="unlocker-title" data-unlocker hidden>
+    <h2 class="card__label" id="unlocker-title">Web Unlocker</h2>
+    <p class="card__note">Send a URL, get the page back. We pick the exit, retry blocked requests on new residential and mobile IPs, and keep cookies per session. <span data-field="unlocker-price"></span> You are charged only when the page comes back.</p>
+    <div class="code">
+      <pre><code data-field="unlock-curl">…</code></pre>
+      <button class="copy" type="button" data-copy="unlock-curl">Copy</button>
+    </div>
+    <p class="card__note">Optional fields: <code>"country": "de"</code> for an exit in that country, <code>"session": "job1"</code> to keep the same IP and cookies for up to 10 minutes. Public pages only; see the <a href="/acceptable-use">acceptable-use policy</a>.</p>
+
+    <h3 class="card__label">API keys</h3>
+    <p class="notice" data-key-notice hidden role="status">Copy this key now. It will not be shown again.</p>
+    <dl class="rows rows--copy" data-new-key hidden>
+      <div><dt>New key</dt><dd><code data-field="new-key"></code><button class="copy" type="button" data-copy="new-key">Copy</button></dd></div>
+    </dl>
+    <dl class="rows" data-keys></dl>
+    <p class="card__note" data-no-keys hidden>No API keys yet.</p>
+    <form class="form" data-key-form>
+      <label class="field">Key name <small>optional, for your own reference</small>
+        <input type="text" name="name" maxlength="40" autocomplete="off" placeholder="e.g. price-monitor">
+      </label>
+      <button class="btn btn--outline" type="submit">Create API key</button>
+    </form>
+    <p class="form__error" data-key-error role="alert" hidden></p>
+  </section>
+  <p class="card__note"><a href="/support">Support</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/acceptable-use">Acceptable use</a> · <a href="/refund-policy">Refund policy</a></p>
 </main>
 </body>
 </html>

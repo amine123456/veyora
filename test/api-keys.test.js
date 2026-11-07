@@ -144,5 +144,6 @@ test('the dashboard issues, lists and revokes keys for the signed-in account onl
 
     const me = await request(port, { path: '/api/me', method: 'GET', headers: { cookie } });
     assert.equal(me.json.balanceMicros, 0);
+    assert.deepEqual([me.json.prices, me.json.mobile, me.json.unlocker], [null, false, false]); // nothing configured here
   });
 });

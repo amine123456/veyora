@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 import { adminConfig } from './config.js';
-import { createClient, credit, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
+import { MICROS_PER_USD, createClient, credit, creditWallet, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
 
 const [, , command, ...args] = process.argv;
 
@@ -26,6 +26,8 @@ function usage() {
   console.log('Usage:');
   console.log('  npm run admin -- create <username> [initial-gb]');
   console.log('  npm run admin -- credit <username|email> <gb>');
+  console.log('  npm run admin -- credit-usd <username|email> <usd>');
+  console.log('  npm run admin -- unlocker-stats');
   console.log('  npm run admin -- password <username|email>');
   console.log('  npm run admin -- enable|disable <username|email>');
   console.log('  npm run admin -- list');
@@ -80,6 +82,30 @@ async function main() {
     return;
   }
 
+  if (command === 'credit-usd' && args.length === 2) {
+    const usd = Number(args[1]);
+    if (!Number.isFinite(usd) || usd <= 0 || usd > 100_000) throw new Error('USD must be a positive amount up to 100000');
+    const client = await api('POST', `/clients/${encodeURIComponent(args[0])}/credit-usd`, { usd })
+      ?? await creditWallet(await offlineUsername(args[0]), Math.round(usd * MICROS_PER_USD));
+    console.log(`Credited $${usd.toFixed(2)} to ${client.username}. Balance: $${(client.balanceMicros / MICROS_PER_USD).toFixed(4)}`);
+    return;
+  }
+
+  if (command === 'unlocker-stats' && args.length === 0) {
+    const stats = await api('GET', '/unlocker/stats');
+    if (!stats) throw new Error('unlocker-stats needs the running server and ADMIN_TOKEN');
+    console.table(stats.map((site) => ({
+      site: site.site,
+      requests: site.requests,
+      success: `${Math.round(site.successRate * 100)}%`,
+      revenue: `$${(site.revenueMicros / MICROS_PER_USD).toFixed(4)}`,
+      cost: `$${(site.costMicros / MICROS_PER_USD).toFixed(4)}`,
+      margin: `$${(site.marginMicros / MICROS_PER_USD).toFixed(4)}`,
+      flagged: site.flagged ? 'LOSING MONEY' : '',
+    })));
+    return;
+  }
+
   if (command === 'password' && args.length === 1) {
     const username = await offlineUsername(args[0]);
     const rotated = await api('POST', `/clients/${encodeURIComponent(username)}/password`, {})
@@ -106,6 +132,7 @@ async function main() {
       quota: display(client.quotaBytes),
       used: display(client.usedBytes),
       remaining: display(client.remainingBytes),
+      balance: `$${((client.balanceMicros ?? 0) / MICROS_PER_USD).toFixed(4)}`,
     })));
     return;
   }
