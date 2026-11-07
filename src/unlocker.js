@@ -57,11 +57,18 @@ const BODY_SLICE = 48 * 1024; // a multiple of 3, so base64 slices need no paddi
 async function sendPage(response, value, body, encoding) {
   if (response.headersSent) return response.destroy();
   response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  // Waits for 'drain' (or 'close' if the client goes away), removing the other listener
+  // so a slow reader does not pile up one 'close' listener per slice.
   const write = (chunk) => (response.write(chunk) || response.destroyed
     ? undefined
     : new Promise((resolve) => {
-        response.once("drain", resolve);
-        response.once("close", resolve);
+        const done = () => {
+          response.off("drain", done);
+          response.off("close", done);
+          resolve();
+        };
+        response.on("drain", done);
+        response.on("close", done);
       }));
   const head = JSON.stringify(value);
   await write(`${head.slice(0, -1)},"body":"`);

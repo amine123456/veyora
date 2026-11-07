@@ -77,7 +77,7 @@ async function harness(handler, { config = {}, mobile = true, log = { warn() {},
     request.end(method === 'POST' ? payload : undefined);
   });
   try {
-    await run({ call, upstream, unlocker });
+    await run({ call, upstream, unlocker, port });
   } finally {
     await close(server);
     await upstream.close();
@@ -470,4 +470,42 @@ test('shutdown refuses new requests, waits for the one in flight, then snapshots
     assert.equal(await balance(username), 1_000_000 - 800); // the hold settled before stop resolved
     assert.equal(unlocker.stats()[0].requests, 1);
   });
+});
+
+test('a slow reader does not pile up listeners on the response', async () => {
+  const page = `<html><body>${'x'.repeat(4 * 1024 * 1024)}</body></html>`;
+  const warnings = [];
+  const onWarning = (warning) => warnings.push(warning.name);
+  process.on('warning', onWarning);
+  try {
+    await harness((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      res.end(page);
+    }, { config: { maxResponseBytes: 5 * 1024 * 1024 } }, async ({ port }) => {
+      const { key } = await customer();
+      const received = await new Promise((resolve, reject) => {
+        const request = http.request({
+          host: '127.0.0.1', port, method: 'POST', path: '/v1/unlock',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+        }, (response) => {
+          let bytes = 0;
+          response.pause();
+          // Read one chunk every few milliseconds, so the server waits for 'drain' many times.
+          const tick = setInterval(() => {
+            let chunk;
+            while ((chunk = response.read(16 * 1024)) !== null) bytes += chunk.length;
+          }, 2);
+          response.on('end', () => { clearInterval(tick); resolve(bytes); });
+          response.on('error', reject);
+        });
+        request.on('error', reject);
+        request.end(JSON.stringify({ url: 'https://shop.example/huge' }));
+      });
+      assert.ok(received > page.length);
+    });
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.deepEqual(warnings.filter((name) => name === 'MaxListenersExceededWarning'), []);
+  } finally {
+    process.off('warning', onWarning);
+  }
 });
