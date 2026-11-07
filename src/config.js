@@ -176,6 +176,35 @@ export function gatewayConfig() {
   };
 }
 
+// Ticket resale, sneaker launches and the upstream provider itself are refused by
+// default (see the acceptable-use policy). UNLOCKER_BLOCKED_DOMAINS adds more.
+const DEFAULT_UNLOCKER_BLOCKLIST = [
+  'ticketmaster.com', 'livenation.com', 'axs.com', 'seatgeek.com', 'stubhub.com',
+  'viagogo.com', 'vividseats.com', 'tickets.com', 'nike.com', 'snkrs.com',
+  'footlocker.com', 'proxi.st',
+];
+
+export function unlockerConfig() {
+  const blocked = new Set([...DEFAULT_UNLOCKER_BLOCKLIST, ...csv('UNLOCKER_BLOCKED_DOMAINS')]);
+  for (const domain of blocked) {
+    if (!/^[a-z0-9.-]+$/.test(domain)) throw new Error(`Invalid UNLOCKER_BLOCKED_DOMAINS entry: ${domain}`);
+  }
+  return {
+    enabled: boolean('UNLOCKER_ENABLED', true),
+    maxAttempts: integer('UNLOCKER_MAX_ATTEMPTS', 4, { max: 8 }),
+    attemptTimeoutMs: integer('UNLOCKER_ATTEMPT_TIMEOUT_MS', 30_000, { min: 1_000, max: 120_000 }),
+    totalTimeoutMs: integer('UNLOCKER_TOTAL_TIMEOUT_MS', 90_000, { min: 1_000, max: 300_000 }),
+    maxResponseBytes: integer('UNLOCKER_MAX_RESPONSE_BYTES', 10 * 1024 * 1024, { min: 64 * 1024, max: 50 * 1024 * 1024 }),
+    minBodyBytes: integer('UNLOCKER_MIN_BODY_BYTES', 512, { min: 0, max: 64 * 1024 }),
+    requestsPerMinutePerKey: integer('UNLOCKER_REQUESTS_PER_MINUTE', 300, { max: 100_000 }),
+    maxConcurrentPerAccount: integer('UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT', 10, { max: 1_000 }),
+    maxConcurrent: integer('UNLOCKER_MAX_CONCURRENT', 100, { max: 10_000 }),
+    flagMinRequests: integer('UNLOCKER_FLAG_MIN_REQUESTS', 20, { max: 1_000_000 }),
+    blockedDomains: blocked,
+    ledgerFile: path.resolve(process.env.UNLOCKER_LEDGER_FILE?.trim() || path.join(path.dirname(dataFile()), 'unlocker-ledger.jsonl')),
+  };
+}
+
 export function adminConfig() {
   const token = process.env.ADMIN_TOKEN?.trim() || '';
   if (token && token.length < 32) throw new Error('ADMIN_TOKEN must be at least 32 characters');

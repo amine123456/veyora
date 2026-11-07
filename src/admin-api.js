@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
-import { createClient, credit, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
+import { MICROS_PER_USD, createClient, credit, creditWallet, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -24,7 +24,7 @@ async function readJson(request) {
 // Control channel for the admin CLI while the running gateway owns the store. It must
 // listen on loopback only and is never published through the reverse proxy; every
 // request also needs ADMIN_TOKEN.
-export function createAdminServer({ token }) {
+export function createAdminServer({ token }, { unlocker = null } = {}) {
   if (typeof token !== 'string' || token.length < 32) {
     throw new Error('The admin API needs a token of at least 32 characters');
   }
@@ -43,6 +43,10 @@ export function createAdminServer({ token }) {
       if (request.method === 'GET' && pathname === '/clients') {
         return send(response, 200, await listClients());
       }
+      if (request.method === 'GET' && pathname === '/unlocker/stats') {
+        if (!unlocker) return send(response, 404, { error: 'Unlocker disabled' });
+        return send(response, 200, unlocker.stats());
+      }
       if (request.method !== 'POST') return send(response, 404, { error: 'Not found' });
       const body = await readJson(request);
 
@@ -51,11 +55,16 @@ export function createAdminServer({ token }) {
         const client = await createClient(body.username, password, body.bytes ?? 0);
         return send(response, 201, { ...client, password });
       }
-      const action = /^\/clients\/([^/]+)\/(credit|enable|disable|password)$/.exec(pathname);
+      const action = /^\/clients\/([^/]+)\/(credit|credit-usd|enable|disable|password)$/.exec(pathname);
       if (action) {
         const username = await findUsername(decodeURIComponent(action[1]));
         if (!username) return send(response, 404, { error: 'Unknown client' });
         if (action[2] === 'credit') return send(response, 200, await credit(username, body.bytes));
+        if (action[2] === 'credit-usd') {
+          const usd = Number(body.usd);
+          if (!Number.isFinite(usd) || usd <= 0 || usd > 100_000) return send(response, 400, { error: 'usd must be a positive amount' });
+          return send(response, 200, await creditWallet(username, Math.round(usd * MICROS_PER_USD)));
+        }
         if (action[2] === 'password') return send(response, 200, { username, password: await regenerateProxyPassword(username) });
         return send(response, 200, await setEnabled(username, action[2] === 'enable'));
       }

@@ -1,7 +1,8 @@
 import { createAdminServer } from './admin-api.js';
-import { adminConfig, gatewayConfig, paymentConfig, pricingConfig } from './config.js';
+import { adminConfig, gatewayConfig, paymentConfig, pricingConfig, unlockerConfig } from './config.js';
 import { createGateway } from './gateway.js';
 import { createPaymentServer } from './payments.js';
+import { createUnlocker } from './unlocker.js';
 
 function listen(server, port, host) {
   return new Promise((resolve, reject) => {
@@ -24,9 +25,12 @@ async function main() {
   const payments = paymentConfig();
   const pricing = pricingConfig();
   const proxyServer = await createGateway(gateway, { pricing });
-  const paymentServer = createPaymentServer(payments);
+  const unlockerSettings = unlockerConfig();
+  const unlocker = unlockerSettings.enabled ? createUnlocker({ gateway, pricing, config: unlockerSettings }) : null;
+  await unlocker?.ledger.load();
+  const paymentServer = createPaymentServer(payments, { unlocker });
   const admin = adminConfig();
-  const adminServer = admin.token ? createAdminServer(admin) : null;
+  const adminServer = admin.token ? createAdminServer(admin, { unlocker }) : null;
   let startupComplete = false;
 
   proxyServer.on('error', (error) => {
@@ -50,6 +54,7 @@ async function main() {
   console.log(`Proxy gateway listening on ${proxyScheme}://${gateway.host}:${gateway.port}`);
   console.log(`Payment API listening on http://${payments.host}:${payments.port}`);
   console.log(adminServer ? `Admin API listening on http://127.0.0.1:${admin.port}` : 'Admin API disabled: set ADMIN_TOKEN to top up accounts while running');
+  console.log(unlocker ? 'Web Unlocker enabled at POST /v1/unlock' : 'Web Unlocker disabled (UNLOCKER_ENABLED=false)');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
 }

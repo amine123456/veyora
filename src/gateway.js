@@ -78,7 +78,7 @@ function allowedHostname(hostname, allowlist) {
   });
 }
 
-function isPublicAddress(address) {
+export function isPublicAddress(address) {
   const family = net.isIP(address);
   if (!family) return false;
   if (family === 6 && address.toLowerCase().startsWith("::ffff:")) {
@@ -87,7 +87,7 @@ function isPublicAddress(address) {
   return !blockedAddresses.check(address, family === 4 ? "ipv4" : "ipv6");
 }
 
-async function resolveTarget(hostname, config, lookup) {
+export async function resolveTarget(hostname, config, lookup) {
   const ascii = domainToASCII(hostname.replace(/^\[|\]$/g, "")).toLowerCase();
   if (!ascii || ascii.length > 253 || ascii === "localhost" || ascii.endsWith(".local")) return null;
   if (!allowedHostname(ascii, config.destinationAllowlist)) return null;

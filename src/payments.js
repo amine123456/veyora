@@ -288,7 +288,7 @@ function redirect(response, location) {
   response.end();
 }
 
-export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {}) {
+export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlocker = null } = {}) {
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
   const availablePackages = packages();
   // Crypto checkout sells USD wallet top-ups; the optional Stripe path keeps GB packs.
@@ -301,6 +301,9 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch } = {
   const hashing = concurrencyLimit(config.maxConcurrentAuth);
   const server = http.createServer(async (request, response) => {
     try {
+      // The unlocker API lives under /v1/ on the same host; it authenticates by API key.
+      if (unlocker && request.url.startsWith('/v1/')) return await unlocker.handle(request, response, clientAddress(request));
+
       // Pages are looked up by path alone, so /account?paid=1 and /?utm_source=x still resolve.
       const asset = publicFiles.get(new URL(request.url, 'http://local').pathname);
       if ((request.method === 'GET' || request.method === 'HEAD') && asset) {
