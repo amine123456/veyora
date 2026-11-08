@@ -1,12 +1,14 @@
-// Browser-based page fetcher: launches Chromium through the upstream proxy,
-// navigates, waits for JS to execute, and returns the rendered HTML.
-// Tries patchright (stealth fork) first, then vanilla playwright.
+// Browser-based page fetcher: launches Chromium (patchright) or Camoufox
+// (stealth Firefox) through the upstream proxy, navigates, waits for JS
+// to execute, and returns the rendered HTML.
 
 import { FetchError } from "./fetcher.js";
 import { solveDataDome, detectDataDome } from "./captcha-solver.js";
+import { launchCamoufox, camoufoxAvailable } from "./camoufox-launcher.js";
 
 let browserModule = null;
 let checked = false;
+let _camoufoxOk = null;
 
 export async function browserAvailable() {
   if (checked) return browserModule !== null;
@@ -20,6 +22,12 @@ export async function browserAvailable() {
     return true;
   } catch {}
   return false;
+}
+
+async function isCamoufoxAvailable() {
+  if (_camoufoxOk !== null) return _camoufoxOk;
+  _camoufoxOk = await camoufoxAvailable();
+  return _camoufoxOk;
 }
 
 function parseBasicAuth(header) {
@@ -281,5 +289,151 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
     throw wrapped;
   } finally {
     await browser.close().catch(() => {});
+  }
+}
+
+// Camoufox-based fetcher: stealth Firefox that defeats DataDome fingerprinting.
+// Uses the Python camoufox package via subprocess → WebSocket → Playwright connect.
+export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false }) {
+  if (!(await isCamoufoxAvailable())) {
+    throw new FetchError("NETWORK", "Camoufox not installed on this server");
+  }
+
+  const auth = parseBasicAuth(proxy.authorization);
+  if (!auth) throw new FetchError("PROXY", "Cannot parse proxy credentials for browser");
+
+  const scheme = proxy.tls ? "https" : "http";
+  const proxyConfig = {
+    server: `${scheme}://${proxy.host}:${proxy.port}`,
+    username: auth.username,
+    password: auth.password,
+  };
+
+  let server = null;
+  let browser = null;
+  let wireBytes = 0;
+
+  try {
+    server = await launchCamoufox({
+      proxy: proxyConfig,
+      headless: "virtual",
+      geoip: country || true,
+      timeoutMs: Math.min(30_000, timeoutMs / 2),
+    });
+
+    // Connect with playwright (Camoufox exposes a standard Playwright WS endpoint)
+    const pw = browserModule || await import("playwright").catch(() => import("patchright"));
+    browser = await pw.firefox.connect(server.wsEndpoint, { timeout: 15_000 });
+
+    const viewport = randomViewport();
+    const context = await browser.newContext({
+      viewport,
+      acceptDownloads: false,
+    });
+    const page = await context.newPage();
+
+    page.on("response", (resp) => {
+      const cl = resp.headers()["content-length"];
+      if (cl) wireBytes += Number(cl) || 0;
+    });
+
+    const target = url instanceof URL ? url : new URL(url);
+
+    if (cookie) {
+      const pairs = cookie
+        .split("; ")
+        .filter(Boolean)
+        .map((pair) => {
+          const eq = pair.indexOf("=");
+          return eq > 0 ? { name: pair.slice(0, eq), value: pair.slice(eq + 1), domain: target.hostname, path: "/" } : null;
+        })
+        .filter(Boolean);
+      if (pairs.length) await context.addCookies(pairs);
+    }
+
+    if (useReferer) {
+      const googleDomain = country === "de" ? "google.de" : country === "fr" ? "google.fr"
+        : country === "br" ? "google.com.br" : country === "es" ? "google.es"
+        : country === "it" ? "google.it" : country === "nl" ? "google.nl"
+        : country === "jp" ? "google.co.jp" : "google.com";
+      try {
+        await page.goto(`https://www.${googleDomain}/`, { waitUntil: "domcontentloaded", timeout: Math.min(10_000, timeoutMs / 3) });
+        await page.waitForTimeout(500 + Math.floor(Math.random() * 1000));
+        await simulateHuman(page);
+      } catch {}
+    }
+
+    const navReferer = useReferer ? `https://www.google.com/` : referer || undefined;
+
+    const response = await page.goto(target.href, {
+      waitUntil: "domcontentloaded",
+      timeout: timeoutMs,
+      referer: navReferer,
+    });
+
+    await simulateHuman(page);
+
+    // Wait for challenges with longer patience — Camoufox gets solvable CAPTCHAs.
+    const settleDeadline = Date.now() + Math.min(30_000, timeoutMs - 5000);
+    let captchaSolveAttempted = false;
+    while (Date.now() < settleDeadline) {
+      await page.waitForTimeout(2000);
+      const isChallenge = await page.evaluate(() => {
+        const html = document.documentElement.outerHTML;
+        if (html.length > 10000) return false;
+        const meta = document.querySelector('meta[http-equiv="refresh"]');
+        const cf = document.getElementById("challenge-running") || document.getElementById("cf-challenge-running");
+        const title = document.title.toLowerCase();
+        const hasCfChallenge = cf || title.includes("just a moment") || title.includes("checking");
+        const hasDataDome = /\bdd\s*=\s*\{/.test(html) && /['"]rt['"]\s*:\s*['"]c['"]/.test(html);
+        const hasGenericChallenge = meta || /captcha|challenge|verify|blocked/i.test(html);
+        return Boolean(hasCfChallenge || hasDataDome || hasGenericChallenge);
+      }).catch(() => false);
+      if (!isChallenge) break;
+
+      if (!captchaSolveAttempted) {
+        captchaSolveAttempted = true;
+        const ddType = await detectDataDome(page).catch(() => "none");
+        if (ddType === "slider" || ddType === "ic" || ddType === "interactive-challenge") {
+          const result = await solveDataDome(page, {
+            timeoutMs: Math.min(15_000, settleDeadline - Date.now()),
+          }).catch(() => ({ solved: false }));
+          if (result.solved) break;
+        }
+      }
+    }
+
+    const finalUrl = page.url();
+    const html = await page.content();
+    const body = Buffer.from(html, "utf-8");
+    if (body.length > maxBytes) throw new FetchError("TOO_LARGE", "Rendered page exceeds size limit");
+
+    const status = response?.status() ?? 200;
+    const headers = { ...(response?.headers() ?? {}) };
+    headers["content-type"] = "text/html; charset=utf-8";
+    delete headers["content-encoding"];
+    delete headers["content-length"];
+    wireBytes = Math.max(wireBytes, body.length);
+
+    const cookies = await context.cookies();
+    if (cookies.length) {
+      headers["set-cookie"] = cookies.map(
+        (c) => `${c.name}=${c.value}; Domain=${c.domain}; Path=${c.path}${c.expires > 0 ? `; Expires=${new Date(c.expires * 1000).toUTCString()}` : ""}`,
+      );
+    }
+
+    return { status, headers, body, wireBytes, protocol: "camoufox", url: new URL(finalUrl) };
+  } catch (error) {
+    if (error instanceof FetchError) {
+      error.wireBytes = wireBytes;
+      throw error;
+    }
+    const code = error.name === "TimeoutError" || error.message?.includes("Timeout") ? "TIMEOUT" : "NETWORK";
+    const wrapped = new FetchError(code, `Camoufox: ${error.message}`);
+    wrapped.wireBytes = wireBytes;
+    throw wrapped;
+  } finally {
+    await browser?.close().catch(() => {});
+    if (server) server.kill();
   }
 }

@@ -4,7 +4,8 @@ import { createGateway } from './gateway.js';
 import { createPaymentServer } from './payments.js';
 import { createShutdown } from './shutdown.js';
 import { drain } from './store.js';
-import { browserAvailable, fetchWithBrowser } from './browser-fetcher.js';
+import { browserAvailable, fetchWithBrowser, fetchWithCamoufox } from './browser-fetcher.js';
+import { camoufoxAvailable } from './camoufox-launcher.js';
 import { createUnlocker } from './unlocker.js';
 
 function listen(server, port, host) {
@@ -30,8 +31,13 @@ async function main() {
   const proxyServer = await createGateway(gateway, { pricing });
   const unlockerSettings = unlockerConfig();
   const hasBrowser = await browserAvailable();
+  const hasCamoufox = await camoufoxAvailable();
   const unlocker = unlockerSettings.enabled
-    ? createUnlocker({ gateway, pricing, config: unlockerSettings, browserFetchImpl: hasBrowser ? fetchWithBrowser : null })
+    ? createUnlocker({
+        gateway, pricing, config: unlockerSettings,
+        browserFetchImpl: hasBrowser ? fetchWithBrowser : null,
+        camoufoxFetchImpl: hasCamoufox ? fetchWithCamoufox : null,
+      })
     : null;
   await unlocker?.ledger.load();
   const paymentServer = createPaymentServer(payments, { unlocker, pricing, mobile: Boolean(gateway.upstreamMobile) });
