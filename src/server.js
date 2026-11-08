@@ -4,6 +4,7 @@ import { createGateway } from './gateway.js';
 import { createPaymentServer } from './payments.js';
 import { createShutdown } from './shutdown.js';
 import { drain } from './store.js';
+import { browserAvailable, fetchWithBrowser } from './browser-fetcher.js';
 import { createUnlocker } from './unlocker.js';
 
 function listen(server, port, host) {
@@ -28,7 +29,10 @@ async function main() {
   const pricing = pricingConfig();
   const proxyServer = await createGateway(gateway, { pricing });
   const unlockerSettings = unlockerConfig();
-  const unlocker = unlockerSettings.enabled ? createUnlocker({ gateway, pricing, config: unlockerSettings }) : null;
+  const hasBrowser = await browserAvailable();
+  const unlocker = unlockerSettings.enabled
+    ? createUnlocker({ gateway, pricing, config: unlockerSettings, browserFetchImpl: hasBrowser ? fetchWithBrowser : null })
+    : null;
   await unlocker?.ledger.load();
   const paymentServer = createPaymentServer(payments, { unlocker, pricing, mobile: Boolean(gateway.upstreamMobile) });
   const admin = adminConfig();
@@ -57,6 +61,8 @@ async function main() {
   console.log(`Payment API listening on http://${payments.host}:${payments.port}`);
   console.log(adminServer ? `Admin API listening on http://127.0.0.1:${admin.port}` : 'Admin API disabled: set ADMIN_TOKEN to top up accounts while running');
   console.log(unlocker ? 'Web Unlocker enabled at POST /v1/unlock' : 'Web Unlocker disabled (UNLOCKER_ENABLED=false)');
+  if (unlocker && hasBrowser) console.log('Browser fetcher enabled: blocked sites will escalate to Chromium');
+  else if (unlocker) console.log('Browser fetcher not available: install patchright or playwright for browser escalation');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
 

@@ -2,7 +2,7 @@
 // ladder without billing anyone. One URL prints one line per rung; --batch runs a list
 // of URLs and prints the success rate per rung.
 
-const POOLS = new Set(["residential", "mobile"]);
+const POOLS = new Set(["residential", "mobile", "browser-residential", "browser-mobile"]);
 const FETCHERS = new Set(["node", "impersonate"]);
 export const UNLOCK_TEST_USAGE = "unlock-test <url> | --batch <file> [--country xx] [--pool residential|mobile] [--fetcher node|impersonate] [--json]";
 

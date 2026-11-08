@@ -24,7 +24,7 @@ const REDIRECTS = new Set([301, 302, 303, 307, 308]);
 const BLOCK_STATUSES = new Set([403, 429, 503]);
 // Pages that are really there (or really gone) are billed like a 200.
 const BILLABLE_STATUSES = new Set([404, 410]);
-const RETRYABLE_ERRORS = new Set(["PROXY", "TIMEOUT", "NETWORK", "TLS", "ENCODING"]);
+const RETRYABLE_ERRORS = new Set(["PROXY", "TIMEOUT", "NETWORK", "TLS", "ENCODING", "BUSY"]);
 
 // Text found on anti-bot challenge and block pages. Only scanned on small HTML bodies:
 // real pages often embed the same vendors' scripts, but never at challenge-page size.
@@ -293,6 +293,7 @@ export function createUnlocker({
   config,
   lookup = dns.lookup,
   fetchImpl = fetchThroughProxy,
+  browserFetchImpl = null,
   tlsOptions = {},
   authenticate = authenticateApiKey,
   log = console,
@@ -312,9 +313,17 @@ export function createUnlocker({
   const activeByAccount = new Map();
   let active = 0;
 
-  const pools = gateway.upstreamMobile ? ["residential", "residential", "mobile"] : ["residential"];
+  const httpPools = gateway.upstreamMobile ? ["residential", "residential", "mobile"] : ["residential"];
+  const browserOk = Boolean(browserFetchImpl) && config.browserEnabled !== false;
+  const browserPools = browserOk
+    ? gateway.upstreamMobile ? ["browser-residential", "browser-mobile"] : ["browser-residential"]
+    : [];
+  const pools = [...httpPools, ...browserPools];
+  const isBrowserRung = (rung) => rung.startsWith("browser-");
+  const poolOf = (rung) => isBrowserRung(rung) ? rung.slice(8) : rung;
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
   const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
+  let browserActive = 0;
 
   async function checkTarget(url) {
     if (url.protocol !== "http:" && url.protocol !== "https:") throw new PublicError(400, "url must be http or https");
@@ -391,6 +400,45 @@ export function createUnlocker({
     }
   }
 
+  // Browser-based fetch: the browser handles redirects and cookies internally.
+  async function browserFetchOnExit(exit, username, country, startUrl, deadline) {
+    const remaining = Math.min(config.browserTimeoutMs ?? 45_000, deadline - Date.now());
+    if (remaining < 2000) {
+      const error = new Error("Out of time for browser attempt");
+      error.code = "TIMEOUT";
+      error.wireBytes = 0;
+      throw error;
+    }
+    if (browserActive >= (config.browserMaxConcurrent ?? 2)) {
+      const error = new Error("Browser concurrency limit");
+      error.code = "BUSY";
+      error.wireBytes = 0;
+      throw error;
+    }
+    browserActive += 1;
+    try {
+      const endpoint = upstreamEndpoint(gateway, exit.pool);
+      const result = await browserFetchImpl({
+        url: startUrl,
+        proxy: {
+          host: endpoint.host,
+          port: endpoint.port,
+          tls: gateway.upstreamTls,
+          authorization: upstreamAuthorization(gateway, { username, country, session: exit.sid, pool: exit.pool }),
+        },
+        timeoutMs: remaining,
+        maxBytes: config.maxResponseBytes,
+        cookie: exit.jar.header(startUrl.hostname),
+        referer: "",
+      });
+      exit.jar.store(startUrl.hostname, result.headers["set-cookie"]);
+      const wireBytes = result.wireBytes ?? 0;
+      return { ...result, url: result.url ?? startUrl, wireBytes };
+    } finally {
+      browserActive -= 1;
+    }
+  }
+
   async function unlock({ username, url, country, session }) {
     const started = Date.now();
     const deadline = started + config.totalTimeoutMs;
@@ -403,8 +451,8 @@ export function createUnlocker({
     // A named session keeps its exit (and cookies) across requests; without one, each
     // customer keeps a warm exit per site so clearance cookies are reused.
     const exitKey = session ? `${username}\0session\0${session}` : `${username}\0site\0${site}`;
-    let exit = sessions.get(exitKey) ?? newExit(poolForStep(step));
-    if (exit.pool !== poolForStep(step) && !session) exit = newExit(poolForStep(step));
+    let exit = sessions.get(exitKey) ?? newExit(poolOf(poolForStep(step)));
+    if (exit.pool !== poolOf(poolForStep(step)) && !session) exit = newExit(poolOf(poolForStep(step)));
     // Escalation continues from the exit in use: a sticky mobile session never steps back.
     if (exit.pool === "mobile") step = Math.max(step, pools.lastIndexOf("mobile"));
     const attempts = [];
@@ -417,16 +465,18 @@ export function createUnlocker({
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250; attempt += 1) {
       if (attempt > 0) {
         step += 1;
-        exit = newExit(poolForStep(step));
+        exit = newExit(poolOf(poolForStep(step)));
       }
+      const rung = poolForStep(step);
       const attemptStarted = Date.now();
       try {
-        const result = await fetchOnExit(exit, username, country, url, deadline);
+        const result = isBrowserRung(rung)
+          ? await browserFetchOnExit(exit, username, country, url, deadline)
+          : await fetchOnExit(exit, username, country, url, deadline);
         wireByPool[exit.pool] += result.wireBytes;
         const outcome = classify(result, config.minBodyBytes);
-        // A blocked page is never returned, so its body need not stay in memory.
         if (outcome === "blocked") result.body = Buffer.alloc(0);
-        attempts.push({ pool: exit.pool, outcome, status: result.status, ms: Date.now() - attemptStarted });
+        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), outcome, status: result.status, ms: Date.now() - attemptStarted });
         if (bestOutcome === null || rank[outcome] >= rank[bestOutcome]) {
           best = result;
           bestOutcome = outcome;
@@ -469,8 +519,11 @@ export function createUnlocker({
   // with the same checks, caps and timeouts as a customer request (redirects included),
   // but nothing is billed, remembered or written to the ledger.
   async function probe({ url: rawUrl, country = null, pool = "residential", username = "unlock-test" }) {
+    const browser = pool.startsWith("browser-");
+    const actualPool = browser ? pool.slice(8) : pool;
     const refused = (error) => ({ pool, outcome: "refused", error, reasons: [], wireBytes: 0, costMicros: 0, ms: 0 });
-    if (!pools.includes(pool)) return refused(`The ${pool} pool is not configured`);
+    if (browser && !browserFetchImpl) return refused("Browser fetcher is not available (install patchright or playwright)");
+    if (!pools.includes(pool) && !httpPools.includes(actualPool)) return refused(`The ${pool} pool is not configured`);
     let url;
     try {
       url = await checkTarget(new URL(rawUrl));
@@ -478,9 +531,12 @@ export function createUnlocker({
       return refused(error instanceof PublicError ? error.message : "Invalid URL");
     }
     const started = Date.now();
-    const exit = newExit(pool);
+    const exit = newExit(actualPool);
+    const timeout = browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
     try {
-      const result = await fetchOnExit(exit, username, country, url, started + config.attemptTimeoutMs);
+      const result = browser
+        ? await browserFetchOnExit(exit, username, country, url, started + timeout)
+        : await fetchOnExit(exit, username, country, url, started + timeout);
       const { outcome, reasons } = diagnose(result, config.minBodyBytes);
       return {
         pool,
@@ -489,14 +545,14 @@ export function createUnlocker({
         reasons: result.abck ? [...reasons, "cookie:_abck"] : reasons,
         bytes: result.body.length,
         wireBytes: result.wireBytes,
-        costMicros: (result.wireBytes * costPerGb[pool]) / GIB,
+        costMicros: (result.wireBytes * costPerGb[actualPool]) / GIB,
         protocol: result.protocol,
-        finalUrl: result.url.href,
+        finalUrl: (result.url ?? url).href,
         ms: Date.now() - started,
       };
     } catch (error) {
       const wireBytes = error.wireBytes ?? 0;
-      return { pool, outcome: "error", error: error.code ?? "NETWORK", reasons: [], wireBytes, costMicros: (wireBytes * costPerGb[pool]) / GIB, ms: Date.now() - started };
+      return { pool, outcome: "error", error: error.code ?? "NETWORK", reasons: [], wireBytes, costMicros: (wireBytes * costPerGb[actualPool]) / GIB, ms: Date.now() - started };
     }
   }
 
@@ -518,7 +574,6 @@ export function createUnlocker({
       throw new PublicError(400, "session must be 1-32 letters or digits");
     }
     if (input.render !== undefined && typeof input.render !== "boolean") throw new PublicError(400, "render must be true or false");
-    if (input.render) throw new PublicError(400, "render is not available yet; send render: false");
     return { url, country: input.country ? input.country.toLowerCase() : null, session: input.session || null };
   }
 

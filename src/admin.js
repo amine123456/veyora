@@ -70,10 +70,15 @@ async function unlockTest(options) {
     throw new Error('The impersonate fetcher is not installed yet; use --fetcher node');
   }
   const { createUnlocker } = await import('./unlocker.js');
+  const { browserAvailable, fetchWithBrowser } = await import('./browser-fetcher.js');
   const gateway = gatewayConfig();
-  // The probe never records anything, but point the ledger away from production anyway.
   const config = { ...unlockerConfig(), ledgerFile: path.join(os.tmpdir(), `unlock-test-${process.pid}.jsonl`) };
-  const unlocker = createUnlocker({ gateway, pricing: pricingConfig(), config, log: { info: (line) => console.error(line), warn: (line) => console.error(line), error: (line) => console.error(line) } });
+  const hasBrowser = await browserAvailable();
+  const unlocker = createUnlocker({
+    gateway, pricing: pricingConfig(), config,
+    browserFetchImpl: hasBrowser ? fetchWithBrowser : null,
+    log: { info: (line) => console.error(line), warn: (line) => console.error(line), error: (line) => console.error(line) },
+  });
   const urls = options.batch ? parseUrlList(await readFile(options.batch, 'utf8')) : [options.url];
   if (!urls.length) throw new Error('The batch file lists no URLs');
   const rungs = rungsFor(unlocker.rungs, options.pool);

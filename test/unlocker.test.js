@@ -307,7 +307,7 @@ test('requests are validated, authenticated and paid for before anything is fetc
     assert.equal((await call({ url: 'https://shop.example/' }, { key, headers: { 'content-type': 'text/plain' } })).status, 415);
     assert.equal((await call('not json', { key })).status, 400);
     assert.equal((await call({ url: 'https://shop.example/', method: 'POST' }, { key })).status, 400);
-    assert.equal((await call({ url: 'https://shop.example/', render: true }, { key })).status, 400);
+    assert.equal((await call({ url: 'https://shop.example/', render: 'yes' }, { key })).status, 400);
     assert.equal((await call({ url: 'ftp://shop.example/' }, { key })).status, 400);
     assert.equal((await call({ url: 'https://user:pw@shop.example/' }, { key })).status, 400);
     assert.equal((await call({ url: 'https://shop.example:8443/' }, { key })).status, 400);
@@ -633,4 +633,99 @@ test('challenge pages that came back as 200 or 202 are blocked and not billed', 
   assert.equal(classify(page(202, '{"queued":true}', { 'content-type': 'application/json' }), 512), 'ok');
   assert.equal(classify(page(202, `<html><body>${'product '.repeat(25_000)}</body></html>`), 512), 'ok');
   assert.equal(classify(page(200, `<html><head><title>Help: access denied errors</title></head><body>${'help '.repeat(200)}</body></html>`, { 'content-type': 'text/html' }), 512), 'ok');
+});
+
+// --- Browser fetcher integration ---
+
+test('browser rungs appear in the ladder when a browser fetch is provided', async () => {
+  const fake = async () => ({ status: 200, headers: { 'content-type': 'text/html' }, body: Buffer.from(PAGE), wireBytes: 100, protocol: 'browser' });
+  const target = await tlsTarget((req, res) => res.end(PAGE));
+  const upstream = await fakeUpstream({ 'shop.example:443': target.port });
+  const gateway = {
+    upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+    upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+    upstreamMobile: { username: 'mob-user', password: 'm', host: '127.0.0.1', port: upstream.port },
+  };
+  const unlocker = createUnlocker({
+    gateway, pricing, config: settings({ browserEnabled: true }), lookup: publicLookup, tlsOptions: { ca: targetCert },
+    browserFetchImpl: fake, log: { warn() {}, error() {} },
+  });
+  assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile', 'browser-residential', 'browser-mobile']);
+  await upstream.close();
+  await target.close();
+});
+
+test('browser rungs are absent when browserFetchImpl is null', async () => {
+  const target = await tlsTarget((req, res) => res.end(PAGE));
+  const upstream = await fakeUpstream({ 'shop.example:443': target.port });
+  const gateway = {
+    upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+    upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+    upstreamMobile: { username: 'mob-user', password: 'm', host: '127.0.0.1', port: upstream.port },
+  };
+  const unlocker = createUnlocker({
+    gateway, pricing, config: settings(), lookup: publicLookup, tlsOptions: { ca: targetCert },
+    browserFetchImpl: null, log: { warn() {}, error() {} },
+  });
+  assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile']);
+  await upstream.close();
+  await target.close();
+});
+
+test('escalation reaches the browser rung when HTTP rungs are blocked', async () => {
+  let browserCalled = false;
+  const browserFetch = async ({ url, proxy }) => {
+    browserCalled = true;
+    assert.ok(proxy.authorization.startsWith('Basic '));
+    return { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: Buffer.from(PAGE), wireBytes: 500, protocol: 'browser', url: url instanceof URL ? url : new URL(url) };
+  };
+  await harness((req, res) => {
+    res.writeHead(403, { 'content-type': 'text/html' });
+    res.end(CHALLENGE);
+  }, {
+    config: { maxAttempts: 6, browserEnabled: true },
+  }, async ({ upstream, port }) => {
+    // Manually create the unlocker with the browser fetch
+    const gateway = {
+      upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+      upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+      upstreamMobile: { username: 'mob-user', password: 'm', host: '127.0.0.1', port: upstream.port },
+    };
+    const unlocker = createUnlocker({
+      gateway, pricing, config: settings({ maxAttempts: 6, browserEnabled: true }),
+      browserFetchImpl: browserFetch, lookup: publicLookup, tlsOptions: { ca: targetCert }, log: { warn() {}, error() {} },
+    });
+    const { key } = await customer();
+    const result = await unlocker.unlock({ username: `unlock-${accounts}`, url: new URL('https://shop.example/'), country: null, session: null });
+    assert.ok(browserCalled, 'browser fetcher should have been called after HTTP rungs failed');
+    assert.equal(result.outcome, 'ok');
+    assert.ok(result.attempts.some((a) => a.browser), 'at least one attempt should be a browser attempt');
+  });
+});
+
+test('probe supports browser pool types', async () => {
+  const browserFetch = async ({ url }) => ({
+    status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: Buffer.from(PAGE), wireBytes: 300, protocol: 'browser',
+    url: url instanceof URL ? url : new URL(url),
+  });
+  const target = await tlsTarget((req, res) => res.end(PAGE));
+  const upstream = await fakeUpstream({ 'shop.example:443': target.port });
+  const gateway = {
+    upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+    upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+    upstreamMobile: { username: 'mob-user', password: 'm', host: '127.0.0.1', port: upstream.port },
+  };
+  const unlocker = createUnlocker({
+    gateway, pricing, config: settings({ browserEnabled: true }),
+    browserFetchImpl: browserFetch, lookup: publicLookup, tlsOptions: { ca: targetCert }, log: { warn() {}, error() {} },
+  });
+  const result = await unlocker.probe({ url: 'https://shop.example/', pool: 'browser-residential', country: 'de' });
+  assert.equal(result.outcome, 'ok');
+  assert.equal(result.pool, 'browser-residential');
+  assert.equal(result.protocol, 'browser');
+
+  const refused = await unlocker.probe({ url: 'https://shop.example/', pool: 'browser-mobile' });
+  assert.equal(refused.outcome, 'ok');
+  await upstream.close();
+  await target.close();
 });
