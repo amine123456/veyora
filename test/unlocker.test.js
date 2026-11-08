@@ -650,7 +650,7 @@ test('browser rungs appear in the ladder when a browser fetch is provided', asyn
     gateway, pricing, config: settings({ browserEnabled: true }), lookup: publicLookup, tlsOptions: { ca: targetCert },
     browserFetchImpl: fake, log: { warn() {}, error() {} },
   });
-  assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile', 'browser-residential', 'browser-mobile']);
+  assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile', 'browser-residential', 'browser-mobile', 'ref-browser-residential', 'ref-browser-mobile']);
   await upstream.close();
   await target.close();
 });
@@ -692,7 +692,7 @@ test('escalation reaches the browser rung when HTTP rungs are blocked', async ()
       upstreamMobile: { username: 'mob-user', password: 'm', host: '127.0.0.1', port: upstream.port },
     };
     const unlocker = createUnlocker({
-      gateway, pricing, config: settings({ maxAttempts: 6, browserEnabled: true }),
+      gateway, pricing, config: settings({ maxAttempts: 8, browserEnabled: true }),
       browserFetchImpl: browserFetch, lookup: publicLookup, tlsOptions: { ca: targetCert }, log: { warn() {}, error() {} },
     });
     const { key } = await customer();
@@ -724,8 +724,15 @@ test('probe supports browser pool types', async () => {
   assert.equal(result.pool, 'browser-residential');
   assert.equal(result.protocol, 'browser');
 
-  const refused = await unlocker.probe({ url: 'https://shop.example/', pool: 'browser-mobile' });
-  assert.equal(refused.outcome, 'ok');
+  const mobile = await unlocker.probe({ url: 'https://shop.example/', pool: 'browser-mobile' });
+  assert.equal(mobile.outcome, 'ok');
+
+  const refRes = await unlocker.probe({ url: 'https://shop.example/', pool: 'ref-browser-residential', country: 'fr' });
+  assert.equal(refRes.outcome, 'ok');
+  assert.equal(refRes.pool, 'ref-browser-residential');
+
+  const refMob = await unlocker.probe({ url: 'https://shop.example/', pool: 'ref-browser-mobile' });
+  assert.equal(refMob.outcome, 'ok');
   await upstream.close();
   await target.close();
 });

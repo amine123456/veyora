@@ -31,7 +31,72 @@ function parseBasicAuth(header) {
 
 export { parseBasicAuth };
 
-export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "" }) {
+// Country → locale/timezone for realistic browser context.
+const COUNTRY_CONTEXT = {
+  us: { locale: "en-US", tz: "America/New_York", lang: "en-US,en" },
+  gb: { locale: "en-GB", tz: "Europe/London", lang: "en-GB,en" },
+  uk: { locale: "en-GB", tz: "Europe/London", lang: "en-GB,en" },
+  de: { locale: "de-DE", tz: "Europe/Berlin", lang: "de-DE,de,en" },
+  fr: { locale: "fr-FR", tz: "Europe/Paris", lang: "fr-FR,fr,en" },
+  es: { locale: "es-ES", tz: "Europe/Madrid", lang: "es-ES,es,en" },
+  it: { locale: "it-IT", tz: "Europe/Rome", lang: "it-IT,it,en" },
+  nl: { locale: "nl-NL", tz: "Europe/Amsterdam", lang: "nl-NL,nl,en" },
+  pt: { locale: "pt-PT", tz: "Europe/Lisbon", lang: "pt-PT,pt,en" },
+  br: { locale: "pt-BR", tz: "America/Sao_Paulo", lang: "pt-BR,pt,en" },
+  jp: { locale: "ja-JP", tz: "Asia/Tokyo", lang: "ja-JP,ja,en" },
+  kr: { locale: "ko-KR", tz: "Asia/Seoul", lang: "ko-KR,ko,en" },
+  cn: { locale: "zh-CN", tz: "Asia/Shanghai", lang: "zh-CN,zh,en" },
+  au: { locale: "en-AU", tz: "Australia/Sydney", lang: "en-AU,en" },
+  ca: { locale: "en-CA", tz: "America/Toronto", lang: "en-CA,en,fr" },
+  in: { locale: "en-IN", tz: "Asia/Kolkata", lang: "en-IN,en,hi" },
+  mx: { locale: "es-MX", tz: "America/Mexico_City", lang: "es-MX,es,en" },
+  ar: { locale: "es-AR", tz: "America/Argentina/Buenos_Aires", lang: "es-AR,es,en" },
+  pl: { locale: "pl-PL", tz: "Europe/Warsaw", lang: "pl-PL,pl,en" },
+  se: { locale: "sv-SE", tz: "Europe/Stockholm", lang: "sv-SE,sv,en" },
+  ch: { locale: "de-CH", tz: "Europe/Zurich", lang: "de-CH,de,fr,en" },
+  at: { locale: "de-AT", tz: "Europe/Vienna", lang: "de-AT,de,en" },
+  be: { locale: "fr-BE", tz: "Europe/Brussels", lang: "fr-BE,nl-BE,fr,nl,en" },
+  ru: { locale: "ru-RU", tz: "Europe/Moscow", lang: "ru-RU,ru,en" },
+  tr: { locale: "tr-TR", tz: "Europe/Istanbul", lang: "tr-TR,tr,en" },
+  za: { locale: "en-ZA", tz: "Africa/Johannesburg", lang: "en-ZA,en" },
+};
+const DEFAULT_CONTEXT = { locale: "en-US", tz: "America/New_York", lang: "en-US,en" };
+
+// Common desktop resolutions with slight randomization.
+const VIEWPORTS = [
+  { width: 1920, height: 1080 },
+  { width: 1366, height: 768 },
+  { width: 1536, height: 864 },
+  { width: 1440, height: 900 },
+  { width: 1680, height: 1050 },
+  { width: 2560, height: 1440 },
+];
+
+function randomViewport() {
+  const base = VIEWPORTS[Math.floor(Math.random() * VIEWPORTS.length)];
+  return { width: base.width, height: base.height };
+}
+
+function contextFor(country) {
+  return COUNTRY_CONTEXT[country?.toLowerCase()] ?? DEFAULT_CONTEXT;
+}
+
+// Simulate human-like behavior: random mouse moves and a scroll.
+async function simulateHuman(page) {
+  const vp = page.viewportSize() ?? { width: 1920, height: 1080 };
+  // Move mouse to a few random positions.
+  for (let i = 0; i < 3; i++) {
+    const x = 100 + Math.floor(Math.random() * (vp.width - 200));
+    const y = 100 + Math.floor(Math.random() * (vp.height - 200));
+    await page.mouse.move(x, y, { steps: 5 + Math.floor(Math.random() * 10) });
+    await page.waitForTimeout(200 + Math.floor(Math.random() * 300));
+  }
+  // Scroll down a bit.
+  await page.mouse.wheel(0, 200 + Math.floor(Math.random() * 400));
+  await page.waitForTimeout(500 + Math.floor(Math.random() * 500));
+}
+
+export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false }) {
   if (!browserModule) throw new FetchError("NETWORK", "No browser engine installed (patchright or playwright)");
   const { chromium } = browserModule;
   const auth = parseBasicAuth(proxy.authorization);
@@ -41,20 +106,25 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
   const browser = await chromium.launch({
     headless: true,
     proxy: { server: `${scheme}://${proxy.host}:${proxy.port}`, username: auth.username, password: auth.password },
-    args: ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions"],
+    args: [
+      "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions",
+      "--disable-blink-features=AutomationControlled",
+    ],
   });
 
   let wireBytes = 0;
   try {
+    const ctx = contextFor(country);
+    const viewport = randomViewport();
     const context = await browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-      locale: "en-US",
-      timezoneId: "America/New_York",
-      deviceScaleFactor: 1,
+      viewport,
+      locale: ctx.locale,
+      timezoneId: ctx.tz,
+      deviceScaleFactor: Math.random() < 0.3 ? 2 : 1,
+      extraHTTPHeaders: { "Accept-Language": ctx.lang },
     });
     const page = await context.newPage();
 
-    // Accumulate wire bytes from response content-length headers.
     page.on("response", (resp) => {
       const cl = resp.headers()["content-length"];
       if (cl) wireBytes += Number(cl) || 0;
@@ -74,17 +144,39 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
       if (pairs.length) await context.addCookies(pairs);
     }
 
+    // Referer chain: navigate to Google first, then to the target.
+    // This makes the traffic look like a real user clicking a search result.
+    if (useReferer) {
+      const googleDomain = country === "de" ? "google.de" : country === "fr" ? "google.fr"
+        : country === "br" ? "google.com.br" : country === "es" ? "google.es"
+        : country === "it" ? "google.it" : country === "nl" ? "google.nl"
+        : country === "jp" ? "google.co.jp" : "google.com";
+      try {
+        await page.goto(`https://www.${googleDomain}/`, { waitUntil: "domcontentloaded", timeout: Math.min(10_000, timeoutMs / 3) });
+        await page.waitForTimeout(500 + Math.floor(Math.random() * 1000));
+        await simulateHuman(page);
+      } catch {
+        // Google failed (proxy issue etc.) — proceed without referer.
+      }
+    }
+
+    const navReferer = useReferer
+      ? `https://www.google.com/`
+      : referer || undefined;
+
     const response = await page.goto(target.href, {
       waitUntil: "domcontentloaded",
       timeout: timeoutMs,
-      referer: referer || undefined,
+      referer: navReferer,
     });
+
+    // Simulate human behavior on the target page.
+    await simulateHuman(page);
 
     // Wait for JS challenges (Cloudflare, DataDome, Akamai, etc.) to resolve.
     // Strategy: if the initial page is small (<10 KB) and looks like a challenge
     // interstitial, keep polling until the page grows, navigates, or time runs out.
     const settleDeadline = Date.now() + Math.min(20_000, timeoutMs - 5000);
-    const initialUrl = page.url();
     while (Date.now() < settleDeadline) {
       await page.waitForTimeout(2000);
       const isChallenge = await page.evaluate(() => {

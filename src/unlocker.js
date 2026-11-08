@@ -315,12 +315,18 @@ export function createUnlocker({
 
   const httpPools = gateway.upstreamMobile ? ["residential", "residential", "mobile"] : ["residential"];
   const browserOk = Boolean(browserFetchImpl) && config.browserEnabled !== false;
+  // Browser escalation ladder: plain browser → browser with Google referer chain.
+  // Each rung gets a fresh proxy session (new IP) for maximum coverage.
+  // The "ref-" prefix triggers the Google referer chain for harder sites.
   const browserPools = browserOk
-    ? gateway.upstreamMobile ? ["browser-residential", "browser-mobile"] : ["browser-residential"]
+    ? gateway.upstreamMobile
+      ? ["browser-residential", "browser-mobile", "ref-browser-residential", "ref-browser-mobile"]
+      : ["browser-residential", "ref-browser-residential"]
     : [];
   const pools = [...httpPools, ...browserPools];
-  const isBrowserRung = (rung) => rung.startsWith("browser-");
-  const poolOf = (rung) => isBrowserRung(rung) ? rung.slice(8) : rung;
+  const isBrowserRung = (rung) => rung.includes("browser-");
+  const isRefererRung = (rung) => rung.startsWith("ref-");
+  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "");
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
   const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
   let browserActive = 0;
@@ -401,7 +407,7 @@ export function createUnlocker({
   }
 
   // Browser-based fetch: the browser handles redirects and cookies internally.
-  async function browserFetchOnExit(exit, username, country, startUrl, deadline) {
+  async function browserFetchOnExit(exit, username, country, startUrl, deadline, { useReferer = false } = {}) {
     const remaining = Math.min(config.browserTimeoutMs ?? 45_000, deadline - Date.now());
     if (remaining < 2000) {
       const error = new Error("Out of time for browser attempt");
@@ -430,6 +436,8 @@ export function createUnlocker({
         maxBytes: config.maxResponseBytes,
         cookie: exit.jar.header(startUrl.hostname),
         referer: "",
+        country: country ?? "",
+        useReferer,
       });
       exit.jar.store(startUrl.hostname, result.headers["set-cookie"]);
       const wireBytes = result.wireBytes ?? 0;
@@ -465,18 +473,19 @@ export function createUnlocker({
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250; attempt += 1) {
       if (attempt > 0) {
         step += 1;
+        // Browser rungs always get a fresh proxy session (new IP) for maximum coverage.
         exit = newExit(poolOf(poolForStep(step)));
       }
       const rung = poolForStep(step);
       const attemptStarted = Date.now();
       try {
         const result = isBrowserRung(rung)
-          ? await browserFetchOnExit(exit, username, country, url, deadline)
+          ? await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung) })
           : await fetchOnExit(exit, username, country, url, deadline);
         wireByPool[exit.pool] += result.wireBytes;
         const outcome = classify(result, config.minBodyBytes);
         if (outcome === "blocked") result.body = Buffer.alloc(0);
-        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), outcome, status: result.status, ms: Date.now() - attemptStarted });
+        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), referer: isRefererRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
         if (bestOutcome === null || rank[outcome] >= rank[bestOutcome]) {
           best = result;
           bestOutcome = outcome;
@@ -519,8 +528,9 @@ export function createUnlocker({
   // with the same checks, caps and timeouts as a customer request (redirects included),
   // but nothing is billed, remembered or written to the ledger.
   async function probe({ url: rawUrl, country = null, pool = "residential", username = "unlock-test" }) {
-    const browser = pool.startsWith("browser-");
-    const actualPool = browser ? pool.slice(8) : pool;
+    const browser = pool.includes("browser-");
+    const useReferer = pool.startsWith("ref-");
+    const actualPool = poolOf(pool);
     const refused = (error) => ({ pool, outcome: "refused", error, reasons: [], wireBytes: 0, costMicros: 0, ms: 0 });
     if (browser && !browserFetchImpl) return refused("Browser fetcher is not available (install patchright or playwright)");
     if (!pools.includes(pool) && !httpPools.includes(actualPool)) return refused(`The ${pool} pool is not configured`);
@@ -535,7 +545,7 @@ export function createUnlocker({
     const timeout = browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
     try {
       const result = browser
-        ? await browserFetchOnExit(exit, username, country, url, started + timeout)
+        ? await browserFetchOnExit(exit, username, country, url, started + timeout, { useReferer })
         : await fetchOnExit(exit, username, country, url, started + timeout);
       const { outcome, reasons } = diagnose(result, config.minBodyBytes);
       return {
