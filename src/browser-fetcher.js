@@ -75,13 +75,31 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
     }
 
     const response = await page.goto(target.href, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: timeoutMs,
       referer: referer || undefined,
     });
 
-    // Give dynamic content a moment to settle after networkidle.
-    await page.waitForTimeout(2000);
+    // Wait for JS challenges (Cloudflare, DataDome, Akamai, etc.) to resolve.
+    // Strategy: if the initial page is small (<10 KB) and looks like a challenge
+    // interstitial, keep polling until the page grows, navigates, or time runs out.
+    const settleDeadline = Date.now() + Math.min(20_000, timeoutMs - 5000);
+    const initialUrl = page.url();
+    while (Date.now() < settleDeadline) {
+      await page.waitForTimeout(2000);
+      const isChallenge = await page.evaluate(() => {
+        const html = document.documentElement.outerHTML;
+        if (html.length > 10000) return false;
+        const meta = document.querySelector('meta[http-equiv="refresh"]');
+        const cf = document.getElementById("challenge-running") || document.getElementById("cf-challenge-running");
+        const title = document.title.toLowerCase();
+        const hasCfChallenge = cf || title.includes("just a moment") || title.includes("checking");
+        const hasDataDome = /\bdd\s*=\s*\{/.test(html) && /['"]rt['"]\s*:\s*['"]c['"]/.test(html);
+        const hasGenericChallenge = meta || /captcha|challenge|verify|blocked/i.test(html);
+        return Boolean(hasCfChallenge || hasDataDome || hasGenericChallenge);
+      }).catch(() => false);
+      if (!isChallenge) break;
+    }
 
     const finalUrl = page.url();
     const html = await page.content();
