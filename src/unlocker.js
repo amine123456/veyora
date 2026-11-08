@@ -43,8 +43,15 @@ const CHALLENGE_MARKERS = [
   ["akamai-access-denied", /<title>\s*access denied\s*<\/title>[\s\S]*reference\s*#/i],
   ["akamai-edgesuite", /errors\.edgesuite\.net/i],
   ["akamai-challenge", /\/_sec\/cp_challenge/i],
+  // Site-styled denial pages, e.g. mobile.de's "Zugriff verweigert / Access denied".
+  // The title must be only the phrase(s), so "Help: access denied errors" is not a match.
+  ["access-denied-title", /<title>\s*(?:(?:access denied|zugriff verweigert)\s*[/|:–-]?\s*)+<\/title>/i],
   ["datadome-adblock", /please enable js and disable any ad blocker/i],
-  ["captcha", /verify you are human|are you a robot\?/i],
+  // AWS WAF's JavaScript challenge (Amazon, Booking): served as a 202 with challenge.js.
+  ["aws-waf", /awsWafCookieDomainList|gokuProps|token\.awswaf\.com/i],
+  ["captcha", /verify you are human|are you a robot\?|verify that you(?:'|&#39;|’)re not a robot/i],
+  // Google's no-results stub that only redirects to its enable-JavaScript page.
+  ["google-enablejs", /\/httpservice\/retry\/enablejs/i],
 ];
 
 // Decodes numeric character references (&#46; &#x2E;) so entity-encoded block pages match.
@@ -250,6 +257,11 @@ export function diagnose(result, minBodyBytes) {
   if (result.status >= 500) return { outcome: "retry", reasons: [status, ...reasons] };
   if (result.status >= 400 && !BILLABLE_STATUSES.has(result.status)) return { outcome: "final", reasons: [status, ...reasons] };
   if (reasons.some((reason) => reason.startsWith("marker:"))) return { outcome: "blocked", reasons };
+  // A page navigation answered 202 with a small HTML body is a challenge, not the page:
+  // challenge vendors use 202 for "come back after running this script".
+  if (result.status === 202 && isHtml(result.headers) && result.body.length <= MARKER_SCAN_LIMIT) {
+    return { outcome: "blocked", reasons: [status, ...reasons] };
+  }
   if (isHtml(result.headers) && result.status === 200 && result.body.length < minBodyBytes) {
     return { outcome: "small", reasons: [...reasons, "size:" + result.body.length] };
   }

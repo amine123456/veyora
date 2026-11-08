@@ -533,7 +533,7 @@ test('Akamai block pages are detected, entity-encoded or plain, with the markers
   assert.ok(encoded.reasons.includes('marker:akamai-edgesuite'));
 
   const plain = diagnose(page(200, '<html><head><title>Access Denied</title></head><body>Reference #18.abc.123</body></html>'), 512);
-  assert.deepEqual(plain, { outcome: 'blocked', reasons: ['marker:akamai-access-denied'] });
+  assert.deepEqual(plain, { outcome: 'blocked', reasons: ['marker:akamai-access-denied', 'marker:access-denied-title'] });
   assert.equal(classify(page(200, '<html><body><a href="https://errors.edgesuite.net/18.1">x</a></body></html>'), 512), 'blocked');
 
   const ghost = diagnose(page(403, '', { 'content-type': 'text/html', server: 'AkamaiGHost' }), 512);
@@ -602,4 +602,35 @@ test('probe reports a pool that is not configured', async () => {
     assert.equal(result.outcome, 'refused');
     assert.match(result.error, /mobile pool is not configured/);
   });
+});
+
+// Shortened copies of challenge pages seen in production (keys replaced).
+const AWS_WAF_CHALLENGE = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title></title>
+<script type="text/javascript">window.awsWafCookieDomainList = []; window.gokuProps = { "key":"TEST", "iv":"TEST", "context":"TEST" };</script>
+<script src="https://1c5c1ecf7303.7a63328c.eu-central-1.token.awswaf.com/1c5c1ecf7303/0ed9a099d7e9/1c0aef3ebb0c/challenge.js"></script></head>
+<body><noscript><h1>JavaScript is disabled</h1>In order to continue, we need to verify that you're not a robot. This requires JavaScript. Enable JavaScript and then reload the page.</noscript></body></html>`;
+const BOOKING_CHALLENGE = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title></title>
+<script src="https://www.booking.com/__challenge_TEST/d8c14d4960ca/a18a4859af9c/challenge.js"></script></head>
+<body><noscript><h1>JavaScript is disabled</h1>In order to continue, we need to verify that you're not a robot. This requires JavaScript.</noscript>${' '.repeat(6000)}</body></html>`;
+const GOOGLE_ENABLEJS = `<!DOCTYPE html><html lang="de"><head><title>Google Search</title></head><body><noscript><meta content="0;url=/httpservice/retry/enablejs?sei=TEST" http-equiv="refresh"><div>Klicke hier, wenn du nach einigen Sekunden nicht automatisch weitergeleitet wirst.</div></noscript>${'<div>x</div>'.repeat(2000)}</body></html>`;
+const MOBILE_DE_DENIED = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Zugriff verweigert / Access denied</title></head><body>${'<p>Leider wurde der Zugriff verweigert.</p>'.repeat(100)}</body></html>`;
+
+test('challenge pages that came back as 200 or 202 are blocked and not billed', () => {
+  const page = (status, body, headers = { 'content-type': 'text/html; charset=utf-8', server: 'CloudFront' }) => ({ status, headers, body: Buffer.from(body) });
+  const amazon = diagnose(page(202, AWS_WAF_CHALLENGE), 512);
+  assert.equal(amazon.outcome, 'blocked');
+  assert.ok(amazon.reasons.includes('marker:aws-waf') && amazon.reasons.includes('marker:captcha'), amazon.reasons.join());
+
+  // Booking's variant has no aws-waf marker; the robot text and the 202 still catch it.
+  assert.equal(classify(page(202, BOOKING_CHALLENGE), 512), 'blocked');
+  assert.equal(classify(page(202, BOOKING_CHALLENGE.replace("verify that you're not a robot", 'wait')), 512), 'blocked'); // 202 alone
+
+  assert.deepEqual(diagnose(page(200, GOOGLE_ENABLEJS, { 'content-type': 'text/html' }), 512), { outcome: 'blocked', reasons: ['marker:google-enablejs'] });
+  assert.deepEqual(diagnose(page(200, MOBILE_DE_DENIED, { 'content-type': 'text/html' }), 512), { outcome: 'blocked', reasons: ['marker:access-denied-title'] });
+
+  // Not challenges: a 202 from a JSON API, a large 202 page, and a real page that talks
+  // about denied access in its text.
+  assert.equal(classify(page(202, '{"queued":true}', { 'content-type': 'application/json' }), 512), 'ok');
+  assert.equal(classify(page(202, `<html><body>${'product '.repeat(25_000)}</body></html>`), 512), 'ok');
+  assert.equal(classify(page(200, `<html><head><title>Help: access denied errors</title></head><body>${'help '.repeat(200)}</body></html>`, { 'content-type': 'text/html' }), 512), 'ok');
 });
