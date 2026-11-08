@@ -3,6 +3,7 @@
 // Tries patchright (stealth fork) first, then vanilla playwright.
 
 import { FetchError } from "./fetcher.js";
+import { solveDataDome, detectDataDome } from "./captcha-solver.js";
 
 let browserModule = null;
 let checked = false;
@@ -81,6 +82,45 @@ function contextFor(country) {
   return COUNTRY_CONTEXT[country?.toLowerCase()] ?? DEFAULT_CONTEXT;
 }
 
+// Stealth patches injected before every page load to defeat common bot
+// detection vectors (navigator.webdriver, missing chrome object, etc.).
+const STEALTH_SCRIPT = `
+  Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+  window.chrome = { runtime: {}, loadTimes: function(){}, csi: function(){} };
+
+  const origQuery = window.navigator.permissions.query;
+  window.navigator.permissions.query = (p) =>
+    p.name === "notifications"
+      ? Promise.resolve({ state: Notification.permission })
+      : origQuery(p);
+
+  Object.defineProperty(navigator, "plugins", {
+    get: () => {
+      const a = [
+        { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer",
+          description: "Portable Document Format" },
+        { name: "Chrome PDF Viewer",
+          filename: "mhjfbmdgcfjbbpaeojofohoefgiehjai", description: "" },
+        { name: "Native Client", filename: "internal-nacl-plugin",
+          description: "" },
+      ];
+      a.refresh = () => {};
+      return a;
+    },
+  });
+
+  Object.defineProperty(navigator, "languages", {
+    get: () => ["en-US", "en"],
+  });
+
+  const _gp = WebGLRenderingContext.prototype.getParameter;
+  WebGLRenderingContext.prototype.getParameter = function(p) {
+    if (p === 37445) return "Intel Inc.";
+    if (p === 37446) return "Intel Iris OpenGL Engine";
+    return _gp.call(this, p);
+  };
+`;
+
 // Simulate human-like behavior: random mouse moves and a scroll.
 async function simulateHuman(page) {
   const vp = page.viewportSize() ?? { width: 1920, height: 1080 };
@@ -121,9 +161,14 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
       locale: ctx.locale,
       timezoneId: ctx.tz,
       deviceScaleFactor: Math.random() < 0.3 ? 2 : 1,
+      hasTouch: false,
+      isMobile: false,
+      colorScheme: "light",
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       extraHTTPHeaders: { "Accept-Language": ctx.lang },
     });
     const page = await context.newPage();
+    await page.addInitScript(STEALTH_SCRIPT);
 
     page.on("response", (resp) => {
       const cl = resp.headers()["content-length"];
@@ -174,9 +219,8 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
     await simulateHuman(page);
 
     // Wait for JS challenges (Cloudflare, DataDome, Akamai, etc.) to resolve.
-    // Strategy: if the initial page is small (<10 KB) and looks like a challenge
-    // interstitial, keep polling until the page grows, navigates, or time runs out.
     const settleDeadline = Date.now() + Math.min(20_000, timeoutMs - 5000);
+    let captchaSolveAttempted = false;
     while (Date.now() < settleDeadline) {
       await page.waitForTimeout(2000);
       const isChallenge = await page.evaluate(() => {
@@ -191,6 +235,18 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
         return Boolean(hasCfChallenge || hasDataDome || hasGenericChallenge);
       }).catch(() => false);
       if (!isChallenge) break;
+
+      // Try to solve DataDome CAPTCHAs if present and not already attempted.
+      if (!captchaSolveAttempted) {
+        captchaSolveAttempted = true;
+        const ddType = await detectDataDome(page).catch(() => "none");
+        if (ddType === "slider" || ddType === "ic" || ddType === "interactive-challenge") {
+          const result = await solveDataDome(page, {
+            timeoutMs: Math.min(15_000, settleDeadline - Date.now()),
+          }).catch(() => ({ solved: false }));
+          if (result.solved) break;
+        }
+      }
     }
 
     const finalUrl = page.url();

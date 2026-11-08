@@ -705,7 +705,7 @@ export function createUnlocker({
         const summary = {
           requestId,
           billedMicros: outcome.billable ? priceMicros : 0,
-          attempts: outcome.attempts.map(({ pool, outcome: result, status, error }) => ({ pool, result, status, error })),
+          attempts: outcome.attempts.map(({ pool, browser, referer, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(referer ? { referer: true } : {}), result, status, error })),
         };
         if (["ok", "small", "final", "retry"].includes(outcome.outcome)) {
           const page = outcome.result;
