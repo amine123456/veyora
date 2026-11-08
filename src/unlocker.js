@@ -28,18 +28,32 @@ const RETRYABLE_ERRORS = new Set(["PROXY", "TIMEOUT", "NETWORK", "TLS", "ENCODIN
 
 // Text found on anti-bot challenge and block pages. Only scanned on small HTML bodies:
 // real pages often embed the same vendors' scripts, but never at challenge-page size.
+// Each has a name so diagnostics (unlock-test) can say which one matched.
 const CHALLENGE_MARKERS = [
-  /<title>\s*just a moment\.\.\.\s*<\/title>/i,
-  /cf-chl-|cf_chl_opt|cf-browser-verification/i,
-  /attention required! \| cloudflare/i,
-  /incapsula incident id|request unsuccessful\. incapsula/i,
-  /px-captcha|perimeterx block/i,
-  /captcha-delivery\.com|geo\.captcha-delivery/i,
-  /<title>\s*access denied\s*<\/title>[\s\S]*reference #/i,
-  /\/_sec\/cp_challenge/i,
-  /please enable js and disable any ad blocker/i,
-  /verify you are human|are you a robot\?/i,
+  ["cloudflare-challenge-title", /<title>\s*just a moment\.\.\.\s*<\/title>/i],
+  ["cloudflare-challenge-script", /cf-chl-|cf_chl_opt|cf-browser-verification/i],
+  ["cloudflare-block", /attention required! \| cloudflare/i],
+  ["imperva", /incapsula incident id|request unsuccessful\. incapsula/i],
+  ["perimeterx", /px-captcha|perimeterx block/i],
+  ["datadome", /captcha-delivery\.com|geo\.captcha-delivery/i],
+  // Akamai's edge block page: <TITLE>Access Denied</TITLE> ... "Reference #18.xxxx" and a
+  // link to errors.edgesuite.net. Akamai writes both with HTML entities
+  // (Reference&#32;&#35;18&#46;..., errors&#46;edgesuite&#46;net), so markers are matched
+  // against the text with numeric entities decoded.
+  ["akamai-access-denied", /<title>\s*access denied\s*<\/title>[\s\S]*reference\s*#/i],
+  ["akamai-edgesuite", /errors\.edgesuite\.net/i],
+  ["akamai-challenge", /\/_sec\/cp_challenge/i],
+  ["datadome-adblock", /please enable js and disable any ad blocker/i],
+  ["captcha", /verify you are human|are you a robot\?/i],
 ];
+
+// Decodes numeric character references (&#46; &#x2E;) so entity-encoded block pages match.
+function decodeNumericEntities(text) {
+  return text.replace(/&#(x[0-9a-f]{1,6}|[0-9]{1,7});/gi, (entity, code) => {
+    const point = code[0] === "x" || code[0] === "X" ? Number.parseInt(code.slice(1), 16) : Number(code);
+    return point > 0 && point <= 0x10ffff ? String.fromCodePoint(point) : entity;
+  });
+}
 
 class PublicError extends Error {
   constructor(status, message, extra = {}) {
@@ -219,18 +233,38 @@ function isHtml(headers) {
 
 // "ok": the page; "small": an HTML page so small it may be a soft block; "blocked": an
 // anti-bot answer; "retry": a server or exit failure; "final": a client error from the
-// site that another IP will not change.
-export function classify(result, minBodyBytes) {
-  if (String(result.headers["cf-mitigated"] ?? "").toLowerCase() === "challenge") return "blocked";
-  if (BLOCK_STATUSES.has(result.status)) return "blocked";
-  if (result.status >= 500) return "retry";
-  if (result.status >= 400 && !BILLABLE_STATUSES.has(result.status)) return "final";
-  if (isHtml(result.headers) && result.body.length <= MARKER_SCAN_LIMIT) {
-    const text = result.body.toString("latin1");
-    if (CHALLENGE_MARKERS.some((marker) => marker.test(text))) return "blocked";
-    if (result.status === 200 && result.body.length < minBodyBytes) return "small";
+// site that another IP will not change. `reasons` names what decided it: the status, a
+// header, or the challenge markers that matched.
+export function diagnose(result, minBodyBytes) {
+  const reasons = [];
+  if (/akamaighost/i.test(String(result.headers.server ?? ""))) reasons.push("server:AkamaiGHost");
+  if (String(result.headers["cf-mitigated"] ?? "").toLowerCase() === "challenge") {
+    return { outcome: "blocked", reasons: [...reasons, "header:cf-mitigated"] };
   }
-  return "ok";
+  if (isHtml(result.headers) && result.body.length <= MARKER_SCAN_LIMIT) {
+    const text = decodeNumericEntities(result.body.toString("latin1"));
+    for (const [name, pattern] of CHALLENGE_MARKERS) if (pattern.test(text)) reasons.push("marker:" + name);
+  }
+  const status = "status:" + result.status;
+  if (BLOCK_STATUSES.has(result.status)) return { outcome: "blocked", reasons: [status, ...reasons] };
+  if (result.status >= 500) return { outcome: "retry", reasons: [status, ...reasons] };
+  if (result.status >= 400 && !BILLABLE_STATUSES.has(result.status)) return { outcome: "final", reasons: [status, ...reasons] };
+  if (reasons.some((reason) => reason.startsWith("marker:"))) return { outcome: "blocked", reasons };
+  if (isHtml(result.headers) && result.status === 200 && result.body.length < minBodyBytes) {
+    return { outcome: "small", reasons: [...reasons, "size:" + result.body.length] };
+  }
+  return { outcome: "ok", reasons };
+}
+
+export function classify(result, minBodyBytes) {
+  return diagnose(result, minBodyBytes).outcome;
+}
+
+// Akamai Bot Manager sets _abck on a visitor it is scoring; seeing it issued tells us a
+// site is behind Bot Manager even when the page itself came back.
+function issuesAbck(setCookie) {
+  const cookies = Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : [];
+  return cookies.some((cookie) => /^\s*_abck=/i.test(cookie));
 }
 
 function bodyEncoding(headers) {
@@ -261,6 +295,7 @@ export function createUnlocker({
   const authFailures = windowCounter(30);
   const sessions = expiringMap(MAX_TRACKED);
   const siteMemory = expiringMap(MAX_TRACKED);
+  const abckLogged = expiringMap(MAX_TRACKED); // sites whose _abck issue was logged recently
   const sessionTtlMs = (gateway.upstreamSessionTtlSeconds ?? 600) * 1000;
   const activeByAccount = new Map();
   let active = 0;
@@ -322,6 +357,14 @@ export function createUnlocker({
       }
       wireBytes += result.wireBytes ?? 0;
       exit.jar.store(url.hostname, result.headers["set-cookie"]);
+      if (issuesAbck(result.headers["set-cookie"])) {
+        result.abck = true;
+        const cookieSite = siteOf(url.hostname);
+        if (!abckLogged.get(cookieSite)) {
+          abckLogged.set(cookieSite, true, DOMAIN_MEMORY_MS);
+          log.info?.(`Unlocker: ${cookieSite} issued an _abck cookie (Akamai Bot Manager) on a ${exit.pool} exit, status ${result.status}`);
+        }
+      }
       const location = result.headers.location;
       if (!REDIRECTS.has(result.status) || !location || hop >= MAX_REDIRECTS) return { ...result, url, wireBytes };
       let next;

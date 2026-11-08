@@ -9,7 +9,7 @@ import { close, fakeUpstream, listen, publicLookup, targetCert, tlsTarget } from
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-unlocker-'));
 process.env.DATA_FILE = path.join(directory, 'state.json');
 const store = await import('../src/store.js');
-const { CookieJar, classify, createLedger, createUnlocker } = await import('../src/unlocker.js');
+const { CookieJar, classify, createLedger, createUnlocker, diagnose } = await import('../src/unlocker.js');
 const { createPaymentServer } = await import('../src/payments.js');
 
 test.after(() => rm(directory, { recursive: true, force: true }));
@@ -508,4 +508,53 @@ test('a slow reader does not pile up listeners on the response', async () => {
   } finally {
     process.off('warning', onWarning);
   }
+});
+
+// Akamai's edge block page as it is served: the reference and the edgesuite link are
+// written with HTML entities.
+const AKAMAI_DENIED = `<HTML><HEAD>
+<TITLE>Access Denied</TITLE>
+</HEAD><BODY>
+<H1>Access Denied</H1>
+
+You don't have permission to access "http&#58;&#47;&#47;www&#46;mobile&#46;de&#47;" on this server.<P>
+Reference&#32;&#35;18&#46;5c4b2e17&#46;1762551234&#46;3f0a9b1
+<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;5c4b2e17&#46;1762551234&#46;3f0a9b1</P>
+</BODY>
+</HTML>
+`;
+
+test('Akamai block pages are detected, entity-encoded or plain, with the markers named', () => {
+  const page = (status, body, headers = { 'content-type': 'text/html' }) => ({ status, headers, body: Buffer.from(body) });
+  // Served with 200 so only the markers can catch it.
+  const encoded = diagnose(page(200, AKAMAI_DENIED), 512);
+  assert.equal(encoded.outcome, 'blocked');
+  assert.ok(encoded.reasons.includes('marker:akamai-access-denied'), encoded.reasons.join());
+  assert.ok(encoded.reasons.includes('marker:akamai-edgesuite'));
+
+  const plain = diagnose(page(200, '<html><head><title>Access Denied</title></head><body>Reference #18.abc.123</body></html>'), 512);
+  assert.deepEqual(plain, { outcome: 'blocked', reasons: ['marker:akamai-access-denied'] });
+  assert.equal(classify(page(200, '<html><body><a href="https://errors.edgesuite.net/18.1">x</a></body></html>'), 512), 'blocked');
+
+  const ghost = diagnose(page(403, '', { 'content-type': 'text/html', server: 'AkamaiGHost' }), 512);
+  assert.deepEqual(ghost, { outcome: 'blocked', reasons: ['status:403', 'server:AkamaiGHost'] });
+
+  // A real page served through Akamai, mentioning "access denied" in its text, is fine.
+  const real = diagnose(page(200, `${PAGE}<p>Access denied? Reset your password.</p>`, { 'content-type': 'text/html', server: 'AkamaiGHost' }), 512);
+  assert.deepEqual(real, { outcome: 'ok', reasons: ['server:AkamaiGHost'] });
+});
+
+test('an issued _abck cookie is logged once per site', async () => {
+  const lines = [];
+  await harness((req, res) => {
+    res.writeHead(200, { 'content-type': 'text/html', 'set-cookie': ['_abck=ABC~-1~YAAQ; Path=/; Secure', 'bm_sz=1; Path=/'] });
+    res.end(PAGE);
+  }, { log: { info: (line) => lines.push(line), warn() {}, error() {} } }, async ({ call }) => {
+    const { key } = await customer();
+    assert.equal((await call({ url: 'https://shop.example/a' }, { key })).status, 200);
+    assert.equal((await call({ url: 'https://shop.example/b' }, { key })).status, 200);
+    const abck = lines.filter((line) => line.includes('_abck'));
+    assert.equal(abck.length, 1);
+    assert.match(abck[0], /shop\.example issued an _abck cookie \(Akamai Bot Manager\) on a residential exit, status 200/);
+  });
 });
