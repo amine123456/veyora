@@ -86,7 +86,8 @@ export function summarize(results) {
 }
 
 const kb = (bytes) => (bytes === undefined ? "" : `${(bytes / 1024).toFixed(1)} KB`);
-const dollars = (micros) => `$${(micros / 1_000_000).toFixed(5)}`;
+// Micro-dollar precision: a 12 KB page costs about $0.0000017.
+const dollars = (micros) => `$${(micros / 1_000_000).toFixed(7)}`;
 
 export function formatResult(result) {
   const detail = result.error ? `error ${result.error}` : `${result.status} ${result.protocol ?? ""}`.trim();
