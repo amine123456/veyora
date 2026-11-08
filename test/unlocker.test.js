@@ -558,3 +558,48 @@ test('an issued _abck cookie is logged once per site', async () => {
     assert.match(abck[0], /shop\.example issued an _abck cookie \(Akamai Bot Manager\) on a residential exit, status 200/);
   });
 });
+
+test('probe tests one rung on a fresh IP, bills nothing and records nothing', async () => {
+  await harness((req, res) => {
+    if (req.url === '/denied') {
+      res.writeHead(403, { 'content-type': 'text/html', server: 'AkamaiGHost' });
+      return res.end(AKAMAI_DENIED);
+    }
+    res.writeHead(200, { 'content-type': 'text/html', 'set-cookie': '_abck=x; Path=/' });
+    res.end(PAGE);
+  }, {}, async ({ upstream, unlocker }) => {
+    assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile']);
+    const ok = await unlocker.probe({ url: 'https://shop.example/', country: 'de', pool: 'residential' });
+    assert.equal(ok.outcome, 'ok');
+    assert.equal(ok.status, 200);
+    assert.equal(ok.bytes, Buffer.byteLength(PAGE));
+    assert.ok(ok.wireBytes > 0 && ok.costMicros > 0 && ok.ms >= 0);
+    assert.ok(ok.reasons.includes('cookie:_abck'));
+
+    const denied = await unlocker.probe({ url: 'https://shop.example/denied', country: 'de', pool: 'mobile' });
+    assert.equal(denied.outcome, 'blocked');
+    assert.deepEqual(denied.reasons.slice(0, 2), ['status:403', 'server:AkamaiGHost']);
+    assert.ok(denied.reasons.includes('marker:akamai-edgesuite'));
+
+    const logins = upstream.logins.map((entry) => loginParts(entry.login));
+    assert.deepEqual(logins.map((parts) => [parts[1], parts[2]]), [['res-user', 'de'], ['mob-user', 'de']]);
+    assert.notEqual(logins[0][3], logins[1][3]);
+
+    // The same SSRF and blocklist checks as a customer request.
+    assert.equal((await unlocker.probe({ url: 'https://private.example/' })).outcome, 'refused');
+    assert.equal((await unlocker.probe({ url: 'https://www.ticketmaster.com/' })).outcome, 'refused');
+    assert.equal((await unlocker.probe({ url: 'not a url' })).outcome, 'refused');
+
+    await unlocker.ledger.flush();
+    assert.deepEqual(unlocker.stats(), []); // nothing recorded
+  });
+});
+
+test('probe reports a pool that is not configured', async () => {
+  await harness((req, res) => res.end(PAGE), { mobile: false }, async ({ unlocker }) => {
+    assert.deepEqual(unlocker.rungs, ['residential']);
+    const result = await unlocker.probe({ url: 'https://shop.example/', pool: 'mobile' });
+    assert.equal(result.outcome, 'refused');
+    assert.match(result.error, /mobile pool is not configured/);
+  });
+});

@@ -453,6 +453,41 @@ export function createUnlocker({
     };
   }
 
+  // Diagnostics for `admin unlock-test`: one fetch on a fresh exit of the given pool,
+  // with the same checks, caps and timeouts as a customer request (redirects included),
+  // but nothing is billed, remembered or written to the ledger.
+  async function probe({ url: rawUrl, country = null, pool = "residential", username = "unlock-test" }) {
+    const refused = (error) => ({ pool, outcome: "refused", error, reasons: [], wireBytes: 0, costMicros: 0, ms: 0 });
+    if (!pools.includes(pool)) return refused(`The ${pool} pool is not configured`);
+    let url;
+    try {
+      url = await checkTarget(new URL(rawUrl));
+    } catch (error) {
+      return refused(error instanceof PublicError ? error.message : "Invalid URL");
+    }
+    const started = Date.now();
+    const exit = newExit(pool);
+    try {
+      const result = await fetchOnExit(exit, username, country, url, started + config.attemptTimeoutMs);
+      const { outcome, reasons } = diagnose(result, config.minBodyBytes);
+      return {
+        pool,
+        outcome,
+        status: result.status,
+        reasons: result.abck ? [...reasons, "cookie:_abck"] : reasons,
+        bytes: result.body.length,
+        wireBytes: result.wireBytes,
+        costMicros: (result.wireBytes * costPerGb[pool]) / GIB,
+        protocol: result.protocol,
+        finalUrl: result.url.href,
+        ms: Date.now() - started,
+      };
+    } catch (error) {
+      const wireBytes = error.wireBytes ?? 0;
+      return { pool, outcome: "error", error: error.code ?? "NETWORK", reasons: [], wireBytes, costMicros: (wireBytes * costPerGb[pool]) / GIB, ms: Date.now() - started };
+    }
+  }
+
   function parseInput(raw) {
     let input;
     try { input = JSON.parse(raw); } catch { throw new PublicError(400, "Body must be JSON"); }
@@ -636,6 +671,8 @@ export function createUnlocker({
     unlock,
     ledger,
     stop,
+    probe,
+    rungs: [...pools],
     stats: () => ledger.stats(),
     memory: () => ({ bookedBytes, budgetBytes: memoryBudget, active, inFlight }),
   };

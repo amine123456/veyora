@@ -127,3 +127,15 @@ UNLOCKER_PREMIUM_DOMAINS=mobile.de:3
 ```
 
 mobile.de then costs 3x the base price ($2.40 per 1,000 successful requests at the default $0.80).
+
+Measuring a site on the server (bills nothing, writes nothing, spends upstream bandwidth only):
+
+```bash
+cd /opt/proxora
+sudo -u proxora node --env-file=.env src/admin.js unlock-test https://www.mobile.de/ --country de --pool residential
+sudo -u proxora node --env-file=.env src/admin.js unlock-test https://www.mobile.de/ --country de --pool mobile
+# A list of URLs, success rate per rung at the end
+sudo -u proxora node --env-file=.env src/admin.js unlock-test --batch /tmp/urls.txt --country de
+# Sites issuing Akamai's _abck cookie
+journalctl -u proxora --since today --no-pager | grep _abck
+```

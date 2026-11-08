@@ -1,6 +1,10 @@
 import crypto from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
-import { adminConfig } from './config.js';
+import { adminConfig, gatewayConfig, pricingConfig, unlockerConfig } from './config.js';
+import { UNLOCK_TEST_USAGE, formatResult, formatSummary, parseUnlockTestArgs, parseUrlList, rungsFor, runUnlockTest } from './unlock-test.js';
 import { MICROS_PER_USD, createClient, credit, creditWallet, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
 
 const [, , command, ...args] = process.argv;
@@ -28,6 +32,7 @@ function usage() {
   console.log('  npm run admin -- credit <username|email> <gb>');
   console.log('  npm run admin -- credit-usd <username|email> <usd>');
   console.log('  npm run admin -- unlocker-stats');
+  console.log(`  npm run admin -- ${UNLOCK_TEST_USAGE}`);
   console.log('  npm run admin -- password <username|email>');
   console.log('  npm run admin -- enable|disable <username|email>');
   console.log('  npm run admin -- list');
@@ -60,7 +65,42 @@ async function offlineUsername(identifier) {
   return username;
 }
 
+async function unlockTest(options) {
+  if (options.fetcher === 'impersonate') {
+    throw new Error('The impersonate fetcher is not installed yet; use --fetcher node');
+  }
+  const { createUnlocker } = await import('./unlocker.js');
+  const gateway = gatewayConfig();
+  // The probe never records anything, but point the ledger away from production anyway.
+  const config = { ...unlockerConfig(), ledgerFile: path.join(os.tmpdir(), `unlock-test-${process.pid}.jsonl`) };
+  const unlocker = createUnlocker({ gateway, pricing: pricingConfig(), config, log: { info: (line) => console.error(line), warn: (line) => console.error(line), error: (line) => console.error(line) } });
+  const urls = options.batch ? parseUrlList(await readFile(options.batch, 'utf8')) : [options.url];
+  if (!urls.length) throw new Error('The batch file lists no URLs');
+  const rungs = rungsFor(unlocker.rungs, options.pool);
+  if (!rungs.length) throw new Error('No rungs to test');
+  if (!options.json) {
+    console.log(`Testing ${urls.length} URL(s) on ${rungs.length} rung(s): ${rungs.join(', ')}${options.country ? `, country ${options.country}` : ''}. Nothing is billed.`);
+  }
+  const report = await runUnlockTest(unlocker.probe, {
+    urls,
+    rungs,
+    country: options.country,
+    onResult: (result) => { if (!options.json) console.log(formatResult(result)); },
+  });
+  if (options.json) {
+    console.log(JSON.stringify(report, null, 2));
+  } else if (urls.length > 1 || rungs.length > 1) {
+    console.log('Per rung:');
+    for (const line of formatSummary(report.summary)) console.log(`  ${line}`);
+  }
+}
+
 async function main() {
+  if (command === 'unlock-test') {
+    await unlockTest(parseUnlockTestArgs(args));
+    return;
+  }
+
   if (command === 'create' && (args.length === 1 || args.length === 2)) {
     const initialBytes = args[1] === undefined ? 0 : gb(args[1], { allowZero: true });
     let created = await api('POST', '/clients', { username: args[0], bytes: initialBytes });

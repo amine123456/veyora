@@ -11,6 +11,8 @@ exposing its credentials, or the Web Unlocker API (`POST /v1/unlock`, API keys).
 - `npm start`: runs `src/server.js` with `.env` (copy `.env.example`).
 - `npm run admin -- list|create|credit|password|enable|disable ...`: account admin. Uses the
   loopback admin API when the server runs with `ADMIN_TOKEN`, else edits the store file.
+- `npm run admin -- unlock-test <url>|--batch <file> [--country xx] [--pool ...]`: fetches once
+  per unlocker rung and prints the classification; bills and records nothing (`src/unlock-test.js`).
 
 ## Layout
 
