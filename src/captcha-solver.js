@@ -1,29 +1,45 @@
-// CAPTCHA solver: detects and solves DataDome slider challenges inside
-// the browser, using in-browser canvas pixel analysis — zero Node deps.
+// CAPTCHA solver: detects and solves DataDome challenges inside
+// the Camoufox browser. Uses Vosk (offline speech-to-text) to solve
+// the audio digit challenge, and script interception to neuter
+// DataDome's devtools detection that blocks the widget from rendering.
 
-// Detect whether the current page (or an iframe) contains a solvable
-// DataDome CAPTCHA and return the type.
-// Returns: "slider" | "hard-block" | "none"
+import { execFile } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const AUDIO_SOLVER = join(__dirname, "audio-solver.py");
+
+// Intercept captcha-delivery.com scripts to remove devtools detection.
+// Must be called on the page BEFORE navigating.
+export async function installDevtoolsBypass(page) {
+  await page.route("**/*captcha-delivery.com/**/*.js*", async (route) => {
+    try {
+      const response = await route.fetch();
+      let body = await response.text();
+      if (/[Dd]ev[Tt]ools/.test(body)) {
+        body = body.replace(/DevTools/g, "XXXXXXXX");
+        body = body.replace(/devtools/gi, "xxxxxxxx");
+      }
+      await route.fulfill({ response, body });
+    } catch {
+      await route.continue().catch(() => {});
+    }
+  });
+}
+
 export async function detectDataDome(page) {
   for (const frame of page.frames()) {
     if (!frame.url().includes("captcha-delivery.com")) continue;
     const type = await frame.evaluate(() => {
       const attr = document.body?.getAttribute("data-dd-response-page");
       if (attr === "hard-block") return "hard-block";
-      const hasSlider = !!(
-        document.querySelector("#captcha-container canvas") ||
-        document.querySelector(".geetest_slider") ||
-        document.querySelector("[class*=slider]") ||
-        document.querySelector(".captcha__human__puzzle")
-      );
-      if (hasSlider) return "slider";
-      if (attr === "interactive-challenge" || attr === "ic") return "slider";
+      if (attr === "captcha" || attr === "interactive-challenge" || attr === "ic") return "captcha";
       if (attr) return attr;
       return "unknown";
     }).catch(() => "error");
     if (type !== "error") return type;
   }
-  // Check main page for dd object
   const hasDD = await page.evaluate(() => {
     const html = document.documentElement.outerHTML;
     if (html.length > 20000) return "none";
@@ -33,7 +49,6 @@ export async function detectDataDome(page) {
   return hasDD;
 }
 
-// Get the DataDome captcha iframe from the page.
 export function getCaptchaFrame(page) {
   for (const frame of page.frames()) {
     if (frame.url().includes("captcha-delivery.com")) return frame;
@@ -41,87 +56,131 @@ export function getCaptchaFrame(page) {
   return null;
 }
 
-// Solve a DataDome slider CAPTCHA by analysing the puzzle image in-browser.
-// The slider shows a background with a puzzle-piece-shaped gap; we find the
-// gap's X offset using edge detection on the canvas, then drag the slider
-// knob to that position with human-like mouse movement.
-export async function solveDataDomeSlider(page, { timeoutMs = 20000 } = {}) {
-  const frame = getCaptchaFrame(page);
-  if (!frame) return { solved: false, reason: "no-captcha-frame" };
+// Wait for the captcha widget to fully render (inputs or canvases present).
+async function waitForWidget(frame, timeoutMs = 20000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const ready = await frame.evaluate(() => {
+      const inputs = document.querySelectorAll("input.audio-captcha-inputs");
+      const canvases = document.querySelectorAll("canvas");
+      const slider = document.querySelector(".sliderContainer");
+      const audioBtn = document.querySelector("#captcha__audio__button");
+      return { inputs: inputs.length, canvases: canvases.length, slider: !!slider, audioBtn: !!audioBtn };
+    }).catch(() => null);
+    if (ready && (ready.inputs > 0 || (ready.canvases > 0 && ready.slider) || ready.audioBtn)) return ready;
+    await frame.page().waitForTimeout(1000);
+  }
+  return null;
+}
 
+// Solve the audio captcha: get audio URL, run Vosk, type digits, verify.
+async function solveAudioCaptcha(page, frame, { timeoutMs = 25000 } = {}) {
+  // Switch to audio mode if not already active
+  const switched = await frame.evaluate(() => {
+    const audioBtn = document.querySelector("#captcha__audio__button");
+    if (audioBtn && !audioBtn.classList.contains("toggled")) {
+      audioBtn.click();
+      return true;
+    }
+    return false;
+  }).catch(() => false);
+  if (switched) await page.waitForTimeout(500);
+
+  // Get audio URL
+  const audioUrl = await frame.evaluate(() => {
+    const audio = document.querySelector("audio.audio-captcha-track");
+    return audio?.src || null;
+  }).catch(() => null);
+  if (!audioUrl) return { solved: false, reason: "no-audio-url" };
+
+  // Run Vosk to transcribe the audio
+  const digits = await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("audio-solver timeout")), timeoutMs);
+    execFile("python3", [AUDIO_SOLVER, audioUrl], { timeout: timeoutMs }, (err, stdout) => {
+      clearTimeout(timer);
+      if (err) return reject(err);
+      try {
+        const result = JSON.parse(stdout.trim());
+        resolve(result.digits);
+      } catch { reject(new Error("bad solver output: " + stdout.substring(0, 100))); }
+    });
+  });
+
+  if (!digits || digits.length !== 6) {
+    return { solved: false, reason: "digit-extraction-failed", digits };
+  }
+
+  // Type digits into the 6 input fields
+  const inputCount = await frame.evaluate(() =>
+    document.querySelectorAll("input.audio-captcha-inputs").length
+  ).catch(() => 0);
+  if (inputCount < 6) return { solved: false, reason: "input-fields-not-found" };
+
+  for (let i = 0; i < 6; i++) {
+    await frame.evaluate((args) => {
+      const inputs = document.querySelectorAll("input.audio-captcha-inputs");
+      const input = inputs[args.i];
+      if (!input) return;
+      input.focus();
+      input.value = args.d;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }, { i, d: digits[i] });
+    await page.waitForTimeout(80 + Math.floor(Math.random() * 120));
+  }
+
+  // Click verify button
+  await frame.evaluate(() => {
+    const btn = document.querySelector(".audio-captcha-submit-button");
+    if (btn) btn.click();
+  }).catch(() => {});
+
+  // Wait for validation
+  await page.waitForTimeout(4000);
+
+  const afterType = await detectDataDome(page);
+  const solved = afterType === "none" || afterType === "bv";
+  return { solved, reason: solved ? "audio-solved" : "validation-failed", digits, afterType };
+}
+
+// Solve the puzzle slider captcha using canvas edge detection.
+async function solvePuzzleSlider(page, frame, { timeoutMs = 20000 } = {}) {
   const deadline = Date.now() + timeoutMs;
 
-  // Wait for the slider/puzzle to render.
-  let sliderReady = false;
+  // Ensure puzzle mode is active
+  await frame.evaluate(() => {
+    const btn = document.querySelector("#captcha__puzzle__button");
+    if (btn && !btn.classList.contains("toggled")) btn.click();
+  }).catch(() => {});
+  await page.waitForTimeout(500);
+
+  // Wait for canvases to have height (image loaded)
+  let canvasReady = false;
   while (Date.now() < deadline) {
-    sliderReady = await frame.evaluate(() => {
-      // DataDome slider puzzle: look for the puzzle image canvas or img
-      const canvas = document.querySelector("canvas");
-      const img = document.querySelector(".captcha__human__puzzle img, .geetest_canvas_bg img, [class*=puzzle] img");
-      const slider = document.querySelector(
-        ".geetest_slider_button, [class*=slider] button, " +
-        "[class*=slider] [role=slider], .captcha__human__slider__knob, " +
-        "[data-dd-captcha-slider-knob]"
-      );
-      return !!(canvas || img) && !!slider;
+    canvasReady = await frame.evaluate(() => {
+      const canvases = document.querySelectorAll("canvas");
+      return [...canvases].some(c => c.height > 0);
     }).catch(() => false);
-    if (sliderReady) break;
+    if (canvasReady) break;
     await page.waitForTimeout(1000);
   }
+  if (!canvasReady) return { solved: false, reason: "canvas-not-loaded" };
 
-  if (!sliderReady) {
-    // Might be a different challenge type — check what's visible
-    const detail = await frame.evaluate(() => {
-      const attr = document.body?.getAttribute("data-dd-response-page");
-      const text = document.body?.innerText?.substring(0, 200);
-      return { attr, text };
-    }).catch(() => ({}));
-    return { solved: false, reason: "slider-not-found", detail };
-  }
+  // Detect gap position via edge detection on the background canvas
+  const gapFraction = await frame.evaluate(() => {
+    const canvases = document.querySelectorAll("canvas");
+    const bg = canvases[0];
+    if (!bg || !bg.width || !bg.height) return null;
 
-  // Analyse the puzzle image inside the browser using canvas API.
-  // The gap in the background image is typically a darker/different region.
-  const gapOffset = await frame.evaluate(() => {
-    // Strategy: Render the puzzle background onto a canvas and scan for the
-    // gap. The gap is where pixel brightness drops sharply compared to the
-    // surrounding area (it's a cutout silhouette).
-
-    const bgImg = document.querySelector(
-      "canvas, .captcha__human__puzzle img, .geetest_canvas_bg img, [class*=puzzle] img"
-    );
-    if (!bgImg) return null;
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    let w, h;
-    if (bgImg.tagName === "CANVAS") {
-      w = bgImg.width;
-      h = bgImg.height;
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(bgImg, 0, 0);
-    } else {
-      w = bgImg.naturalWidth || bgImg.width;
-      h = bgImg.naturalHeight || bgImg.height;
-      if (!w || !h) return null;
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(bgImg, 0, 0, w, h);
-    }
-
+    const ctx = bg.getContext("2d");
+    const { width: w, height: h } = bg;
     const imageData = ctx.getImageData(0, 0, w, h);
     const data = imageData.data;
 
-    // Scan columns for vertical edge (the left edge of the gap).
-    // The gap is typically 40-80px wide and appears between 20% and 80% of width.
-    // We look for a column where many pixels have a big luminance difference
-    // compared to their left neighbour.
     const startX = Math.floor(w * 0.15);
     const endX = Math.floor(w * 0.85);
     const scanTop = Math.floor(h * 0.1);
     const scanBottom = Math.floor(h * 0.9);
-
     const edgeStrength = new Float32Array(w);
 
     for (let x = startX; x < endX; x++) {
@@ -136,120 +195,101 @@ export async function solveDataDomeSlider(page, { timeoutMs = 20000 } = {}) {
       edgeStrength[x] = total;
     }
 
-    // Find the column with the strongest edge (left edge of gap).
-    let maxEdge = 0;
-    let maxX = 0;
+    let maxEdge = 0, maxX = 0;
     for (let x = startX; x < endX; x++) {
-      if (edgeStrength[x] > maxEdge) {
-        maxEdge = edgeStrength[x];
-        maxX = x;
-      }
+      if (edgeStrength[x] > maxEdge) { maxEdge = edgeStrength[x]; maxX = x; }
     }
-
-    if (maxEdge === 0) return null;
-
-    // Return the gap's left X position as a fraction of the image width.
-    // The slider track maps [0, 1] to the full width.
-    return { gapX: maxX, imageWidth: w, imageHeight: h, fraction: maxX / w };
+    return maxEdge > 0 ? maxX / w : null;
   }).catch(() => null);
 
-  if (!gapOffset) return { solved: false, reason: "gap-detection-failed" };
+  if (gapFraction === null) return { solved: false, reason: "gap-detection-failed" };
 
-  // Find the slider knob and track dimensions.
-  const sliderInfo = await frame.evaluate(() => {
-    const knob = document.querySelector(
-      ".geetest_slider_button, [class*=slider] button, " +
-      "[class*=slider] [role=slider], .captcha__human__slider__knob, " +
-      "[data-dd-captcha-slider-knob]"
-    );
-    const track = knob?.closest("[class*=slider]") || knob?.parentElement;
+  // Find slider knob and track
+  const slider = await frame.evaluate(() => {
+    const knob = document.querySelector(".slider");
+    const track = document.querySelector(".sliderContainer");
     if (!knob || !track) return null;
-
-    const knobRect = knob.getBoundingClientRect();
-    const trackRect = track.getBoundingClientRect();
-    return {
-      knobX: knobRect.x + knobRect.width / 2,
-      knobY: knobRect.y + knobRect.height / 2,
-      trackLeft: trackRect.x,
-      trackWidth: trackRect.width,
-      trackRight: trackRect.x + trackRect.width,
-    };
+    const kr = knob.getBoundingClientRect();
+    const tr = track.getBoundingClientRect();
+    return { knobX: kr.x + kr.width / 2, knobY: kr.y + kr.height / 2, trackWidth: tr.width };
   }).catch(() => null);
 
-  if (!sliderInfo) return { solved: false, reason: "slider-element-not-found" };
+  if (!slider) return { solved: false, reason: "slider-not-found" };
 
-  // Calculate drag distance. The gap fraction maps to the track width.
-  const dragDistance = gapOffset.fraction * sliderInfo.trackWidth;
-  const targetX = sliderInfo.knobX + dragDistance;
-
-  // Perform human-like drag: accelerate, maintain, decelerate, with slight
-  // Y wobble and randomized timing.
+  const dragDistance = gapFraction * slider.trackWidth;
   const steps = 25 + Math.floor(Math.random() * 15);
-  const startX = sliderInfo.knobX;
-  const startY = sliderInfo.knobY;
 
-  // Move to knob, press down
-  await frame.page().mouse.move(startX, startY, { steps: 5 });
+  // Human-like drag
+  await frame.page().mouse.move(slider.knobX, slider.knobY, { steps: 5 });
   await frame.page().mouse.down();
-  await frame.page().waitForTimeout(100 + Math.floor(Math.random() * 100));
+  await page.waitForTimeout(100 + Math.floor(Math.random() * 100));
 
-  // Drag with easing curve (ease-out: fast start, slow end)
   for (let i = 1; i <= steps; i++) {
-    const progress = i / steps;
-    // Ease-out cubic
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const currentX = startX + dragDistance * eased;
-    // Slight Y wobble to look human
-    const wobbleY = startY + (Math.random() - 0.5) * 3;
-    await frame.page().mouse.move(currentX, wobbleY);
-    // Variable delay: faster in middle, slower at edges
-    const baseDelay = progress < 0.3 ? 8 : progress > 0.8 ? 20 : 12;
-    await frame.page().waitForTimeout(baseDelay + Math.floor(Math.random() * 10));
+    const eased = 1 - Math.pow(1 - i / steps, 3);
+    const x = slider.knobX + dragDistance * eased;
+    const wobbleY = slider.knobY + (Math.random() - 0.5) * 3;
+    await frame.page().mouse.move(x, wobbleY);
+    const delay = (i / steps) < 0.3 ? 8 : (i / steps) > 0.8 ? 20 : 12;
+    await page.waitForTimeout(delay + Math.floor(Math.random() * 10));
   }
 
-  // Small overshoot then correct (human imprecision)
   const overshoot = 2 + Math.floor(Math.random() * 4);
-  await frame.page().mouse.move(targetX + overshoot, startY + (Math.random() - 0.5) * 2);
-  await frame.page().waitForTimeout(50 + Math.floor(Math.random() * 80));
-  await frame.page().mouse.move(targetX, startY);
-  await frame.page().waitForTimeout(80 + Math.floor(Math.random() * 60));
-
-  // Release
+  await frame.page().mouse.move(slider.knobX + dragDistance + overshoot, slider.knobY);
+  await page.waitForTimeout(60);
+  await frame.page().mouse.move(slider.knobX + dragDistance, slider.knobY);
+  await page.waitForTimeout(80);
   await frame.page().mouse.up();
 
-  // Wait for validation — DataDome sends the answer server-side and
-  // either redirects or shows an error.
-  await frame.page().waitForTimeout(3000);
-
-  // Check if the challenge was solved (page should have navigated away
-  // from the captcha or the iframe should be gone).
+  await page.waitForTimeout(3000);
   const afterType = await detectDataDome(page);
   const solved = afterType === "none" || afterType === "bv";
-
-  return { solved, reason: solved ? "slider-solved" : "validation-failed", gapOffset, afterType };
+  return { solved, reason: solved ? "slider-solved" : "validation-failed", gapFraction, afterType };
 }
 
-// Attempt to solve whatever DataDome challenge is present.
-// Returns { solved: boolean, type: string, reason: string }
+// Main solver entry point.
 export async function solveDataDome(page, options = {}) {
   const type = await detectDataDome(page);
 
-  switch (type) {
-    case "none":
-      return { solved: true, type: "none", reason: "no-captcha" };
-    case "hard-block":
-      return { solved: false, type: "hard-block", reason: "hard-block-no-challenge" };
-    case "slider":
-    case "interactive-challenge":
-    case "ic":
-      return { solved: false, type, ...(await solveDataDomeSlider(page, options)) };
-    case "bv":
-      // Browser verification — the dd JS may solve itself; wait and re-check.
+  if (type === "none") return { solved: true, type: "none", reason: "no-captcha" };
+  if (type === "hard-block") return { solved: false, type: "hard-block", reason: "hard-block-no-challenge" };
+
+  // JS challenges ("bv", "fe", "device-check") may auto-resolve with Camoufox.
+  const jsChallenge = type === "bv" || type === "fe" || type === "device-check" || type === "unknown";
+  if (jsChallenge) {
+    for (let wait = 0; wait < 3; wait++) {
       await page.waitForTimeout(5000);
       const recheck = await detectDataDome(page);
-      if (recheck === "none") return { solved: true, type: "bv", reason: "js-challenge-auto-solved" };
-      return { solved: false, type: "bv", reason: "js-challenge-persisted" };
-    default:
-      return { solved: false, type, reason: "unknown-challenge-type" };
+      if (recheck === "none") return { solved: true, type, reason: "js-challenge-auto-solved" };
+      if (recheck === "captcha") break;
+      if (recheck === "hard-block") return { solved: false, type: recheck, reason: "escalated-to-hard-block" };
+    }
   }
+
+  // Solvable captcha: "captcha", "slider", "unknown" with a frame present.
+  const frame = getCaptchaFrame(page);
+  if (!frame) return { solved: false, type, reason: "no-captcha-frame" };
+
+  const widget = await waitForWidget(frame, options.timeoutMs || 15000);
+  if (!widget) return { solved: false, type, reason: "widget-not-loaded" };
+
+  // Audio is more reliable than slider — try it first if available.
+  const hasAudioBtn = widget.audioBtn || await frame.evaluate(() =>
+    !!document.querySelector("#captcha__audio__button")
+  ).catch(() => false);
+
+  if (hasAudioBtn) {
+    const result = await solveAudioCaptcha(page, frame, options);
+    if (result.solved) return { type, ...result };
+    // Audio failed — try slider as fallback.
+    if (widget.slider && widget.canvases > 0) {
+      return { type, ...await solvePuzzleSlider(page, frame, options) };
+    }
+    return { type, ...result };
+  }
+
+  if (widget.slider && widget.canvases > 0) {
+    return { type, ...await solvePuzzleSlider(page, frame, options) };
+  }
+
+  return { solved: false, type, reason: "no-solvable-challenge" };
 }

@@ -5,7 +5,7 @@
 // fingerprint-based bot detection.  It generates realistic fingerprints,
 // spoofs OS-level fonts, WebGL, and navigator properties automatically.
 
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { once } from "node:events";
 
 let _playwright = null;
@@ -18,68 +18,95 @@ async function getPlaywright() {
 }
 
 const LAUNCH_SCRIPT = `
-import sys, json
+import sys, json, warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
 from camoufox.server import launch_server
 
 conf = json.loads(sys.argv[1])
 proxy = conf.get("proxy")
 headless = conf.get("headless", False)
-geoip = conf.get("geoip")
 
-launch_server(
+kwargs = dict(
     proxy=proxy or None,
-    headless=headless if headless == "virtual" else bool(headless),
-    geoip=geoip or None,
     humanize=True,
     block_webrtc=True,
     i_know_what_im_doing=True,
+    headless=bool(headless),
 )
+
+launch_server(**kwargs)
 `;
+
+const XVFB_DISPLAY = `:${90 + (process.pid % 10)}`;
+
+function ensureXvfb() {
+  try {
+    execSync(`xdpyinfo -display ${XVFB_DISPLAY} >/dev/null 2>&1`, { timeout: 2000 });
+    return XVFB_DISPLAY;
+  } catch {}
+  try { execSync(`pkill -f "Xvfb ${XVFB_DISPLAY}" 2>/dev/null`, { stdio: "ignore" }); } catch {}
+  const xvfb = spawn("Xvfb", [XVFB_DISPLAY, "-screen", "0", "1920x1080x24", "-ac"], {
+    stdio: "ignore", detached: true,
+  });
+  xvfb.unref();
+  xvfb.on("error", () => {});
+  execSync("sleep 1");
+  return XVFB_DISPLAY;
+}
 
 // Start a Camoufox server process and return { wsEndpoint, kill() }.
 // proxy: { server: "http://host:port", username, password }
-export async function launchCamoufox({ proxy, headless = "virtual", geoip, timeoutMs = 30_000 } = {}) {
+export async function launchCamoufox({ proxy, headless = "virtual", timeoutMs = 30_000 } = {}) {
   const conf = {};
   if (proxy) {
     conf.proxy = { server: proxy.server };
     if (proxy.username) conf.proxy.username = proxy.username;
     if (proxy.password) conf.proxy.password = proxy.password;
   }
-  conf.headless = headless;
-  if (geoip) conf.geoip = geoip;
+  const useXvfb = headless === "virtual";
+  conf.headless = useXvfb ? false : Boolean(headless);
 
-  const child = spawn("python3", ["-c", LAUNCH_SCRIPT, JSON.stringify(conf)], {
+  const env = { ...process.env };
+  if (useXvfb) {
+    const display = ensureXvfb();
+    env.DISPLAY = display;
+  }
+
+  const child = spawn("python3", ["-u", "-c", LAUNCH_SCRIPT, JSON.stringify(conf)], {
     stdio: ["ignore", "pipe", "pipe"],
-    env: { ...process.env, DISPLAY: headless === "virtual" ? undefined : process.env.DISPLAY },
+    env,
   });
 
   let wsEndpoint = null;
-  let stderr = "";
+  let output = "";
+
+  const parseWs = (text) => {
+    output += text;
+    const m = /ws:\/\/[^\s\x1b]+/.exec(text);
+    if (m && !wsEndpoint) {
+      wsEndpoint = m[0];
+      return true;
+    }
+    return false;
+  };
 
   const endpointPromise = new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       child.kill("SIGKILL");
-      reject(new Error(`Camoufox launch timed out after ${timeoutMs}ms. stderr: ${stderr}`));
+      reject(new Error(`Camoufox launch timed out after ${timeoutMs}ms. output: ${output}`));
     }, timeoutMs);
 
     child.stdout.on("data", (chunk) => {
-      const text = chunk.toString();
-      // The server prints: "Websocket endpoint: ws://..."
-      const m = /ws:\/\/[^\s\x1b]+/.exec(text);
-      if (m && !wsEndpoint) {
-        wsEndpoint = m[0];
-        clearTimeout(timer);
-        resolve(wsEndpoint);
-      }
+      if (parseWs(chunk.toString())) { clearTimeout(timer); resolve(wsEndpoint); }
     });
-
     child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
+      if (parseWs(chunk.toString())) { clearTimeout(timer); resolve(wsEndpoint); }
     });
 
     child.on("exit", (code) => {
       clearTimeout(timer);
-      if (!wsEndpoint) reject(new Error(`Camoufox exited with code ${code}. stderr: ${stderr}`));
+      if (!wsEndpoint) reject(new Error(`Camoufox exited with code ${code}. output: ${output}`));
     });
   });
 

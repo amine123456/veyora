@@ -70,13 +70,16 @@ async function unlockTest(options) {
     throw new Error('The impersonate fetcher is not installed yet; use --fetcher node');
   }
   const { createUnlocker } = await import('./unlocker.js');
-  const { browserAvailable, fetchWithBrowser } = await import('./browser-fetcher.js');
+  const { browserAvailable, fetchWithBrowser, fetchWithCamoufox } = await import('./browser-fetcher.js');
+  const { camoufoxAvailable } = await import('./camoufox-launcher.js');
   const gateway = gatewayConfig();
   const config = { ...unlockerConfig(), ledgerFile: path.join(os.tmpdir(), `unlock-test-${process.pid}.jsonl`) };
   const hasBrowser = await browserAvailable();
+  const hasCamoufox = await camoufoxAvailable();
   const unlocker = createUnlocker({
     gateway, pricing: pricingConfig(), config,
     browserFetchImpl: hasBrowser ? fetchWithBrowser : null,
+    camoufoxFetchImpl: hasCamoufox ? fetchWithCamoufox : null,
     log: { info: (line) => console.error(line), warn: (line) => console.error(line), error: (line) => console.error(line) },
   });
   const urls = options.batch ? parseUrlList(await readFile(options.batch, 'utf8')) : [options.url];

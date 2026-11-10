@@ -3,7 +3,7 @@
 // to execute, and returns the rendered HTML.
 
 import { FetchError } from "./fetcher.js";
-import { solveDataDome, detectDataDome } from "./captcha-solver.js";
+import { solveDataDome, detectDataDome, installDevtoolsBypass } from "./captcha-solver.js";
 import { launchCamoufox, camoufoxAvailable } from "./camoufox-launcher.js";
 
 let browserModule = null;
@@ -317,12 +317,13 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
     server = await launchCamoufox({
       proxy: proxyConfig,
       headless: "virtual",
-      geoip: country || true,
+      geoip: null,
       timeoutMs: Math.min(30_000, timeoutMs / 2),
     });
 
-    // Connect with playwright (Camoufox exposes a standard Playwright WS endpoint)
-    const pw = browserModule || await import("playwright").catch(() => import("patchright"));
+    // Camoufox WS server uses the Python playwright's protocol version.
+    // We must connect with a matching Node.js playwright version, not patchright.
+    const pw = await import("playwright");
     browser = await pw.firefox.connect(server.wsEndpoint, { timeout: 15_000 });
 
     const viewport = randomViewport();
@@ -331,6 +332,7 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
       acceptDownloads: false,
     });
     const page = await context.newPage();
+    await installDevtoolsBypass(page);
 
     page.on("response", (resp) => {
       const cl = resp.headers()["content-length"];
@@ -374,10 +376,24 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
     await simulateHuman(page);
 
     // Wait for challenges with longer patience — Camoufox gets solvable CAPTCHAs.
+    // Check for DataDome iframe first (it appears regardless of page size).
     const settleDeadline = Date.now() + Math.min(30_000, timeoutMs - 5000);
     let captchaSolveAttempted = false;
     while (Date.now() < settleDeadline) {
       await page.waitForTimeout(2000);
+
+      const ddType = await detectDataDome(page).catch(() => "none");
+      if (ddType !== "none" && ddType !== "error") {
+        if (!captchaSolveAttempted) {
+          captchaSolveAttempted = true;
+          const result = await solveDataDome(page, {
+            timeoutMs: Math.min(25_000, settleDeadline - Date.now()),
+          }).catch(() => ({ solved: false }));
+          if (result.solved) break;
+        }
+        continue;
+      }
+
       const isChallenge = await page.evaluate(() => {
         const html = document.documentElement.outerHTML;
         if (html.length > 10000) return false;
@@ -385,22 +401,10 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
         const cf = document.getElementById("challenge-running") || document.getElementById("cf-challenge-running");
         const title = document.title.toLowerCase();
         const hasCfChallenge = cf || title.includes("just a moment") || title.includes("checking");
-        const hasDataDome = /\bdd\s*=\s*\{/.test(html) && /['"]rt['"]\s*:\s*['"]c['"]/.test(html);
         const hasGenericChallenge = meta || /captcha|challenge|verify|blocked/i.test(html);
-        return Boolean(hasCfChallenge || hasDataDome || hasGenericChallenge);
+        return Boolean(hasCfChallenge || hasGenericChallenge);
       }).catch(() => false);
       if (!isChallenge) break;
-
-      if (!captchaSolveAttempted) {
-        captchaSolveAttempted = true;
-        const ddType = await detectDataDome(page).catch(() => "none");
-        if (ddType === "slider" || ddType === "ic" || ddType === "interactive-challenge") {
-          const result = await solveDataDome(page, {
-            timeoutMs: Math.min(15_000, settleDeadline - Date.now()),
-          }).catch(() => ({ solved: false }));
-          if (result.solved) break;
-        }
-      }
     }
 
     const finalUrl = page.url();
