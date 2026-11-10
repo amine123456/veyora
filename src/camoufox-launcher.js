@@ -7,6 +7,11 @@
 
 import { spawn, execSync } from "node:child_process";
 import { once } from "node:events";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DD_BYPASS_EXT = join(__dirname, "dd-bypass-ext");
 
 let _playwright = null;
 
@@ -26,6 +31,7 @@ from camoufox.server import launch_server
 conf = json.loads(sys.argv[1])
 proxy = conf.get("proxy")
 headless = conf.get("headless", False)
+addons = conf.get("addons")
 
 kwargs = dict(
     proxy=proxy or None,
@@ -34,6 +40,8 @@ kwargs = dict(
     i_know_what_im_doing=True,
     headless=bool(headless),
 )
+if addons:
+    kwargs["addons"] = addons
 
 launch_server(**kwargs)
 `;
@@ -57,7 +65,7 @@ function ensureXvfb() {
 
 // Start a Camoufox server process and return { wsEndpoint, kill() }.
 // proxy: { server: "http://host:port", username, password }
-export async function launchCamoufox({ proxy, headless = "virtual", timeoutMs = 30_000 } = {}) {
+export async function launchCamoufox({ proxy, headless = "virtual", addons, timeoutMs = 30_000 } = {}) {
   const conf = {};
   if (proxy) {
     conf.proxy = { server: proxy.server };
@@ -66,6 +74,7 @@ export async function launchCamoufox({ proxy, headless = "virtual", timeoutMs = 
   }
   const useXvfb = headless === "virtual";
   conf.headless = useXvfb ? false : Boolean(headless);
+  if (addons) conf.addons = addons;
 
   const env = { ...process.env };
   if (useXvfb) {

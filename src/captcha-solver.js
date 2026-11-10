@@ -1,7 +1,7 @@
 // CAPTCHA solver: detects and solves DataDome challenges inside
 // the Camoufox browser. Uses Vosk (offline speech-to-text) to solve
-// the audio digit challenge, and script interception to neuter
-// DataDome's devtools detection that blocks the widget from rendering.
+// the audio digit challenge. Devtools detection is neutralized by the
+// dd-bypass-ext Firefox extension loaded into Camoufox at launch time.
 
 import { execFile } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -9,24 +9,6 @@ import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const AUDIO_SOLVER = join(__dirname, "audio-solver.py");
-
-// Intercept captcha-delivery.com scripts to remove devtools detection.
-// Must be called on the page BEFORE navigating.
-export async function installDevtoolsBypass(page) {
-  await page.route("**/*captcha-delivery.com/**/*.js*", async (route) => {
-    try {
-      const response = await route.fetch();
-      let body = await response.text();
-      if (/[Dd]ev[Tt]ools/.test(body)) {
-        body = body.replace(/DevTools/g, "XXXXXXXX");
-        body = body.replace(/devtools/gi, "xxxxxxxx");
-      }
-      await route.fulfill({ response, body });
-    } catch {
-      await route.continue().catch(() => {});
-    }
-  });
-}
 
 export async function detectDataDome(page) {
   for (const frame of page.frames()) {

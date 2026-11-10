@@ -2,9 +2,14 @@
 // (stealth Firefox) through the upstream proxy, navigates, waits for JS
 // to execute, and returns the rendered HTML.
 
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { FetchError } from "./fetcher.js";
-import { solveDataDome, detectDataDome, installDevtoolsBypass } from "./captcha-solver.js";
+import { solveDataDome, detectDataDome } from "./captcha-solver.js";
 import { launchCamoufox, camoufoxAvailable } from "./camoufox-launcher.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DD_BYPASS_EXT = join(__dirname, "dd-bypass-ext");
 
 let browserModule = null;
 let checked = false;
@@ -317,7 +322,7 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
     server = await launchCamoufox({
       proxy: proxyConfig,
       headless: "virtual",
-      geoip: null,
+      addons: [DD_BYPASS_EXT],
       timeoutMs: Math.min(30_000, timeoutMs / 2),
     });
 
@@ -332,7 +337,6 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
       acceptDownloads: false,
     });
     const page = await context.newPage();
-    await installDevtoolsBypass(page);
 
     page.on("response", (resp) => {
       const cl = resp.headers()["content-length"];

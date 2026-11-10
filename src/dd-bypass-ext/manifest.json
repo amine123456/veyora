@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "DD Bypass",
+  "version": "1.0",
+  "description": "Neutralizes devtools detection in captcha scripts",
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.captcha-delivery.com/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
