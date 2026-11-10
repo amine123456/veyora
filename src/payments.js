@@ -34,6 +34,7 @@ const publicFiles = new Map([
   ['/signup', { file: 'signup.html', type: html, session: 'guest' }],
   ['/account', { file: 'account.html', type: html, session: 'required' }],
   ['/auth.css', { file: 'auth.css', type: 'text/css; charset=utf-8' }],
+  ['/dashboard.css', { file: 'dashboard.css', type: 'text/css; charset=utf-8' }],
   ['/auth.js', { file: 'auth.js', type: 'text/javascript; charset=utf-8' }],
   ['/trust.css', { file: 'trust.css', type: 'text/css; charset=utf-8' }],
   ['/support.js', { file: 'support.js', type: 'text/javascript; charset=utf-8' }],

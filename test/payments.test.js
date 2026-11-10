@@ -196,6 +196,12 @@ test('landing page serves only allowlisted assets with browser security headers'
     assert.equal(script.status, 200);
     assert.match(script.headers['content-type'], /^text\/javascript/);
 
+    // The dashboard design system is its own allowlisted stylesheet.
+    const dashboardStyles = await request(port, { method: 'GET', path: '/dashboard.css' });
+    assert.equal(dashboardStyles.status, 200);
+    assert.match(dashboardStyles.headers['content-type'], /^text\/css/);
+    assert.match(dashboardStyles.body, /VEYORA DASHBOARD DESIGN SYSTEM/);
+
     const traversal = await request(port, { method: 'GET', path: '/../src/config.js' });
     assert.equal(traversal.status, 404);
     assert.doesNotMatch(traversal.body, /PACKAGES/);

@@ -24,6 +24,39 @@ async function post(path, body) {
 }
 
 /* ================= login + signup forms ================= */
+// Show / hide password
+document.querySelectorAll('[data-toggle-password]').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const input = toggle.parentElement.querySelector('input');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    toggle.setAttribute('aria-pressed', String(show));
+    toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  });
+});
+
+// Stat carousel on the auth panel: rotates every few seconds, pauses on hover/focus, and honours reduced motion.
+const slides = [...document.querySelectorAll('[data-slides] .slide')];
+const dots = [...document.querySelectorAll('[data-dot]')];
+if (slides.length > 1) {
+  let current = 0, timer = 0;
+  const show = index => {
+    current = (index + slides.length) % slides.length;
+    slides.forEach((slide, i) => slide.classList.toggle('is-on', i === current));
+    dots.forEach((dot, i) => { if (i === current) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current'); });
+  };
+  const stop = () => { clearInterval(timer); timer = 0; };
+  const start = () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    stop(); timer = setInterval(() => show(current + 1), 5000);
+  };
+  dots.forEach((dot, i) => dot.addEventListener('click', () => { show(i); start(); }));
+  const stage = document.querySelector('.stage');
+  stage.addEventListener('mouseenter', stop); stage.addEventListener('mouseleave', start);
+  stage.addEventListener('focusin', stop); stage.addEventListener('focusout', start);
+  start();
+}
+
 const form = document.querySelector('[data-auth]');
 if (form) {
   const mode = form.dataset.auth;
@@ -60,7 +93,18 @@ if (form) {
 const dash = document.querySelector('[data-dashboard]');
 if (dash) {
   const $ = selector => dash.querySelector(selector);
-  const set = (name, value) => { $(`[data-field="${name}"]`).textContent = value; };
+  const set = (name, value) => { const el = $(`[data-field="${name}"]`); if (el) el.textContent = value; };
+  // Buttons carry an icon plus a .lbl span; only the label text changes so the icon survives.
+  const lbl = (button, text) => { (button.querySelector('.lbl') || button).textContent = text; };
+  const icon = id => {
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'ic'); svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS(ns, 'use');
+    use.setAttribute('href', `#i-${id}`);
+    svg.append(use);
+    return svg;
+  };
   const values = {};
   let me = null;
 
@@ -83,13 +127,15 @@ if (dash) {
       if (!data) return;
       me = data;
       set('email', me.email);
+      set('initial', (me.email || 'V').trim().charAt(0));
       set('wallet', usd(me.balanceMicros ?? 0));
       if (me.prices) {
         const { residentialPerGbMicros: res, mobilePerGbMicros: mob, unlockerPerRequestMicros: unl } = me.prices;
-        const parts = [`Residential ${usd(res)}/GB`];
-        if (me.mobile) parts.push(`mobile ${usd(mob)}/GB`);
-        if (me.unlocker) parts.push(`Web Unlocker ${usd(unl * 1000)} per 1,000 requests`);
-        set('prices', `${parts.join(', ')}.`);
+        set('price-res', `${usd(res)}/GB`);
+        set('price-mob', `${usd(mob)}/GB`);
+        set('price-unl', `${usd(unl * 1000)} per 1,000`);
+        $('[data-chip-mobile]').hidden = !me.mobile;
+        $('[data-chip-unlocker]').hidden = !me.unlocker;
         set('mobile-price', `${usd(mob)}/GB`);
         set('unlocker-price', `${usd(unl * 1000)} per 1,000 successful requests.`);
       }
@@ -106,6 +152,7 @@ if (dash) {
       $('[data-mobile-option]').hidden = !me.mobile;
       if (me.unlocker) {
         $('[data-unlocker]').hidden = false;
+        dash.querySelectorAll('[data-unlocker-nav]').forEach(link => { link.hidden = false; });
         values['unlock-curl'] = `curl -X POST ${location.origin}/v1/unlock \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url": "https://example.com/"}'`;
         set('unlock-curl', values['unlock-curl']);
         loadKeys();
@@ -135,12 +182,14 @@ if (dash) {
   fetch('/packages')
     .then(response => response.json())
     .then(list => {
+      packs.replaceChildren();
+      packs.removeAttribute('aria-busy');
       list.forEach(topup => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'pack';
+        button.className = topup.bonusPercent ? 'pack pack--bonus' : 'pack';
         button.dataset.pack = topup.id;
-        button.innerHTML = '<b></b><span></span>';
+        button.innerHTML = '<i class="pack__ic"><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg></i><b></b><span></span>';
         button.querySelector('b').textContent = `$${(topup.cents / 100).toFixed(0)}`;
         button.querySelector('span').textContent = topup.bonusPercent
           ? `+${topup.bonusPercent}% · ${usd(topup.creditMicros)}`
@@ -148,7 +197,7 @@ if (dash) {
         packs.append(button);
       });
     })
-    .catch(() => { buyError.textContent = 'Could not load the top-ups. Refresh the page.'; buyError.hidden = false; });
+    .catch(() => { packs.replaceChildren(); packs.removeAttribute('aria-busy'); buyError.textContent = 'Could not load the top-ups. Refresh the page.'; buyError.hidden = false; });
 
   packs.addEventListener('click', async event => {
     const button = event.target.closest('[data-pack]');
@@ -183,13 +232,13 @@ if (dash) {
     keys.forEach(key => {
       const row = document.createElement('div');
       const dt = document.createElement('dt');
-      dt.textContent = key.name || 'Unnamed key';
+      dt.append(icon('key'), key.name || 'Unnamed key');
       const dd = document.createElement('dd');
       const code = document.createElement('code');
       code.textContent = `${key.prefix}…`;
       const revoke = document.createElement('button');
       revoke.type = 'button';
-      revoke.className = 'copy';
+      revoke.className = 'btn btn--danger btn--sm';
       revoke.dataset.revoke = key.id;
       revoke.textContent = 'Revoke';
       dd.append(code, ' ', revoke);
@@ -246,11 +295,12 @@ if (dash) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      button.textContent = 'Copied';
+      lbl(button, 'Copied');
+      button.classList.add('is-done');
     } catch {
-      button.textContent = 'Select and copy';
+      lbl(button, 'Select and copy');
     }
-    setTimeout(() => { button.textContent = 'Copy'; }, 1600);
+    setTimeout(() => { lbl(button, 'Copy'); button.classList.remove('is-done'); }, 1600);
   });
 
   // Regenerate: first click asks to confirm, second click replaces the password.
@@ -261,14 +311,14 @@ if (dash) {
     errorBox.hidden = true;
     if (!armed) {
       armed = true;
-      regenerate.textContent = 'Click again to replace your password';
-      disarmTimer = setTimeout(() => { armed = false; regenerate.textContent = 'Generate new password'; }, 5000);
+      lbl(regenerate, 'Click again to replace your password');
+      disarmTimer = setTimeout(() => { armed = false; lbl(regenerate, 'Generate new password'); }, 5000);
       return;
     }
     clearTimeout(disarmTimer);
     armed = false;
     regenerate.disabled = true;
-    regenerate.textContent = 'Generating…';
+    lbl(regenerate, 'Generating…');
     try {
       const { ok, data } = await post('/api/proxy-password', {});
       if (!ok) throw new Error(data.error || 'Could not generate a password. Try again.');
@@ -284,9 +334,27 @@ if (dash) {
       errorBox.hidden = false;
     } finally {
       regenerate.disabled = false;
-      regenerate.textContent = 'Generate new password';
+      lbl(regenerate, 'Generate new password');
     }
   });
+  // Sidebar: highlight the section being read.
+  const links = [...dash.querySelectorAll('.snav__a[href^="#"]')];
+  const sections = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  const mark = id => links.forEach(a => {
+    const on = a.getAttribute('href') === `#${id}`;
+    a.classList.toggle('is-active', on);
+    if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+  });
+  if ('IntersectionObserver' in window && sections.length) {
+    const visible = new Map();
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => visible.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0));
+      const top = [...visible].filter(([, r]) => r > 0).sort((a, b) => sections.findIndex(x => x.id === a[0]) - sections.findIndex(x => x.id === b[0]))[0];
+      if (top) mark(top[0]);
+    }, { rootMargin: '-15% 0px -55% 0px', threshold: [0, .1, .5] });
+    sections.forEach(sec => spy.observe(sec));
+  }
+
 }
 
 const logout = document.querySelector('[data-logout]');

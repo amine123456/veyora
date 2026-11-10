@@ -5,35 +5,84 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Create an account | Veyora</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#04222A">
+<meta name="theme-color" content="#F6F5F1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="auth.css">
 <script src="auth.js" defer></script>
 </head>
-<body>
-<main class="auth">
-  <a class="brand" href="/"><span class="brand__mark" aria-hidden="true">V</span>Veyora</a>
-  <section class="card" aria-labelledby="auth-title">
-    <h1 id="auth-title">Create your account</h1>
-    <p class="card__sub">Residential proxies from $2 per GB. You only pay for the traffic you buy.</p>
-    <form class="form" data-auth="signup" novalidate>
-      <label class="field">
-        <span>Email</span>
-        <input type="email" name="email" autocomplete="email" required maxlength="254">
-      </label>
-      <label class="field">
-        <span>Password</span>
-        <input type="password" name="password" autocomplete="new-password" required minlength="10" maxlength="256" aria-describedby="password-hint">
-        <small id="password-hint">At least 10 characters.</small>
-      </label>
-      <p class="form__error" role="alert" hidden></p>
-      <button class="btn" type="submit">Create account</button>
-    </form>
-    <p class="card__switch">Already have an account? <a href="/login">Log in</a></p>
-    <p class="card__switch">By creating an account, you agree to the <a href="/terms">Terms</a> and <a href="/acceptable-use">Acceptable Use Policy</a>. See our <a href="/privacy">Privacy Policy</a>.</p>
-  </section>
-</main>
+<body class="authpage">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-logo" viewBox="0 0 28 28"><rect width="28" height="28" rx="8" fill="#FFDD1F"/><path d="M7.5 8h3.4l3.1 9.1L17.100 8h3.400l-4.800 12h-3.400z" fill="#161615"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24" fill="none"><path d="M2 8C2 8 6.47715 3 12 3C17.5228 3 22 8 22 8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 7C7.08671 7 3.43133 11.7818 2 14C3.43133 16.2182 7.08671 21 12 21C16.9133 21 20.5687 16.2182 22 14C20.5687 11.7818 16.9133 7 12 7Z" stroke="currentColor" stroke-width="1.5"/><path d="M15 14C15 12.3431 13.6569 11 12 11C10.3431 11 9 12.3431 9 14C9 15.6569 10.3431 17 12 17C13.6569 17 15 15.6569 15 14Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+<symbol id="i-eyeoff" viewBox="0 0 24 24" fill="none"><path d="M22 8C22 8 18 14 12 14C6 14 2 8 2 8" stroke="currentColor" stroke-width="1.5"/><path d="M15 13.5L16.5 16" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M20 11L22 13" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 13L4 11" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 13.5L7.5 16" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol></defs></svg>
+
+<div class="page">
+  <a class="brand" href="/" aria-label="Veyora home"><svg class="brand__mark" aria-hidden="true"><use href="#i-logo"/></svg><span>veyora</span></a>
+
+  <main class="card">
+    <section class="card__form" aria-labelledby="auth-title">
+      <div class="formwrap">
+        <header class="head">
+          <h1 id="auth-title">Create your account</h1>
+          <p>Residential proxies from $2 per GB. You only pay for the traffic you buy.</p>
+        </header>
+
+        <form class="form" data-auth="signup" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" autocomplete="email" required maxlength="254" placeholder="Enter your email">
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="pw">
+              <input id="password" type="password" name="password" autocomplete="new-password" required minlength="10" maxlength="256" aria-describedby="password-hint" placeholder="Create a password">
+              <button class="pw__toggle" type="button" data-toggle-password aria-label="Show password" aria-pressed="false">
+                <svg class="pw__on" aria-hidden="true"><use href="#i-eye"/></svg>
+                <svg class="pw__off" aria-hidden="true"><use href="#i-eyeoff"/></svg>
+              </button>
+            </div>
+            <small id="password-hint">At least 10 characters.</small>
+          </div>
+
+          <p class="form__error" role="alert" hidden></p>
+          <button class="btn" type="submit">Create account</button>
+        </form>
+
+        <p class="switch">Already have an account? <a href="/login">Log in</a></p>
+      </div>
+    </section>
+
+    <aside class="stage" aria-label="About Veyora">
+      <div class="slides" data-slides>
+        <figure class="slide is-on">
+          <p class="slide__n">5M</p>
+          <p class="slide__t">residential IPs across 195 countries.</p>
+          <p class="slide__s">Real home ISPs. Not datacenter ranges.</p>
+        </figure>
+        <figure class="slide">
+          <p class="slide__n">API</p>
+          <p class="slide__t">Send a URL. Get the page back.</p>
+          <p class="slide__s">The Web Unlocker charges you only when the page comes back.</p>
+        </figure>
+        <figure class="slide">
+          <p class="slide__n">USDT</p>
+          <p class="slide__t">prepaid, with no contract.</p>
+          <p class="slide__s">Top up from $10. One balance pays for everything.</p>
+        </figure>
+      </div>
+      <div class="dots" role="group" aria-label="Choose a slide">
+        <button type="button" data-dot aria-label="Show slide 1" aria-current="true"></button>
+        <button type="button" data-dot aria-label="Show slide 2"></button>
+        <button type="button" data-dot aria-label="Show slide 3"></button>
+      </div>
+      <p class="stage__cap">Residential and mobile proxies plus a Web Unlocker API for teams that scrape. <a href="/">Explore Veyora</a> to see it in action.</p>
+    </aside>
+  </main>
+
+  <p class="foot">By creating an account, you agree to our <a href="/terms">Terms of Service</a>, <a href="/acceptable-use">Acceptable Use Policy</a> and <a href="/privacy">Privacy Policy</a>.</p>
+</div>
 </body>
 </html>

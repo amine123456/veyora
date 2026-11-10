@@ -54,6 +54,17 @@
       <button class="nav__toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="sheet" aria-label="Open menu"><i></i><i></i></button>
     </div>
   </div>
+  <nav class="navpill" id="navPill" aria-label="Primary" inert>
+    <a class="brand" href="#top" aria-label="Veyora, back to top"><svg class="brand__mark" aria-hidden="true"><use href="#i-logo"/></svg><span>veyora</span></a>
+    <ul class="navpill__links">
+      <li><a href="#products">Products</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#compare">Network</a></li>
+      <li><a href="#how">Docs</a></li>
+    </ul>
+    <a class="navpill__login" href="/login">Log in</a>
+    <a class="btn btn--ink btn--sm" href="#pricing">Get proxies</a>
+  </nav>
   <div class="sheet" id="sheet" hidden>
     <ul>
       <li><a href="#products">Products</a></li>
@@ -85,13 +96,13 @@
 
   <div class="hero__copy">
     <p class="chip"><span class="dot"></span>5 million residential IPs · 195 countries</p>
-    <h1 class="h1" id="hero-title" data-split>Proxies that look like <span class="y"><em class="serif">real people</em>, at any scale.</span></h1>
+    <h1 class="h1" id="hero-title" data-split>Proxies that look like <br class="br-d"><span class="y"><em class="serif">real people</em>, at any scale.</span></h1>
     <p class="sub">5 million residential IPs across 195 countries, sticky or a fresh IP every request. HTTP, HTTPS and SOCKS5. Prepaid in USDT.</p>
     <div class="cta-row">
       <a class="btn btn--yellow btn--lg" href="#pricing">Get proxies</a>
       <a class="btn btn--ghost-dark btn--lg" href="#pricing">View pricing</a>
     </div>
-    <p class="note mono">Or start with a $10 USDT top-up.</p>
+    <p class="hero__pill">Or start with a $10 USDT top-up.</p>
   </div>
 
   <div class="dash-wrap" role="img" aria-label="Example dashboard preview: a Gate sidebar with locations, a requests list, and a detail panel for GET /checkout returning 200 OK in 412ms over SOCKS5 with a sticky 10-minute session.">
@@ -225,6 +236,124 @@
         </ul>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ ALSO INCLUDED (circuit section) ============ -->
+<section class="panel al" id="also" aria-labelledby="al-title">
+  <div class="al__in">
+
+    <!-- A: heading + 2x2 bento -->
+    <div class="al__blk al__a">
+      <div class="cir" data-circuit="a" aria-hidden="true"></div>
+      <header class="al__head">
+        <p class="al__label">Also included</p>
+        <h2 class="al__h" id="al-title" data-split>Works with <span class="c-y">your tools</span><br>and with <span class="c-b">your team</span></h2>
+      </header>
+
+      <div class="al__grid">
+        <article class="al__cell">
+          <h3>Works in<br><span class="c-y">the client you already use</span></h3>
+          <p class="al__p">Point cURL, Python, Node, Playwright or any HTTP, HTTPS or SOCKS5 client at the gateway. Sticky sessions last 10 minutes.</p>
+          <div class="mock" aria-label="Example proxy settings">
+            <p class="mock__h"><b>Proxy settings</b><span>Example</span></p>
+            <dl class="mock__rows">
+              <div><dt>Host</dt><dd class="mono">gate.veyora.io:8080</dd></div>
+              <div><dt>Username</dt><dd class="mono">user-country-fr <small>France</small></dd></div>
+              <div><dt>Protocol</dt><dd class="mono">SOCKS5 <small>or HTTP, HTTPS</small></dd></div>
+            </dl>
+            <p class="sel sel--y"><i class="ok"><svg><use href="#i-check"/></svg></i>Connected. Request returned 200 OK.</p>
+            <p class="mock__chips"><span>Also works in</span><em>cURL</em><em>Python</em><em>Node</em><em>Playwright</em></p>
+          </div>
+        </article>
+
+        <article class="al__cell">
+          <h3>Countries and sessions<br><span class="c-b">in your control</span></h3>
+          <p class="al__p">Add a country flag to your username, or leave it off to use the whole 195-country pool. Name a session to keep the same exit.</p>
+          <div class="mock" aria-label="Example session timeline">
+            <p class="mock__h"><b>Session timeline</b><span class="pill-b"><i class="dot"></i>Sticky · 10 min</span></p>
+            <div class="tl">
+              <p><time>0:00</time><span></span></p>
+              <p><time>5:00</time><span class="sel sel--b tl__ev"><b>user-session-cart</b><small>Lyon, FR · same IP kept</small></span></p>
+              <p><time>10:00</time><span></span></p>
+            </div>
+            <p class="mock__person"><svg class="flag"><use href="#f-fr"/></svg><span><b>Lyon, FR</b><small>Exit reused while the session lasts</small></span><em>Sticky</em></p>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- B: statement with scroll-linked word reveal -->
+    <div class="al__blk al__b">
+      <div class="cir" data-circuit="b" aria-hidden="true"></div>
+      <figure class="al__quote">
+        <blockquote data-quote><mark>Real home IPs, not datacenter ranges.</mark> Every residential address comes from a real ISP, across 195 countries, with sticky or rotating sessions.</blockquote>
+        <figcaption class="mono">Veyora · residential network</figcaption>
+      </figure>
+    </div>
+
+    <!-- D: second bento row -->
+    <div class="al__blk al__d">
+      <div class="cir" data-circuit="d" aria-hidden="true"></div>
+      <div class="al__grid">
+        <article class="al__cell">
+          <h3>Give your team<br><span class="c-p">the right access</span></h3>
+          <p class="al__p">Pro includes API access, sub-users and unlimited IP whitelisting, set up from the dashboard or the API.</p>
+          <div class="mock" aria-label="Example sub-users list">
+            <p class="mock__h"><b>Sub-users</b><span class="pill-p">+ Add</span></p>
+            <ul class="mock__list">
+              <li><i class="av">OW</i><span><b>Owner</b><small>Main account</small></span><em>All access</em></li>
+              <li><i class="av">S1</i><span><b>sub-user</b><small>Created from the dashboard</small></span><em>IP whitelisted</em></li>
+              <li class="sel sel--p"><i class="av">S2</i><span><b>New sub-user</b><small>Created through the API</small></span><em class="spin">Waiting</em></li>
+            </ul>
+            <p class="mock__foot">API access and sub-users are included on Pro.</p>
+          </div>
+        </article>
+
+        <article class="al__cell">
+          <h3>Automate it<br><span class="c-y">from code</span></h3>
+          <p class="al__p">Send a URL to the Web Unlocker API and get the page back. You are charged only when the page comes back.</p>
+          <div class="mock" aria-label="Example Web Unlocker request log">
+            <p class="mock__h"><b>Web Unlocker</b><span class="mono">POST /v1/unlock</span><span class="act"><i class="dot"></i>Example</span></p>
+            <ul class="log mono">
+              <li class="is-on"><span>unlock</span><b>200</b><small>412 ms</small><time>10:42:07</time></li>
+              <li><span>unlock</span><b>200</b><small>386 ms</small><time>10:42:01</time></li>
+              <li><span>unlock</span><b>200</b><small>441 ms</small><time>10:39:44</time></li>
+            </ul>
+            <p class="sel sel--y code mono">curl -X POST https://YOUR_HOST/v1/unlock<br>&nbsp;&nbsp;-d '{"url": "https://example.com/"}'</p>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- C: one balance -->
+    <div class="al__blk al__c">
+      <div class="cir" data-circuit="c" aria-hidden="true"></div>
+      <header class="al__sec">
+        <h3 data-split>One balance <span class="c-b">pays for everything</span></h3>
+        <p>Residential and mobile traffic by the GB, Web Unlocker by the request. Top up in USDT on BNB Smart Chain.</p>
+      </header>
+      <div class="al__cards">
+        <div class="mock mock--c" aria-label="Example prepaid balance">
+          <p class="mock__h"><b>Prepaid balance</b><span>Example</span></p>
+          <p class="bar" aria-hidden="true"><i></i></p>
+          <ul class="mock__list mock__list--plain">
+            <li><i class="ic"><svg><use href="#i-globe"/></svg></i><span><b>Residential traffic</b><small>Billed by the GB</small></span></li>
+            <li><i class="ic"><svg><use href="#i-spark"/></svg></i><span><b>Mobile traffic</b><small>Billed by the GB</small></span></li>
+            <li><i class="ic"><svg><use href="#i-code"/></svg></i><span><b>Web Unlocker</b><small>Billed by the request</small></span></li>
+          </ul>
+        </div>
+        <div class="mock mock--c" aria-label="Top-ups">
+          <p class="mock__h"><b>Top-ups</b><span class="pill-b">From /packages</span></p>
+          <ul class="mock__list mock__list--checks">
+            <li><i class="ck"><svg><use href="#i-check"/></svg></i><span><b>USDT on BNB Smart Chain (BEP-20)</b><small>Prepaid, from $10</small></span></li>
+            <li><i class="ck"><svg><use href="#i-check"/></svg></i><span><b>$100 · $500</b><small>+5% credit · +10% credit</small></span></li>
+            <li><i class="ck"><svg><use href="#i-check"/></svg></i><span><b>No contract</b><small>Cryptocurrency payments are final</small></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
