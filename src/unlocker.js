@@ -294,6 +294,7 @@ export function createUnlocker({
   lookup = dns.lookup,
   fetchImpl = fetchThroughProxy,
   browserFetchImpl = null,
+  camoufoxFetchImpl = null,
   tlsOptions = {},
   authenticate = authenticateApiKey,
   log = console,
@@ -315,18 +316,24 @@ export function createUnlocker({
 
   const httpPools = gateway.upstreamMobile ? ["residential", "residential", "mobile"] : ["residential"];
   const browserOk = Boolean(browserFetchImpl) && config.browserEnabled !== false;
-  // Browser escalation ladder: plain browser → browser with Google referer chain.
-  // Each rung gets a fresh proxy session (new IP) for maximum coverage.
-  // The "ref-" prefix triggers the Google referer chain for harder sites.
+  const camoufoxOk = Boolean(camoufoxFetchImpl) && config.browserEnabled !== false;
+  // Escalation ladder: HTTP → Chromium browser → Camoufox (stealth Firefox).
+  // Camoufox defeats fingerprint-based detection (DataDome, etc.) that blocks Chromium.
   const browserPools = browserOk
     ? gateway.upstreamMobile
       ? ["browser-residential", "browser-mobile", "ref-browser-residential", "ref-browser-mobile"]
       : ["browser-residential", "ref-browser-residential"]
     : [];
-  const pools = [...httpPools, ...browserPools];
-  const isBrowserRung = (rung) => rung.includes("browser-");
+  const camoufoxPools = camoufoxOk
+    ? gateway.upstreamMobile
+      ? ["camoufox-residential", "camoufox-mobile"]
+      : ["camoufox-residential"]
+    : [];
+  const pools = [...httpPools, ...browserPools, ...camoufoxPools];
+  const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-");
+  const isCamoufoxRung = (rung) => rung.startsWith("camoufox-");
   const isRefererRung = (rung) => rung.startsWith("ref-");
-  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "");
+  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "");
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
   const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
   let browserActive = 0;
@@ -407,7 +414,14 @@ export function createUnlocker({
   }
 
   // Browser-based fetch: the browser handles redirects and cookies internally.
-  async function browserFetchOnExit(exit, username, country, startUrl, deadline, { useReferer = false } = {}) {
+  async function browserFetchOnExit(exit, username, country, startUrl, deadline, { useReferer = false, useCamoufox = false } = {}) {
+    const impl = useCamoufox ? camoufoxFetchImpl : browserFetchImpl;
+    if (!impl) {
+      const error = new Error(useCamoufox ? "Camoufox not available" : "Browser fetcher not available");
+      error.code = "NETWORK";
+      error.wireBytes = 0;
+      throw error;
+    }
     const remaining = Math.min(config.browserTimeoutMs ?? 45_000, deadline - Date.now());
     if (remaining < 2000) {
       const error = new Error("Out of time for browser attempt");
@@ -424,7 +438,7 @@ export function createUnlocker({
     browserActive += 1;
     try {
       const endpoint = upstreamEndpoint(gateway, exit.pool);
-      const result = await browserFetchImpl({
+      const result = await impl({
         url: startUrl,
         proxy: {
           host: endpoint.host,
@@ -480,12 +494,12 @@ export function createUnlocker({
       const attemptStarted = Date.now();
       try {
         const result = isBrowserRung(rung)
-          ? await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung) })
+          ? await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung) })
           : await fetchOnExit(exit, username, country, url, deadline);
         wireByPool[exit.pool] += result.wireBytes;
         const outcome = classify(result, config.minBodyBytes);
         if (outcome === "blocked") result.body = Buffer.alloc(0);
-        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), referer: isRefererRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
+        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), camoufox: isCamoufoxRung(rung) || undefined, referer: isRefererRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
         if (bestOutcome === null || rank[outcome] >= rank[bestOutcome]) {
           best = result;
           bestOutcome = outcome;
@@ -528,11 +542,13 @@ export function createUnlocker({
   // with the same checks, caps and timeouts as a customer request (redirects included),
   // but nothing is billed, remembered or written to the ledger.
   async function probe({ url: rawUrl, country = null, pool = "residential", username = "unlock-test" }) {
-    const browser = pool.includes("browser-");
+    const browser = pool.includes("browser-") || pool.startsWith("camoufox-");
+    const useCamoufox = pool.startsWith("camoufox-");
     const useReferer = pool.startsWith("ref-");
     const actualPool = poolOf(pool);
     const refused = (error) => ({ pool, outcome: "refused", error, reasons: [], wireBytes: 0, costMicros: 0, ms: 0 });
-    if (browser && !browserFetchImpl) return refused("Browser fetcher is not available (install patchright or playwright)");
+    if (useCamoufox && !camoufoxFetchImpl) return refused("Camoufox is not available (install camoufox Python package)");
+    if (browser && !useCamoufox && !browserFetchImpl) return refused("Browser fetcher is not available (install patchright or playwright)");
     if (!pools.includes(pool) && !httpPools.includes(actualPool)) return refused(`The ${pool} pool is not configured`);
     let url;
     try {
@@ -545,7 +561,7 @@ export function createUnlocker({
     const timeout = browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
     try {
       const result = browser
-        ? await browserFetchOnExit(exit, username, country, url, started + timeout, { useReferer })
+        ? await browserFetchOnExit(exit, username, country, url, started + timeout, { useReferer, useCamoufox })
         : await fetchOnExit(exit, username, country, url, started + timeout);
       const { outcome, reasons } = diagnose(result, config.minBodyBytes);
       return {
@@ -705,7 +721,7 @@ export function createUnlocker({
         const summary = {
           requestId,
           billedMicros: outcome.billable ? priceMicros : 0,
-          attempts: outcome.attempts.map(({ pool, browser, referer, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(referer ? { referer: true } : {}), result, status, error })),
+          attempts: outcome.attempts.map(({ pool, browser, camoufox, referer, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(camoufox ? { camoufox: true } : {}), ...(referer ? { referer: true } : {}), result, status, error })),
         };
         if (["ok", "small", "final", "retry"].includes(outcome.outcome)) {
           const page = outcome.result;
