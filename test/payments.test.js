@@ -182,7 +182,7 @@ test('landing page serves only allowlisted assets with browser security headers'
     assert.equal(page.status, 200);
     assert.match(page.headers['content-type'], /^text\/html/);
     assert.match(page.headers['content-security-policy'], /default-src 'none'/);
-    assert.match(page.headers['content-security-policy'], /script-src 'self';/);
+    assert.match(page.headers['content-security-policy'], /script-src 'self'/);
     assert.equal(page.headers['x-frame-options'], 'DENY');
     assert.match(page.body, /<title>Veyora \|/);
     assert.match(page.body, /<script src="app\.js" defer><\/script>/);
