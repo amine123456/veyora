@@ -135,27 +135,27 @@ test('a finished USDT payment credits the wallet exactly once', async () => {
     // Unsigned or forged notices are refused and credit nothing.
     const forged = await request(port, { path: '/nowpayments/ipn', raw: JSON.stringify(paidBody), headers: { 'x-nowpayments-sig': signIpn(paidBody, 'attacker-secret') } });
     assert.equal(forged.status, 401);
-    assert.equal((await store.getClient(username)).balanceMicros, 0);
+    assert.equal((await store.getClient(username)).balanceMicros, 1_000_000);
 
     // Partial payment: acknowledged, not credited.
     const partial = await ipn(port, { ...paidBody, payment_id: 9000, payment_status: 'partially_paid', actually_paid: 4 });
     assert.deepEqual(partial.json, { received: true, credited: false });
-    assert.equal((await store.getClient(username)).balanceMicros, 0);
+    assert.equal((await store.getClient(username)).balanceMicros, 1_000_000);
 
     // Signed but for a different amount: not credited.
     const wrongAmount = await ipn(port, { ...paidBody, payment_id: 8999, price_amount: 2 });
     assert.deepEqual(wrongAmount.json, { received: true, credited: false });
-    assert.equal((await store.getClient(username)).balanceMicros, 0);
+    assert.equal((await store.getClient(username)).balanceMicros, 1_000_000);
 
     // The real one credits $10 to the wallet.
     const paid = await ipn(port, paidBody);
     assert.deepEqual(paid.json, { received: true, credited: true });
-    assert.equal((await store.getClient(username)).balanceMicros, 10_000_000);
+    assert.equal((await store.getClient(username)).balanceMicros, 11_000_000);
 
     // Replays and a second payment on the same invoice do not credit again.
     assert.equal((await ipn(port, paidBody)).json.credited, false);
     assert.equal((await ipn(port, { ...paidBody, payment_id: 9002 })).json.credited, false);
-    assert.equal((await store.getClient(username)).balanceMicros, 10_000_000);
+    assert.equal((await store.getClient(username)).balanceMicros, 11_000_000);
   });
 });
 
@@ -187,7 +187,7 @@ test('top-ups are listed with their bonus, and a bonus top-up credits the extra'
       price_amount: 100, price_currency: 'usd', pay_currency: 'usdttrc20',
     });
     assert.equal(paid.json.credited, true);
-    assert.equal((await store.getClient(username)).balanceMicros, 105_000_000);
+    assert.equal((await store.getClient(username)).balanceMicros, 106_000_000);
     assert.equal((await store.getClient(username)).quotaBytes, 0);
   });
 });

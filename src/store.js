@@ -693,6 +693,7 @@ export async function createAccount(email, password) {
       ...proxyRecord,
       quotaBytes: 0,
       usedBytes: 0,
+      balanceMicros: 1_000_000,
       enabled: true,
       createdAt: new Date().toISOString(),
       email: normalized,

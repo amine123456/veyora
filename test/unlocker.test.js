@@ -39,7 +39,8 @@ let accounts = 0;
 async function customer(usd = 1) {
   accounts += 1;
   const account = await store.createAccount(`unlock-${accounts}@example.com`, 'long enough password');
-  if (usd > 0) await store.creditWallet(account.username, Math.round(usd * 1_000_000));
+  if (usd === 0) await store.reserveFunds(account.username, 1_000_000);
+  else if (usd > 0) await store.creditWallet(account.username, Math.round(usd * 1_000_000));
   const { key } = await store.createApiKey(account.username, 'test');
   return { username: account.username, key };
 }
@@ -134,14 +135,14 @@ test('a successful unlock charges once, hides cookies, and reuses the warm exit'
     assert.equal(first.json.headers['set-cookie'], undefined);
     assert.equal(first.json.billedMicros, 800);
     assert.deepEqual(first.json.attempts, [{ pool: 'residential', result: 'ok', status: 200 }]);
-    assert.equal(await balance(username), 1_000_000 - 800);
+    assert.equal(await balance(username), 2_000_000 - 800);
 
     const second = await call({ url: 'https://shop.example/item?id=2' }, { key });
     assert.equal(second.status, 200);
     assert.deepEqual(cookies, ['', 'clearance=ok']);
     assert.equal(upstream.logins[0].login, upstream.logins[1].login); // same exit IP
     assert.ok(loginParts(upstream.logins[0].login));
-    assert.equal(await balance(username), 1_000_000 - 1_600);
+    assert.equal(await balance(username), 2_000_000 - 1_600);
 
     await unlocker.ledger.flush();
     const [stats] = unlocker.stats();
@@ -175,7 +176,7 @@ test('blocked attempts escalate to a new IP, then mobile, and the site remembers
     assert.deepEqual(logins.map((parts) => parts[1]), ['res-user', 'res-user', 'mob-user']);
     assert.ok(logins.every((parts) => parts[2] === 'de'));
     assert.equal(new Set(logins.map((parts) => parts[3])).size, 3); // a new IP each time
-    assert.equal(await balance(username), 1_000_000 - 800); // charged once
+    assert.equal(await balance(username), 2_000_000 - 800); // charged once
 
     // The next request for this site starts on mobile, even for another customer.
     const other = await customer();
@@ -197,7 +198,7 @@ test('when every attempt is blocked nothing is charged and the ledger shows it',
     assert.equal(result.json.attempts.length, 4);
     assert.ok(result.json.attempts.every((attempt) => attempt.pool === 'residential' && attempt.result === 'blocked'));
     assert.equal(upstream.logins.length, 4);
-    assert.equal(await balance(username), 1_000_000);
+    assert.equal(await balance(username), 2_000_000);
 
     await unlocker.ledger.flush();
     const [stats] = unlocker.stats();
@@ -293,7 +294,7 @@ test('404s are billed, other client errors are returned unbilled, premium sites 
     assert.equal(image.json.encoding, 'base64');
     assert.equal(Buffer.from(image.json.body, 'base64')[1], 0x50);
     assert.equal(image.json.billedMicros, 1_600); // other.example has a 2x premium
-    assert.equal(await balance(username), 1_000_000 - 800 - 800 - 1_600);
+    assert.equal(await balance(username), 2_000_000 - 800 - 800 - 1_600);
   });
 });
 
@@ -419,7 +420,7 @@ test('the memory budget turns away requests it cannot hold', async () => {
     waiting();
     assert.equal((await first).status, 200);
     assert.equal(unlocker.memory().bookedBytes, 0);
-    assert.equal(await balance(username), 1_000_000 - 800); // the turned-away one cost nothing
+    assert.equal(await balance(username), 2_000_000 - 800); // the turned-away one cost nothing
   });
 });
 
@@ -467,7 +468,7 @@ test('shutdown refuses new requests, waits for the one in flight, then snapshots
     assert.equal(await stopping, 'drained');
     assert.equal(unlocker.memory().inFlight, 0);
     assert.equal((await slow).status, 200);
-    assert.equal(await balance(username), 1_000_000 - 800); // the hold settled before stop resolved
+    assert.equal(await balance(username), 2_000_000 - 800); // the hold settled before stop resolved
     assert.equal(unlocker.stats()[0].requests, 1);
   });
 });

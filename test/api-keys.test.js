@@ -143,7 +143,7 @@ test('the dashboard issues, lists and revokes keys for the signed-in account onl
     assert.equal((await request(port, { path: '/api/keys/revoke', method: 'GET', headers: { cookie } })).status, 405);
 
     const me = await request(port, { path: '/api/me', method: 'GET', headers: { cookie } });
-    assert.equal(me.json.balanceMicros, 0);
+    assert.equal(me.json.balanceMicros, 1_000_000);
     assert.deepEqual([me.json.prices, me.json.mobile, me.json.unlocker], [null, false, false]); // nothing configured here
   });
 });
