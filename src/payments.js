@@ -44,6 +44,9 @@ const publicFiles = new Map([
   ['/terms', { file: 'terms.html', type: html }],
   ['/acceptable-use', { file: 'acceptable-use.html', type: html }],
   ['/refund-policy', { file: 'refund-policy.html', type: html }],
+  ['/favicon.svg', { file: 'favicon.svg', type: 'image/svg+xml' }],
+  ['/favicon.ico', { file: 'favicon.svg', type: 'image/svg+xml' }],
+  ['/docs', { file: 'docs.html', type: html }],
 ]);
 
 async function staticFile(response, asset, headOnly = false) {
