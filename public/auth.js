@@ -90,6 +90,38 @@ if (form) {
     }).catch(() => {});
   }
 
+  function showVerificationNotice(maskedEmail, rawEmail, password) {
+    const wrap = form.closest('.formwrap');
+    wrap.innerHTML = `
+      <header class="head">
+        <h1 id="auth-title">Check your email</h1>
+        <p>We sent a verification link to <strong>${maskedEmail}</strong>. Click it to activate your account.</p>
+      </header>
+      <p style="margin:16px 0 0;font-size:14px;color:#666">Didn't get it? Check your spam folder, or click below to resend.</p>
+      <button class="btn" type="button" id="resend-btn" style="margin-top:16px">Resend verification email</button>
+      <p class="form__error" role="alert" hidden id="resend-error"></p>
+      <p class="switch" style="margin-top:16px"><a href="/login">Back to login</a></p>`;
+    const resendBtn = document.getElementById('resend-btn');
+    const resendErr = document.getElementById('resend-error');
+    resendBtn.addEventListener('click', async () => {
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending…';
+      resendErr.hidden = true;
+      try {
+        const { ok, data } = await post('/api/resend-verification', { email: rawEmail, password });
+        if (ok) { resendBtn.textContent = 'Sent! Check your inbox'; return; }
+        resendErr.textContent = data.error || 'Could not resend. Try again.';
+        resendErr.hidden = false;
+      } catch {
+        resendErr.textContent = 'Could not reach the server.';
+        resendErr.hidden = false;
+      } finally {
+        if (resendBtn.textContent === 'Sending…') { resendBtn.textContent = 'Resend verification email'; }
+        resendBtn.disabled = false;
+      }
+    });
+  }
+
   form.addEventListener('submit', async event => {
     event.preventDefault();
     error.hidden = true;
@@ -109,7 +141,11 @@ if (form) {
     button.textContent = mode === 'signup' ? 'Creating account…' : 'Logging in…';
     try {
       const { ok, data } = await post(`/api/${mode}`, body);
-      if (ok) { location.assign('/account'); return; }
+      if (ok && !data.needsVerification) { location.assign('/account'); return; }
+      if (data.needsVerification) {
+        showVerificationNotice(data.email || email, email, password);
+        return;
+      }
       show(data.error || 'Something went wrong. Try again.');
       if (mode === 'signup' && window.turnstile && turnstileWidgetId !== null) {
         turnstileToken = '';

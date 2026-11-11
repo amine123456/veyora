@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify your email | Veyora</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F6F5F1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="auth.css">
+</head>
+<body class="authpage">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-logo" viewBox="0 0 28 28"><rect width="28" height="28" rx="8" fill="#FFDD1F"/><path d="M7.5 8h3.4l3.1 9.1L17.100 8h3.400l-4.800 12h-3.400z" fill="#161615"/></symbol></defs></svg>
+
+<div class="page">
+  <a class="brand" href="/" aria-label="Veyora home"><svg class="brand__mark" aria-hidden="true"><use href="#i-logo"/></svg><span>veyora</span></a>
+
+  <main class="card">
+    <section class="card__form" aria-labelledby="verify-title">
+      <div class="formwrap">
+        <div id="verify-loading">
+          <header class="head">
+            <h1 id="verify-title">Verifying your email…</h1>
+            <p>Please wait while we confirm your email address.</p>
+          </header>
+        </div>
+
+        <div id="verify-success" hidden>
+          <header class="head">
+            <h1>Email verified</h1>
+            <p>Your account is now active. Redirecting to your dashboard…</p>
+          </header>
+        </div>
+
+        <div id="verify-error" hidden>
+          <header class="head">
+            <h1>Verification failed</h1>
+            <p id="verify-error-msg">The link is invalid or has expired.</p>
+          </header>
+          <p style="margin-top:24px"><a class="btn" href="/login">Log in to resend</a></p>
+        </div>
+
+        <div id="verify-notoken" hidden>
+          <header class="head">
+            <h1>No token found</h1>
+            <p>This link is missing the verification token. Please check your email and try again.</p>
+          </header>
+          <p style="margin-top:24px"><a class="btn" href="/login">Go to login</a></p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="stage" aria-label="About Veyora">
+      <div class="slides" data-slides>
+        <figure class="slide is-on">
+          <p class="slide__n">5M</p>
+          <p class="slide__t">residential IPs across 195 countries.</p>
+          <p class="slide__s">Real home ISPs. Not datacenter ranges.</p>
+        </figure>
+      </div>
+      <p class="stage__cap">Residential and mobile proxies plus a Web Unlocker API for teams that scrape. <a href="/">Explore Veyora</a> to see it in action.</p>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const token = new URLSearchParams(location.search).get('token');
+  if (!token) {
+    document.getElementById('verify-loading').hidden = true;
+    document.getElementById('verify-notoken').hidden = false;
+    return;
+  }
+  fetch('/api/verify-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+    credentials: 'same-origin',
+  })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      document.getElementById('verify-loading').hidden = true;
+      if (ok && data.verified) {
+        document.getElementById('verify-success').hidden = false;
+        setTimeout(() => location.assign('/account'), 1500);
+      } else {
+        document.getElementById('verify-error-msg').textContent =
+          data.error || 'The link is invalid or has expired.';
+        document.getElementById('verify-error').hidden = false;
+      }
+    })
+    .catch(() => {
+      document.getElementById('verify-loading').hidden = true;
+      document.getElementById('verify-error-msg').textContent =
+        'Could not reach the server. Check your connection and try again.';
+      document.getElementById('verify-error').hidden = false;
+    });
+})();
+</script>
+</body>
+</html>

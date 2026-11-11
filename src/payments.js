@@ -11,10 +11,12 @@ import {
   bindPaymentSession,
   cancelPendingPayment,
   completePayment,
+  confirmEmail,
   createAccount,
   createApiKey,
   createPendingPayment,
   createSession,
+  createVerificationToken,
   deleteSession,
   getSessionClient,
   listApiKeys,
@@ -22,6 +24,7 @@ import {
   revokeApiKey,
   verifyAccount,
 } from './store.js';
+import { createMailer } from './resend.js';
 
 const publicDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 const html = 'text/html; charset=utf-8';
@@ -47,6 +50,7 @@ const publicFiles = new Map([
   ['/favicon.svg', { file: 'favicon.svg', type: 'image/svg+xml' }],
   ['/favicon.ico', { file: 'favicon.svg', type: 'image/svg+xml' }],
   ['/docs', { file: 'docs.html', type: html }],
+  ['/verify-email', { file: 'verify-email.html', type: html }],
 ]);
 
 async function staticFile(response, asset, headOnly = false) {
@@ -321,6 +325,12 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
     unlocker: Boolean(unlocker),
   };
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
+  const mailer = createMailer({
+    apiKey: config.resendApiKey,
+    fromAddress: config.verificationFromEmail,
+    baseUrl: config.proxyEndpoint ? `https://${config.proxyEndpoint.host}` : '',
+    fetchImpl,
+  });
   const availablePackages = packages();
   // Crypto checkout sells USD wallet top-ups; the optional Stripe path keeps GB packs.
   const availableTopups = topups();
@@ -348,6 +358,35 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
 
       if (request.method === 'GET' && request.url === '/api/captcha') {
         return json(response, 200, { siteKey: config.turnstileSiteKey || null });
+      }
+
+      if (request.method === 'POST' && request.url === '/api/verify-email') {
+        assertSameOrigin(request);
+        const input = parseJson(await readBody(request, config.maxBodyBytes));
+        const token = input?.token;
+        if (!token || typeof token !== 'string') return json(response, 400, { error: 'Missing token' });
+        const client = await confirmEmail(token);
+        if (!client) return json(response, 400, { error: 'Invalid or expired verification link. Request a new one.' });
+        const session = await createSession(client.username);
+        response.setHeader('Set-Cookie', sessionCookie(session.token, session.maxAgeSeconds));
+        return json(response, 200, { verified: true });
+      }
+
+      if (request.method === 'POST' && request.url === '/api/resend-verification') {
+        assertSameOrigin(request);
+        const key = clientAddress(request);
+        if (!signupAttempts.allowed(key)) return json(response, 429, { error: 'Too many attempts. Wait a minute and try again.' });
+        signupAttempts.fail(key);
+        const input = parseJson(await readBody(request, config.maxBodyBytes));
+        const email = input?.email;
+        if (!email || typeof email !== 'string') return json(response, 400, { error: 'Missing email' });
+        const client = await hashing(() => verifyAccount(email, input?.password));
+        if (!client) return json(response, 401, { error: 'Wrong email or password' });
+        if (client.emailVerified) return json(response, 200, { sent: false, alreadyVerified: true });
+        if (!mailer) return json(response, 200, { sent: false });
+        const token = await createVerificationToken(client.username);
+        await mailer.verificationEmail(client.email, token);
+        return json(response, 200, { sent: true });
       }
 
       if (request.method === 'POST' && request.url === '/api/support') {
@@ -412,11 +451,19 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
             if (error.code) throw new PublicError(error.code === 'EMAIL_TAKEN' ? 409 : 400, error.message);
             throw error;
           }
+          if (mailer && client.email) {
+            const token = await createVerificationToken(client.username);
+            mailer.verificationEmail(client.email, token).catch(() => {});
+            return json(response, 201, { needsVerification: true, email: client.email });
+          }
         } else {
           client = await hashing(() => verifyAccount(input?.email, input?.password));
           if (!client) {
             limiter.fail(key);
             return json(response, 401, { error: 'Wrong email or password' });
+          }
+          if (mailer && !client.emailVerified) {
+            return json(response, 403, { error: 'Please verify your email before signing in. Check your inbox.', needsVerification: true, email: client.email });
           }
         }
         const session = await createSession(client.username);

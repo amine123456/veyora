@@ -272,6 +272,8 @@ export function paymentConfig() {
     stickySessionSeconds: integer('UPSTREAM_SESSION_TTL_SECONDS', 600, { min: 60, max: 86_400 }),
     turnstileSiteKey: process.env.TURNSTILE_SITE_KEY?.trim() || '',
     turnstileSecret: process.env.TURNSTILE_SECRET?.trim() || '',
+    resendApiKey: process.env.RESEND_API_KEY?.trim() || '',
+    verificationFromEmail: process.env.VERIFICATION_FROM_EMAIL?.trim() || 'Veyora <noreply@veyora.pro>',
   };
 }
 

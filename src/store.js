@@ -13,6 +13,7 @@ const DUMMY_HASH = "4a343291b084137d2a38a2f9b09386740818e9fa5510fe9470fe5f8c202f
 const MAX_PENDING_PAYMENTS = 10_000;
 const MAX_PENDING_PAYMENTS_PER_CLIENT = 10;
 const PENDING_PAYMENT_TTL_MS = 24 * 60 * 60 * 1000;
+const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_SESSIONS_PER_CLIENT = 10;
 const MAX_API_KEYS_PER_CLIENT = 10;
@@ -423,6 +424,7 @@ function publicClient(username, client) {
     enabled: client.enabled !== false,
     createdAt: client.createdAt,
     email: client.email ?? null,
+    emailVerified: client.emailVerified === true,
   };
 }
 
@@ -702,6 +704,35 @@ export async function createAccount(email, password) {
     };
     await saveSnapshot(state);
     return publicClient(username, state.clients[username]);
+  });
+}
+
+export async function createVerificationToken(username) {
+  const token = crypto.randomBytes(32).toString("base64url");
+  await mutate(async (state) => {
+    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+    if (!client) throw new Error("Unknown client");
+    client.verificationToken = sessionKey(token);
+    client.verificationExpiresAt = Date.now() + VERIFICATION_TOKEN_TTL_MS;
+    await saveSnapshot(state);
+  });
+  return token;
+}
+
+export async function confirmEmail(token) {
+  if (typeof token !== "string" || !token) return null;
+  const digest = sessionKey(token);
+  return mutate(async (state) => {
+    for (const [username, client] of Object.entries(state.clients)) {
+      if (client.verificationToken === digest && client.verificationExpiresAt > Date.now()) {
+        client.emailVerified = true;
+        delete client.verificationToken;
+        delete client.verificationExpiresAt;
+        await saveSnapshot(state);
+        return publicClient(username, client);
+      }
+    }
+    return null;
   });
 }
 
