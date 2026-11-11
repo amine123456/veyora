@@ -154,7 +154,7 @@ test('a successful unlock charges once, hides cookies, and reuses the warm exit'
   });
 });
 
-test('blocked attempts escalate to a new IP, then mobile, and the site remembers', async () => {
+test('blocked attempts escalate to new IPs and the site remembers', async () => {
   let served = 0;
   await harness((req, res) => {
     served += 1;
@@ -165,23 +165,18 @@ test('blocked attempts escalate to a new IP, then mobile, and the site remembers
     }
     res.writeHead(200, { 'content-type': 'text/html' });
     res.end(PAGE);
-  }, {}, async ({ call, upstream }) => {
+  }, { config: { maxAttempts: 4 } }, async ({ call, upstream }) => {
     const { username, key } = await customer();
     const result = await call({ url: 'https://shop.example/', country: 'DE' }, { key });
     assert.equal(result.status, 200, JSON.stringify(result.json));
     assert.deepEqual(result.json.attempts.map((attempt) => [attempt.pool, attempt.result]), [
-      ['residential', 'blocked'], ['residential', 'blocked'], ['mobile', 'ok'],
+      ['residential', 'blocked'], ['residential', 'blocked'], ['residential', 'ok'],
     ]);
     const logins = upstream.logins.map((entry) => loginParts(entry.login));
-    assert.deepEqual(logins.map((parts) => parts[1]), ['res-user', 'res-user', 'mob-user']);
+    assert.deepEqual(logins.map((parts) => parts[1]), ['res-user', 'res-user', 'res-user']);
     assert.ok(logins.every((parts) => parts[2] === 'de'));
     assert.equal(new Set(logins.map((parts) => parts[3])).size, 3); // a new IP each time
     assert.equal(await balance(username), 2_000_000 - 800); // charged once
-
-    // The next request for this site starts on mobile, even for another customer.
-    const other = await customer();
-    assert.equal((await call({ url: 'https://shop.example/next' }, { key: other.key })).status, 200);
-    assert.equal(loginParts(upstream.logins.at(-1).login)[1], 'mob-user');
   });
 });
 
@@ -569,7 +564,7 @@ test('probe tests one rung on a fresh IP, bills nothing and records nothing', as
     res.writeHead(200, { 'content-type': 'text/html', 'set-cookie': '_abck=x; Path=/' });
     res.end(PAGE);
   }, {}, async ({ upstream, unlocker }) => {
-    assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile']);
+    assert.deepEqual(unlocker.rungs, ['residential']);
     const ok = await unlocker.probe({ url: 'https://shop.example/', country: 'de', pool: 'residential' });
     assert.equal(ok.outcome, 'ok');
     assert.equal(ok.status, 200);
@@ -577,14 +572,10 @@ test('probe tests one rung on a fresh IP, bills nothing and records nothing', as
     assert.ok(ok.wireBytes > 0 && ok.costMicros > 0 && ok.ms >= 0);
     assert.ok(ok.reasons.includes('cookie:_abck'));
 
-    const denied = await unlocker.probe({ url: 'https://shop.example/denied', country: 'de', pool: 'mobile' });
+    const denied = await unlocker.probe({ url: 'https://shop.example/denied', country: 'de', pool: 'residential' });
     assert.equal(denied.outcome, 'blocked');
     assert.deepEqual(denied.reasons.slice(0, 2), ['status:403', 'server:AkamaiGHost']);
     assert.ok(denied.reasons.includes('marker:akamai-edgesuite'));
-
-    const logins = upstream.logins.map((entry) => loginParts(entry.login));
-    assert.deepEqual(logins.map((parts) => [parts[1], parts[2]]), [['res-user', 'de'], ['mob-user', 'de']]);
-    assert.notEqual(logins[0][3], logins[1][3]);
 
     // The same SSRF and blocklist checks as a customer request.
     assert.equal((await unlocker.probe({ url: 'https://private.example/' })).outcome, 'refused');
@@ -651,7 +642,7 @@ test('browser rungs appear in the ladder when a browser fetch is provided', asyn
     gateway, pricing, config: settings({ browserEnabled: true }), lookup: publicLookup, tlsOptions: { ca: targetCert },
     browserFetchImpl: fake, log: { warn() {}, error() {} },
   });
-  assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile', 'browser-residential', 'browser-mobile', 'ref-browser-residential', 'ref-browser-mobile']);
+  assert.deepEqual(unlocker.rungs, ['residential', 'browser-residential', 'ref-browser-residential']);
   await upstream.close();
   await target.close();
 });
@@ -668,7 +659,7 @@ test('browser rungs are absent when browserFetchImpl is null', async () => {
     gateway, pricing, config: settings(), lookup: publicLookup, tlsOptions: { ca: targetCert },
     browserFetchImpl: null, log: { warn() {}, error() {} },
   });
-  assert.deepEqual(unlocker.rungs, ['residential', 'residential', 'mobile']);
+  assert.deepEqual(unlocker.rungs, ['residential']);
   await upstream.close();
   await target.close();
 });
@@ -726,14 +717,14 @@ test('probe supports browser pool types', async () => {
   assert.equal(result.protocol, 'browser');
 
   const mobile = await unlocker.probe({ url: 'https://shop.example/', pool: 'browser-mobile' });
-  assert.equal(mobile.outcome, 'ok');
+  assert.equal(mobile.outcome, 'refused');
 
   const refRes = await unlocker.probe({ url: 'https://shop.example/', pool: 'ref-browser-residential', country: 'fr' });
   assert.equal(refRes.outcome, 'ok');
   assert.equal(refRes.pool, 'ref-browser-residential');
 
   const refMob = await unlocker.probe({ url: 'https://shop.example/', pool: 'ref-browser-mobile' });
-  assert.equal(refMob.outcome, 'ok');
+  assert.equal(refMob.outcome, 'refused');
   await upstream.close();
   await target.close();
 });

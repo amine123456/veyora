@@ -314,28 +314,20 @@ export function createUnlocker({
   const activeByAccount = new Map();
   let active = 0;
 
-  const httpPools = gateway.upstreamMobile ? ["residential", "residential", "mobile"] : ["residential"];
+  const httpPools = ["residential"];
   const browserOk = Boolean(browserFetchImpl) && config.browserEnabled !== false;
   const camoufoxOk = Boolean(camoufoxFetchImpl) && config.browserEnabled !== false;
   // Escalation ladder: HTTP → Chromium browser → Camoufox (stealth Firefox).
   // Camoufox defeats fingerprint-based detection (DataDome, etc.) that blocks Chromium.
-  const browserPools = browserOk
-    ? gateway.upstreamMobile
-      ? ["browser-residential", "browser-mobile", "ref-browser-residential", "ref-browser-mobile"]
-      : ["browser-residential", "ref-browser-residential"]
-    : [];
-  const camoufoxPools = camoufoxOk
-    ? gateway.upstreamMobile
-      ? ["camoufox-residential", "camoufox-mobile"]
-      : ["camoufox-residential"]
-    : [];
+  const browserPools = browserOk ? ["browser-residential", "ref-browser-residential"] : [];
+  const camoufoxPools = camoufoxOk ? ["camoufox-residential"] : [];
   const pools = [...httpPools, ...browserPools, ...camoufoxPools];
   const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-");
   const isCamoufoxRung = (rung) => rung.startsWith("camoufox-");
   const isRefererRung = (rung) => rung.startsWith("ref-");
   const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "");
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
-  const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
+  const costPerGb = { residential: pricing.costResidentialPerGbMicros };
   let browserActive = 0;
 
   async function checkTarget(url) {
@@ -475,10 +467,8 @@ export function createUnlocker({
     const exitKey = session ? `${username}\0session\0${session}` : `${username}\0site\0${site}`;
     let exit = sessions.get(exitKey) ?? newExit(poolOf(poolForStep(step)));
     if (exit.pool !== poolOf(poolForStep(step)) && !session) exit = newExit(poolOf(poolForStep(step)));
-    // Escalation continues from the exit in use: a sticky mobile session never steps back.
-    if (exit.pool === "mobile") step = Math.max(step, pools.lastIndexOf("mobile"));
     const attempts = [];
-    const wireByPool = { residential: 0, mobile: 0 };
+    const wireByPool = { residential: 0 };
     const rank = { retry: 0, blocked: 1, small: 2, final: 3, ok: 4 };
     let best = null;
     let bestOutcome = null;
@@ -531,7 +521,7 @@ export function createUnlocker({
       result: best,
       attempts,
       pool: exit.pool,
-      wireBytes: wireByPool.residential + wireByPool.mobile,
+      wireBytes: wireByPool.residential,
       costMicros,
       ms: Date.now() - started,
       site,
