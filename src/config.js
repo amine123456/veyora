@@ -274,6 +274,7 @@ export function paymentConfig() {
     turnstileSecret: process.env.TURNSTILE_SECRET?.trim() || '',
     resendApiKey: process.env.RESEND_API_KEY?.trim() || '',
     verificationFromEmail: process.env.VERIFICATION_FROM_EMAIL?.trim() || 'Veyora <noreply@veyora.pro>',
+    siteUrl: process.env.SITE_URL?.trim() || '',
   };
 }
 

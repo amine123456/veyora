@@ -328,7 +328,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
   const mailer = createMailer({
     apiKey: config.resendApiKey,
     fromAddress: config.verificationFromEmail,
-    baseUrl: config.proxyEndpoint ? `https://${config.proxyEndpoint.host}` : '',
+    baseUrl: config.siteUrl || (config.proxyEndpoint ? `https://${config.proxyEndpoint.host}` : ''),
     fetchImpl,
   });
   const availablePackages = packages();
