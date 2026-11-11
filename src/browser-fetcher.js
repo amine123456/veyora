@@ -160,7 +160,7 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
     headless: true,
     proxy: { server: `${scheme}://${proxy.host}:${proxy.port}`, username: auth.username, password: auth.password },
     args: [
-      "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions",
+      "--disable-dev-shm-usage", "--disable-gpu", "--disable-extensions",
       "--disable-blink-features=AutomationControlled",
     ],
   });
