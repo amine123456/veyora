@@ -270,6 +270,8 @@ export function paymentConfig() {
       supportFile: path.resolve(process.env.SUPPORT_FILE ?? './data/support-requests.jsonl'),
     proxyEndpoint: proxyEndpoint(),
     stickySessionSeconds: integer('UPSTREAM_SESSION_TTL_SECONDS', 600, { min: 60, max: 86_400 }),
+    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY?.trim() || '',
+    turnstileSecret: process.env.TURNSTILE_SECRET?.trim() || '',
   };
 }
 

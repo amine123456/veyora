@@ -65,6 +65,31 @@ if (form) {
   const label = button.textContent;
   const show = message => { error.textContent = message; error.hidden = false; };
 
+  let turnstileToken = '';
+  let turnstileWidgetId = null;
+  if (mode === 'signup') {
+    fetch('/api/captcha').then(r => r.json()).then(({ siteKey }) => {
+      if (!siteKey) return;
+      const container = document.createElement('div');
+      container.id = 'turnstile-container';
+      container.style.cssText = 'margin:0 0 4px';
+      button.parentElement.insertBefore(container, button);
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+      script.async = true;
+      window.onTurnstileLoad = () => {
+        turnstileWidgetId = window.turnstile.render('#turnstile-container', {
+          sitekey: siteKey,
+          theme: 'light',
+          callback: token => { turnstileToken = token; },
+          'expired-callback': () => { turnstileToken = ''; },
+          'error-callback': () => { turnstileToken = ''; },
+        });
+      };
+      document.head.appendChild(script);
+    }).catch(() => {});
+  }
+
   form.addEventListener('submit', async event => {
     event.preventDefault();
     error.hidden = true;
@@ -74,12 +99,22 @@ if (form) {
     if (mode === 'signup' && password.length < 10) return show('Password must be at least 10 characters.');
     if (!password) return show('Enter your password.');
 
+    const body = { email, password };
+    if (mode === 'signup' && turnstileWidgetId !== null) {
+      if (!turnstileToken) return show('Complete the verification challenge.');
+      body.turnstileToken = turnstileToken;
+    }
+
     button.disabled = true;
     button.textContent = mode === 'signup' ? 'Creating account…' : 'Logging in…';
     try {
-      const { ok, data } = await post(`/api/${mode}`, { email, password });
+      const { ok, data } = await post(`/api/${mode}`, body);
       if (ok) { location.assign('/account'); return; }
       show(data.error || 'Something went wrong. Try again.');
+      if (mode === 'signup' && window.turnstile && turnstileWidgetId !== null) {
+        turnstileToken = '';
+        window.turnstile.reset(turnstileWidgetId);
+      }
     } catch {
       show('Could not reach the server. Check your connection and try again.');
     } finally {

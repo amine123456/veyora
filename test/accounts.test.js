@@ -171,6 +171,50 @@ test('behind nginx, signup caps apply per visitor address, not to everyone', asy
   });
 });
 
+test('when turnstile is configured, signup requires a valid token', async () => {
+  let verifyBody = null;
+  const fakeCloudflare = http.createServer((req, res) => {
+    const chunks = [];
+    req.on('data', c => chunks.push(c));
+    req.on('end', () => {
+      verifyBody = Buffer.concat(chunks).toString();
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: verifyBody.includes('response=good-token') }));
+    });
+  });
+  await new Promise(r => fakeCloudflare.listen(0, '127.0.0.1', r));
+  const cfPort = fakeCloudflare.address().port;
+  const fakeFetch = (url, opts) => {
+    const replaced = url.replace('https://challenges.cloudflare.com', `http://127.0.0.1:${cfPort}`);
+    return fetch(replaced, opts);
+  };
+  const server = createPaymentServer({
+    stripeKey: '', webhookSecret: '', authAttemptsPerMinute: 30, maxConcurrentAuth: 4,
+    maxBodyBytes: 32_768, stripeTimeoutMs: 1_000, requestTimeoutMs: 5_000,
+    turnstileSiteKey: 'test-site-key', turnstileSecret: 'test-secret',
+    proxyEndpoint: { scheme: 'https', host: 'gate.example.test', port: 8443 },
+  }, { fetchImpl: fakeFetch });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  const port = server.address().port;
+  try {
+    // No token at all.
+    const noToken = await request(port, { path: '/api/signup', body: { email: 'bot1@example.com', password: 'long enough password' } });
+    assert.equal(noToken.status, 400);
+    // Bad token.
+    const bad = await request(port, { path: '/api/signup', body: { email: 'bot2@example.com', password: 'long enough password', turnstileToken: 'bad-token' } });
+    assert.equal(bad.status, 403);
+    // Good token.
+    const good = await request(port, { path: '/api/signup', body: { email: 'human@example.com', password: 'long enough password', turnstileToken: 'good-token' } });
+    assert.equal(good.status, 201);
+    // The captcha endpoint returns the site key.
+    const captcha = await request(port, { path: '/api/captcha', method: 'GET' });
+    assert.equal(captcha.json.siteKey, 'test-site-key');
+  } finally {
+    await new Promise(r => server.close(r));
+    await new Promise(r => fakeCloudflare.close(r));
+  }
+});
+
 test('version 2 state files upgrade with an empty session table', async () => {
   const legacyDirectory = await mkdtemp(path.join(os.tmpdir(), 'proxy-legacy-'));
   const legacyFile = path.join(legacyDirectory, 'state.json');

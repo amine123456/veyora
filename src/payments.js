@@ -84,6 +84,20 @@ function json(response, status, value) {
   response.end(JSON.stringify(value));
 }
 
+async function verifyTurnstile(secret, token, remoteip, fetchImpl) {
+  try {
+    const response = await fetchImpl('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}&remoteip=${encodeURIComponent(remoteip)}`,
+    });
+    const result = await response.json();
+    return result.success === true;
+  } catch {
+    return false;
+  }
+}
+
 function authLimiter(maxPerMinute) {
   const attempts = new Map();
   const windowMs = 60_000;
@@ -329,6 +343,10 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
         return await staticFile(response, asset, request.method === 'HEAD');
       }
 
+      if (request.method === 'GET' && request.url === '/api/captcha') {
+        return json(response, 200, { siteKey: config.turnstileSiteKey || null });
+      }
+
       if (request.method === 'POST' && request.url === '/api/support') {
         assertSameOrigin(request);
         if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
@@ -379,6 +397,12 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
         let client;
         if (signup) {
           limiter.fail(key); // every signup counts toward the per-minute cap, not only failed ones
+          if (config.turnstileSecret) {
+            const token = input?.turnstileToken;
+            if (!token || typeof token !== 'string') throw new PublicError(400, 'Complete the verification challenge');
+            const verified = await verifyTurnstile(config.turnstileSecret, token, clientAddress(request), fetchImpl);
+            if (!verified) throw new PublicError(403, 'Verification failed. Reload the page and try again.');
+          }
           try {
             client = await hashing(() => createAccount(input?.email, input?.password));
           } catch (error) {
