@@ -369,14 +369,19 @@ export async function createAccount(email, password) {
   }
 }
 
-export async function createVerificationToken(username) {
+// Returns a new token, or null when one was issued less than cooldownMs ago (that earlier
+// link keeps working, so repeated logins cannot flood the inbox).
+export async function createVerificationToken(username, { cooldownMs = 0 } = {}) {
   const token = crypto.randomBytes(32).toString("base64url");
+  const now = Date.now();
   const result = await query(
-    "UPDATE clients SET verification_token = $2, verification_expires_at = $3 WHERE username = $1",
-    [username, sessionKey(token), new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS)],
+    `UPDATE clients SET verification_token = $2, verification_expires_at = $3
+     WHERE username = $1 AND (verification_expires_at IS NULL OR verification_expires_at <= $4)`,
+    [username, sessionKey(token), new Date(now + VERIFICATION_TOKEN_TTL_MS), new Date(now + VERIFICATION_TOKEN_TTL_MS - cooldownMs)],
   );
-  if (result.rowCount !== 1) throw new Error("Unknown client");
-  return token;
+  if (result.rowCount === 1) return token;
+  if (!(await findClient(username))) throw new Error("Unknown client");
+  return null;
 }
 
 export async function confirmEmail(token) {

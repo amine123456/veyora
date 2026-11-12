@@ -388,6 +388,15 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
   };
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
   const site = loadSite(config.siteDirectory);
+  // At most one link a minute per account; a failed send is logged, never shown to the visitor.
+  async function sendVerification(client) {
+    try {
+      const token = await createVerificationToken(client.username, { cooldownMs: 60_000 });
+      if (token) await mailer.verificationEmail(client.email, token);
+    } catch (error) {
+      console.error(`Verification email to ${client.username} failed: ${error.message}`);
+    }
+  }
   const mailer = createMailer({
     apiKey: config.resendApiKey,
     fromAddress: config.verificationFromEmail,
@@ -519,8 +528,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
             throw error;
           }
           if (mailer && client.email) {
-            const token = await createVerificationToken(client.username);
-            mailer.verificationEmail(client.email, token).catch(() => {});
+            await sendVerification(client);
             return json(response, 201, { needsVerification: true, email: client.email });
           }
         } else {
@@ -530,6 +538,8 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
             return json(response, 401, { error: 'Wrong email or password' });
           }
           if (mailer && !client.emailVerified) {
+            // Accounts made before verification existed never got a link: send one now.
+            await sendVerification(client);
             return json(response, 403, { error: 'Please verify your email before signing in. Check your inbox.', needsVerification: true, email: client.email });
           }
         }

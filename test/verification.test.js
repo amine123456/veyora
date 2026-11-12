@@ -101,6 +101,27 @@ test('signup with mailer sends verification email and blocks login until verifie
   });
 });
 
+test('logging in to an account that never got a link sends one, at most once a minute', async () => {
+  const store = await import('../src/store.js');
+  const legacy = await store.createAccount('legacy-user@example.com', 'long enough password');
+  await withServer(async (port) => {
+    const login = () => request(port, { path: '/api/login', body: { email: 'legacy-user@example.com', password: 'long enough password' } });
+    const first = await login();
+    assert.equal(first.status, 403);
+    assert.equal(first.json.needsVerification, true);
+    assert.equal(sentEmails.length, 1);
+    assert.deepEqual(sentEmails[0].to, ['legacy-user@example.com']);
+
+    assert.equal((await login()).status, 403);
+    assert.equal(sentEmails.length, 1, 'a second login within a minute sends nothing');
+
+    const verify = await request(port, { path: '/api/verify-email', body: { token: extractToken(sentEmails[0].html) } });
+    assert.equal(verify.json.verified, true);
+    assert.equal((await login()).status, 200);
+  });
+  assert.equal((await store.getClient(legacy.username)).emailVerified, true);
+});
+
 test('verify-email rejects invalid and expired tokens', async () => {
   await withServer(async (port) => {
     const noToken = await request(port, { path: '/api/verify-email', body: {} });
