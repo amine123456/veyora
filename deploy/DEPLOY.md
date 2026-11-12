@@ -1,6 +1,6 @@
 # Deploying Veyora to a server
 
-> **Live now (temporary address):** `https://veyora.157-230-28-253.sslip.io` (site) and `https://gate.157-230-28-253.sslip.io:8443` (proxy) on 157.230.28.253. sslip.io maps the name to the IP, so Let's Encrypt certificates work without a domain. To move Veyora to a real domain: add its DNS records (step 1), replace the sslip.io names in `/etc/nginx/sites-available/proxora`, `/etc/letsencrypt/renewal-hooks/deploy/proxora.sh` and `PUBLIC_PROXY_URL` in `/opt/proxora/.env`, then rerun step 5 and `systemctl restart proxora`. The `proxora` service, user, and filesystem names are retained as legacy operational identifiers.
+> **Live:** `https://veyora.pro` (site) and `https://gate.veyora.pro:8443` (proxy) on 157.230.28.253. The `proxora` service, user, and filesystem names are retained as legacy operational identifiers.
 
 Target: Ubuntu 24.04 with Node 20+ and nginx (as on 157.230.28.253). Replace `veyora.example` with the real domain everywhere below and in `nginx-proxora.conf` and `certbot-deploy-hook.sh`.
 

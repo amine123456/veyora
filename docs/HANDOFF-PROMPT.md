@@ -9,7 +9,7 @@ You are continuing work on **Veyora**, my residential/mobile proxy business, and
 - Admin CLI: `npm run admin -- list|create|credit|password|enable|disable`.
 
 ## Production
-- Live: `https://veyora.157-230-28-253.sslip.io` (site), `https://gate.157-230-28-253.sslip.io:8443` (proxy). DigitalOcean Ubuntu 24.04, nginx + certbot (cert valid to 2027-01-25), systemd service `proxora`, app in `/opt/proxora`, data in `/opt/proxora/data`. Legacy `proxora` names are intentional; the session cookie `__Host-proxora_session` must not be renamed (it would log everyone out).
+- Live: `https://veyora.pro` (site), `https://gate.veyora.pro:8443` (proxy). DigitalOcean Ubuntu 24.04, nginx + certbot (cert valid to 2027-01-25), systemd service `proxora`, app in `/opt/proxora`, data in `/opt/proxora/data`. Legacy `proxora` names are intentional; the session cookie `__Host-proxora_session` must not be renamed (it would log everyone out).
 - Deploy: `sh deploy/push.sh root@157.230.28.253`. Production currently runs commit `7c88157` (before the fixes below).
 - Security to-do for me: the root password was exposed in a chat. Rotate it, use SSH keys, set `PasswordAuthentication no`.
 - Production upstream uses `ALLOW_INSECURE_UPSTREAM=true` to `gw.proxi.st:9999`: upstream credentials travel in cleartext. Switch to a TLS endpoint if the provider has one.
