@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import http from 'node:http';
 import net from 'node:net';
 import { appendFile, mkdir, readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AUTH_BUSY, createClientAuthParser } from './auth.js';
@@ -56,19 +57,77 @@ const publicFiles = new Map([
   ['/docs.css', { file: 'docs.css', type: 'text/css; charset=utf-8' }],
 ]);
 
-async function staticFile(response, asset, headOnly = false) {
-  const body = await readFile(path.join(publicDirectory, asset.file));
+// Inline scripts are blocked. A page built by Next.js carries a few inline bootstrap
+// scripts, so that page's policy also lists their exact hashes (from csp-hashes.json).
+function contentSecurityPolicy(scriptHashes = []) {
+  const hashes = scriptHashes.map((hash) => ` '${hash}'`).join('');
+  return `default-src 'none'; style-src 'self' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src https://fonts.gstatic.com; script-src 'self'${hashes} https://challenges.cloudflare.com; img-src 'self' data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`;
+}
+
+// The site is the static pages in public/, or a Next.js export (web/out) when SITE_DIR is set.
+function loadSite(directory) {
+  if (!directory) return { directory: publicDirectory, scriptHashes: {}, exported: false };
+  let manifest;
+  try {
+    manifest = JSON.parse(readFileSync(path.join(directory, 'csp-hashes.json'), 'utf8'));
+  } catch {
+    throw new Error(`SITE_DIR has no csp-hashes.json: build the site first (npm --prefix web run build)`);
+  }
+  for (const [page, hashes] of Object.entries(manifest)) {
+    if (!Array.isArray(hashes) || hashes.some((hash) => !/^sha256-[A-Za-z0-9+/]{43}=$/.test(hash))) {
+      throw new Error(`Invalid script hashes for ${page} in csp-hashes.json`);
+    }
+  }
+  return { directory, scriptHashes: manifest, exported: true };
+}
+
+async function staticFile(response, site, asset, headOnly = false) {
+  const body = await readFile(path.join(site.directory, asset.file));
   response.writeHead(200, {
     'Content-Type': asset.type,
     'Content-Length': body.length,
     // Assets are not fingerprinted, so a long max-age would keep serving stale
     // app.js/styles.css after a deploy.
     'Cache-Control': 'no-cache',
-    'Content-Security-Policy': "default-src 'none'; style-src 'self' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src https://fonts.gstatic.com; script-src 'self' https://challenges.cloudflare.com; img-src 'self' data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+    'Content-Security-Policy': contentSecurityPolicy(site.scriptHashes[asset.file]),
     'Referrer-Policy': 'no-referrer',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
+  });
+  response.end(headOnly ? undefined : body);
+}
+
+const NEXT_ASSET_TYPES = new Map([
+  ['.js', 'text/javascript; charset=utf-8'],
+  ['.css', 'text/css; charset=utf-8'],
+  ['.map', 'application/json; charset=utf-8'],
+  ['.json', 'application/json; charset=utf-8'],
+  ['.woff2', 'font/woff2'],
+  ['.svg', 'image/svg+xml'],
+  ['.png', 'image/png'],
+]);
+
+// Next.js build output under /_next/static/. File names contain a content hash, so they
+// are cached forever. Only plain path segments are accepted: no dots-only segments, no
+// encoded characters, nothing that could leave the static directory.
+async function nextAsset(response, site, pathname, headOnly) {
+  const relative = pathname.slice('/_next/static/'.length);
+  const type = NEXT_ASSET_TYPES.get(path.posix.extname(relative));
+  const safe = /^[A-Za-z0-9_~-][A-Za-z0-9._~-]*(\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*)*$/.test(relative) && !relative.includes('..');
+  if (!type || !safe) return json(response, 404, { error: 'Not found' });
+  let body;
+  try {
+    body = await readFile(path.join(site.directory, '_next', 'static', ...relative.split('/')));
+  } catch (error) {
+    if (error.code === 'ENOENT' || error.code === 'EISDIR') return json(response, 404, { error: 'Not found' });
+    throw error;
+  }
+  response.writeHead(200, {
+    'Content-Type': type,
+    'Content-Length': body.length,
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'X-Content-Type-Options': 'nosniff',
   });
   response.end(headOnly ? undefined : body);
 }
@@ -328,6 +387,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
     unlocker: Boolean(unlocker),
   };
   if (typeof fetchImpl !== 'function') throw new TypeError('fetchImpl must be a function');
+  const site = loadSite(config.siteDirectory);
   const mailer = createMailer({
     apiKey: config.resendApiKey,
     fromAddress: config.verificationFromEmail,
@@ -349,14 +409,18 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
       if (unlocker && request.url.startsWith('/v1/')) return await unlocker.handle(request, response, clientAddress(request));
 
       // Pages are looked up by path alone, so /account?paid=1 and /?utm_source=x still resolve.
-      const asset = publicFiles.get(new URL(request.url, 'http://local').pathname);
+      const { pathname } = new URL(request.url, 'http://local');
+      const asset = publicFiles.get(pathname);
+      if ((request.method === 'GET' || request.method === 'HEAD') && site.exported && pathname.startsWith('/_next/static/')) {
+        return await nextAsset(response, site, pathname, request.method === 'HEAD');
+      }
       if ((request.method === 'GET' || request.method === 'HEAD') && asset) {
         if (asset.session) {
           const signedIn = Boolean(await getSessionClient(sessionToken(request)));
           if (asset.session === 'required' && !signedIn) return redirect(response, '/login');
           if (asset.session === 'guest' && signedIn) return redirect(response, '/account');
         }
-        return await staticFile(response, asset, request.method === 'HEAD');
+        return await staticFile(response, site, asset, request.method === 'HEAD');
       }
 
       if (request.method === 'GET' && request.url === '/api/captcha') {

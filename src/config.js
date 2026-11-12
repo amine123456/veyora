@@ -287,6 +287,8 @@ export function paymentConfig() {
     resendApiKey: process.env.RESEND_API_KEY?.trim() || '',
     verificationFromEmail: process.env.VERIFICATION_FROM_EMAIL?.trim() || 'Veyora <noreply@veyora.pro>',
     siteUrl: process.env.SITE_URL?.trim() || '',
+    // A Next.js export (web/out) to serve instead of the static pages in public/.
+    siteDirectory: process.env.SITE_DIR?.trim() ? path.resolve(process.env.SITE_DIR.trim()) : null,
   };
 }
 
