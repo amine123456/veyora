@@ -461,10 +461,12 @@ export function createUnlocker({
     const deadline = started + config.totalTimeoutMs;
     const site = siteOf(url.hostname);
     const remembered = siteMemory.get(site);
-    // A site remembered on a costlier rung tries one rung cheaper every 20th request,
-    // so it moves back down once the cheaper exits work again.
+    // Every request opens with one cheap plain try (a blocked answer costs ~2 KB and a
+    // second). A site remembered on a browser rung then jumps straight to that rung,
+    // except every 20th request, which walks the whole ladder to find cheaper exits again.
     const probeDown = remembered && remembered.step > 0 && remembered.uses % 20 === 19;
-    let step = remembered ? remembered.step - (probeDown ? 1 : 0) : 0;
+    const jumpTo = remembered && !probeDown ? remembered.step : 0;
+    let step = 0;
     // A named session keeps its exit (and cookies) across requests; without one, each
     // customer keeps a warm exit per site so clearance cookies are reused.
     const exitKey = session ? `${username}\0session\0${session}` : `${username}\0site\0${site}`;
@@ -479,7 +481,7 @@ export function createUnlocker({
 
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250; attempt += 1) {
       if (attempt > 0) {
-        step += 1;
+        step = Math.max(step + 1, jumpTo);
         // Browser rungs always get a fresh proxy session (new IP) for maximum coverage.
         exit = newExit(poolOf(poolForStep(step)));
       }
@@ -510,7 +512,8 @@ export function createUnlocker({
     const billable = bestOutcome === "ok" || bestOutcome === "small";
     if (billable) {
       sessions.set(exitKey, exit, sessionTtlMs);
-      const settled = Math.min(step, pools.length - 1);
+      // Any plain HTTP success means the site needs no browser; only browser rungs are remembered.
+      const settled = step < httpPools.length ? 0 : Math.min(step, pools.length - 1);
       siteMemory.set(site, { step: settled, uses: settled === remembered?.step ? remembered.uses + 1 : 0 }, DOMAIN_MEMORY_MS);
     } else {
       sessions.delete(exitKey);

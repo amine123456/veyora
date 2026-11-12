@@ -731,6 +731,47 @@ test('plain HTTP gets three different IPs before any browser is used', async () 
   });
 });
 
+test('a site remembered on a browser rung still gets one quick plain try first', async () => {
+  const browserFetch = async ({ url }) => ({ status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: Buffer.from(PAGE), wireBytes: 500, protocol: 'browser', url: url instanceof URL ? url : new URL(url) });
+  let blockHttp = true;
+  await harness((req, res) => {
+    if (blockHttp) {
+      res.writeHead(403, { 'content-type': 'text/html' });
+      res.end(CHALLENGE);
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/html' });
+    res.end(PAGE);
+  }, {}, async ({ upstream }) => {
+    const gateway = {
+      upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+      upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+    };
+    const unlocker = createUnlocker({
+      gateway, pricing, config: settings({ maxAttempts: 8, browserEnabled: true }),
+      browserFetchImpl: browserFetch, lookup: publicLookup, tlsOptions: { ca: targetCert }, log: { warn() {}, error() {} },
+    });
+    const url = new URL('https://shop.example/');
+    const kinds = (result) => result.attempts.map((a) => `${a.browser ? 'browser' : 'http'}:${a.outcome}`);
+
+    // HTTP blocked everywhere: the browser rung wins and is remembered.
+    const first = await unlocker.unlock({ username: 'memory', url, country: null, session: null });
+    assert.deepEqual(kinds(first), ['http:blocked', 'http:blocked', 'http:blocked', 'browser:ok']);
+
+    // Next request: one plain try, then straight to the remembered browser rung.
+    const second = await unlocker.unlock({ username: 'memory', url, country: null, session: null });
+    assert.deepEqual(kinds(second), ['http:blocked', 'browser:ok']);
+
+    // Once plain HTTP works again, the first try succeeds and the browser is forgotten.
+    blockHttp = false;
+    const third = await unlocker.unlock({ username: 'memory', url, country: null, session: null });
+    assert.deepEqual(kinds(third), ['http:ok']);
+    blockHttp = true;
+    const fourth = await unlocker.unlock({ username: 'memory', url, country: null, session: null });
+    assert.deepEqual(kinds(fourth), ['http:blocked', 'http:blocked', 'http:blocked', 'browser:ok']);
+  });
+});
+
 test('probe supports browser pool types', async () => {
   const browserFetch = async ({ url }) => ({
     status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: Buffer.from(PAGE), wireBytes: 300, protocol: 'browser',
