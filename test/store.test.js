@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import './helpers/database.js';
 
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'proxy-store-'));
 process.env.DATA_FILE = path.join(directory, 'store.json');

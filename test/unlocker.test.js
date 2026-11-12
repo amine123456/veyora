@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { close, fakeUpstream, listen, publicLookup, targetCert, tlsTarget } from './helpers/fake-upstream.js';
+import './helpers/database.js';
 
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-unlocker-'));
 process.env.DATA_FILE = path.join(directory, 'state.json');

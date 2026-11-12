@@ -39,7 +39,7 @@ function usage() {
 }
 
 // While the server runs it owns the store, so commands go through its loopback admin
-// API. Only when nothing is listening do they edit the store file directly.
+// API. Only when nothing is listening do they write to the database directly.
 const admin = adminConfig();
 async function api(method, path, body) {
   if (!admin.token) return null;

@@ -3,6 +3,7 @@ import { adminConfig, gatewayConfig, paymentConfig, pricingConfig, unlockerConfi
 import { createGateway } from './gateway.js';
 import { createPaymentServer } from './payments.js';
 import { createShutdown } from './shutdown.js';
+import { migrate } from './db.js';
 import { drain } from './store.js';
 import { browserAvailable, fetchWithBrowser, fetchWithCamoufox } from './browser-fetcher.js';
 import { camoufoxAvailable } from './camoufox-launcher.js';
@@ -25,6 +26,8 @@ function close(server) {
 }
 
 async function main() {
+  const migrations = await migrate();
+  if (migrations.length) console.log(`Database migrated: ${migrations.join(', ')}`);
   const gateway = gatewayConfig();
   const payments = paymentConfig();
   const pricing = pricingConfig();
@@ -73,7 +76,7 @@ async function main() {
   startupComplete = true;
 
   // systemd stops the service with SIGTERM: stop listening, let in-flight unlocks and
-  // store writes finish (at most 10 s), write the ledger snapshot, then exit.
+  // database writes finish (at most 10 s), write the ledger snapshot, then exit.
   const stop = createShutdown({ servers: [proxyServer, paymentServer, adminServer], unlocker, drainStore: drain });
   const shutdown = () => {
     console.log('Shutting down: waiting for in-flight requests and store writes');

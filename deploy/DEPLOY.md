@@ -22,6 +22,12 @@ install -d -o proxora -g proxora /opt/proxora /opt/proxora/data
 apt-get install -y certbot python3-certbot-nginx
 ```
 
+After step 3 has copied the app, set up the database (installs PostgreSQL on localhost only, creates the `veyora` database, writes `DATABASE_URL` into `/opt/proxora/.env`, and installs a nightly backup in `/var/backups/veyora`):
+
+```sh
+sh /opt/proxora/deploy/server-postgres.sh
+```
+
 ## 3. Copy the app (from this PC, in the proxy-provider folder)
 
 ```sh
@@ -47,6 +53,7 @@ UPSTREAM_PROXY_PASSWORD=...
 ALLOW_INSECURE_UPSTREAM=true
 PAYMENTS_PORT=3100
 DATA_FILE=/opt/proxora/data/store.json
+# DATABASE_URL is written by deploy/server-postgres.sh
 ADMIN_TOKEN=<new random value, not the one from the PC>
 ```
 

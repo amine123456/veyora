@@ -227,8 +227,20 @@ export function dataFile() {
   return path.resolve(process.env.DATA_FILE ?? './data/store.json');
 }
 
-export function processedPaymentHistoryLimit() {
-  return integer('PROCESSED_PAYMENT_HISTORY_LIMIT', 10_000, { max: 1_000_000 });
+export function databaseConfig() {
+  const url = required('DATABASE_URL');
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error('DATABASE_URL must be a valid postgres:// URL');
+  }
+  if (!['postgres:', 'postgresql:'].includes(parsed.protocol)) {
+    throw new Error('DATABASE_URL must be a valid postgres:// URL');
+  }
+  const schema = process.env.DB_SCHEMA?.trim() || 'public';
+  if (!/^[a-z_][a-z0-9_]{0,62}$/.test(schema)) throw new Error('DB_SCHEMA must be a lowercase identifier');
+  return { url, schema, poolSize: integer('DB_POOL_SIZE', 10, { max: 100 }) };
 }
 
 export function paymentConfig() {

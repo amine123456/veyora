@@ -1,13 +1,10 @@
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { promisify } from "node:util";
-import { dataFile, processedPaymentHistoryLimit } from "./config.js";
+import { query, transaction } from "./db.js";
+
+export { drain } from "./db.js";
 
 const scrypt = promisify(crypto.scrypt);
-const file = dataFile();
-const usageJournal = `${file}.usage.log`;
-const processedPaymentLimit = processedPaymentHistoryLimit();
 const DUMMY_SALT = "d93b866614ee2f90a3f8782cc561566b";
 const DUMMY_HASH = "4a343291b084137d2a38a2f9b09386740818e9fa5510fe9470fe5f8c202fa6d73db6af0ba6671d6976000c15d0fc00852f170bd3507105d2326b7d329263542c";
 const MAX_PENDING_PAYMENTS = 10_000;
@@ -19,6 +16,7 @@ const MAX_SESSIONS_PER_CLIENT = 10;
 const MAX_API_KEYS_PER_CLIENT = 10;
 const API_KEY_NAME_MAX = 40;
 const API_KEY_PATTERN = /^vy_live_[A-Za-z0-9_-]{43}$/;
+const UNIQUE_VIOLATION = "23505";
 
 // Proxy clients send their password on every request, and scrypt costs tens of
 // milliseconds of CPU. Remember credentials that verified recently, keyed by an HMAC
@@ -42,33 +40,15 @@ function rememberCredentials(digest, username, hash) {
   verifiedCredentials.set(digest, { username, hash, expiresAt: Date.now() + AUTH_CACHE_TTL_MS });
 }
 
-let statePromise;
-let mutationQueue = Promise.resolve();
-
-function hasOwn(record, key) {
-  return Object.prototype.hasOwnProperty.call(record, key);
-}
-
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function blankState() {
-  return {
-    version: 3,
-    clients: {},
-    processedPayments: {},
-    pendingPayments: {},
-    sessions: {},
-    apiKeys: {},
-    lastUsageSeq: 0,
-  };
 }
 
 function validEmail(value) {
   return typeof value === "string"
     && value.length <= 254
     && value === value.trim().toLowerCase()
+    && !value.includes(String.fromCharCode(0))
     && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
@@ -79,12 +59,6 @@ export function normalizeEmail(value) {
 
 function sessionKey(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
-}
-
-function validTimestamp(value) {
-  return typeof value === "string"
-    && Number.isFinite(Date.parse(value))
-    && new Date(value).toISOString() === value;
 }
 
 // Payment references from each provider: a checkout session (or invoice) and the
@@ -130,323 +104,55 @@ function validPackageInfo(value) {
     && /^[a-zA-Z]{3}$/.test(value.currency);
 }
 
-function pruneProcessedPayments(payments, limit = processedPaymentLimit) {
-  const entries = Object.entries(payments);
-  if (entries.length <= limit) return { ...payments };
-  entries.sort(([leftId, left], [rightId, right]) => {
-    const timestampOrder = Date.parse(right.processedAt) - Date.parse(left.processedAt);
-    return timestampOrder || rightId.localeCompare(leftId);
-  });
-  return Object.fromEntries(entries.slice(0, limit));
-}
-
-function normalizeState(parsed) {
-  if (!isRecord(parsed) || (parsed.version !== 2 && parsed.version !== 3)) throw new Error("Invalid or unsupported state file");
-  // Version 2 predates web accounts; it upgrades by gaining an empty session table.
-  if (parsed.version === 2) parsed = { ...parsed, version: 3, sessions: {} };
-  // API keys were added within version 3; older files simply have none.
-  if (parsed.apiKeys === undefined) parsed = { ...parsed, apiKeys: {} };
-  if (!isRecord(parsed.clients) || !isRecord(parsed.processedPayments) || !isRecord(parsed.pendingPayments)
-    || !isRecord(parsed.sessions) || !isRecord(parsed.apiKeys)) {
-    throw new Error("Invalid state collections");
-  }
-  if (!Number.isSafeInteger(parsed.lastUsageSeq) || parsed.lastUsageSeq < 0) {
-    throw new Error("Invalid usage sequence");
-  }
-
-  const emails = new Set();
-  for (const [username, client] of Object.entries(parsed.clients)) {
-    const valid = /^[A-Za-z0-9._-]{3,64}$/.test(username)
-      && isRecord(client)
-      && /^[0-9a-f]{32}$/i.test(client.salt)
-      && /^[0-9a-f]{128}$/i.test(client.hash)
-      && Number.isSafeInteger(client.quotaBytes)
-      && client.quotaBytes >= 0
-      && Number.isSafeInteger(client.usedBytes)
-      && client.usedBytes >= 0
-      && client.usedBytes <= client.quotaBytes
-      && typeof client.enabled === "boolean"
-      && validTimestamp(client.createdAt)
-      && (client.balanceMicros === undefined
-        || (Number.isSafeInteger(client.balanceMicros) && client.balanceMicros >= 0))
-      && (client.email === undefined
-        || (validEmail(client.email)
-          && /^[0-9a-f]{32}$/i.test(client.webSalt)
-          && /^[0-9a-f]{128}$/i.test(client.webHash)));
-    if (!valid) throw new Error(`Invalid client record: ${username}`);
-    if (client.email !== undefined) {
-      if (emails.has(client.email)) throw new Error(`Duplicate account email: ${username}`);
-      emails.add(client.email);
-    }
-  }
-
-  for (const [key, session] of Object.entries(parsed.sessions)) {
-    const valid = /^[0-9a-f]{64}$/.test(key)
-      && isRecord(session)
-      && typeof session.username === "string"
-      && hasOwn(parsed.clients, session.username)
-      && Number.isSafeInteger(session.expiresAt)
-      && session.expiresAt > 0;
-    if (!valid) throw new Error("Invalid session record");
-  }
-
-  for (const [key, apiKey] of Object.entries(parsed.apiKeys)) {
-    const valid = /^[0-9a-f]{64}$/.test(key)
-      && isRecord(apiKey)
-      && /^key_[0-9a-f]{16}$/.test(apiKey.id)
-      && typeof apiKey.username === "string"
-      && hasOwn(parsed.clients, apiKey.username)
-      && typeof apiKey.name === "string"
-      && apiKey.name.length <= API_KEY_NAME_MAX
-      && /^vy_live_[A-Za-z0-9_-]{4}$/.test(apiKey.prefix)
-      && validTimestamp(apiKey.createdAt);
-    if (!valid) throw new Error("Invalid API key record");
-  }
-
-
-  for (const [purchaseId, payment] of Object.entries(parsed.pendingPayments)) {
-    const valid = validPurchaseId(purchaseId)
-      && isRecord(payment)
-      && payment.purchaseId === purchaseId
-      && typeof payment.username === "string"
-      && hasOwn(parsed.clients, payment.username)
-      && /^[A-Za-z0-9_-]{1,40}$/.test(payment.packageId)
-      && validCredit(payment.bytes, payment.micros)
-      && Number.isSafeInteger(payment.cents)
-      && payment.cents >= 50
-      && /^[a-z]{3}$/.test(payment.currency)
-      && validTimestamp(payment.createdAt)
-      && Number.isSafeInteger(payment.expiresAt)
-      && payment.expiresAt > 0
-      && (payment.sessionId === null || validPaymentRef(payment.sessionId, "session"));
-    if (!valid) throw new Error(`Invalid pending payment record: ${purchaseId}`);
-  }
-
-  for (const [eventId, payment] of Object.entries(parsed.processedPayments)) {
-    const valid = validPaymentRef(eventId, "event")
-      && isRecord(payment)
-      && payment.eventId === eventId
-      && validPurchaseId(payment.purchaseId)
-      && validPaymentRef(payment.sessionId, "session")
-      && typeof payment.username === "string"
-      && hasOwn(parsed.clients, payment.username)
-      && /^[A-Za-z0-9_-]{1,40}$/.test(payment.packageId)
-      && validCredit(payment.bytes, payment.micros)
-      && validTimestamp(payment.processedAt);
-    if (!valid) throw new Error(`Invalid processed payment record: ${eventId}`);
-  }
-
-  return {
-    version: 3,
-    clients: { ...parsed.clients },
-    processedPayments: pruneProcessedPayments(parsed.processedPayments),
-    pendingPayments: { ...parsed.pendingPayments },
-    sessions: { ...parsed.sessions },
-    apiKeys: { ...parsed.apiKeys },
-    lastUsageSeq: parsed.lastUsageSeq,
-  };
-}
-
-// Reads the usage journal's lines. A crash (OOM kill, power loss) during an append can
-// leave a last line without its newline. That append never reached its fsync, so the
-// operation never succeeded: an unparsable unterminated last line is dropped and the
-// file truncated back to the last complete line. A parsable one was written in full and
-// only lacks its newline, which is added so the next append starts on its own line.
-// Any bad line before the end is real corruption and still refuses to start.
-async function readJournal() {
-  const raw = await fs.readFile(usageJournal);
-  const end = raw.lastIndexOf(0x0a) + 1; // bytes up to and including the last newline
-  const lines = raw.subarray(0, end).toString("utf8").split("\n").filter(Boolean);
-  if (end === raw.length) return lines;
-
-  const tail = raw.subarray(end).toString("utf8");
-  let parsed = false;
-  try {
-    JSON.parse(tail);
-    parsed = true;
-  } catch { /* torn */ }
-  const handle = await fs.open(usageJournal, "r+");
-  try {
-    if (parsed) {
-      await handle.write("\n", raw.length);
-      lines.push(tail);
-    } else {
-      await handle.truncate(end);
-      console.warn(`Usage journal: dropped an unfinished last line (${raw.length - end} bytes) left by a crash`);
-    }
-    await handle.sync();
-  } finally {
-    await handle.close();
-  }
-  return lines;
-}
-
-async function loadState() {
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  let state;
-  try {
-    state = normalizeState(JSON.parse(await fs.readFile(file, "utf8")));
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-    state = blankState();
-  }
-
-  try {
-    const records = await readJournal();
-    for (const line of records) {
-      const record = JSON.parse(line);
-      if (!Number.isSafeInteger(record.seq) || record.seq <= state.lastUsageSeq) continue;
-      if (record.seq !== state.lastUsageSeq + 1
-        || typeof record.username !== "string"
-        || !hasOwn(state.clients, record.username)
-        || !Number.isSafeInteger(record.delta)
-        || record.delta === 0
-        || (record.unit !== undefined && record.unit !== "micros")) {
-        throw new Error("Invalid usage journal record");
-      }
-      const client = state.clients[record.username];
-      if (record.unit === "micros") {
-        // Wallet movement: delta is added to the USD balance (micro-dollars).
-        const nextBalance = (client.balanceMicros ?? 0) + record.delta;
-        if (!Number.isSafeInteger(nextBalance) || nextBalance < 0) {
-          throw new Error("Usage journal drives a wallet below zero");
-        }
-        client.balanceMicros = nextBalance;
-        state.lastUsageSeq = record.seq;
-        continue;
-      }
-      const nextUsage = client.usedBytes + record.delta;
-      if (!Number.isSafeInteger(nextUsage) || nextUsage < 0 || nextUsage > client.quotaBytes) {
-        throw new Error("Usage journal exceeds client quota bounds");
-      }
-      client.usedBytes = nextUsage;
-      state.lastUsageSeq = record.seq;
-    }
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
-  return state;
-}
-
-function getState() {
-  statePromise ??= loadState();
-  return statePromise;
-}
-
-async function readState() {
-  await mutationQueue;
-  return getState();
-}
-
-function mutate(operation) {
-  const result = mutationQueue.then(async () => {
-    const draft = structuredClone(await getState());
-    const value = await operation(draft);
-    statePromise = Promise.resolve(draft);
-    return value;
-  });
-  mutationQueue = result.catch(() => {});
-  return result;
-}
-
-// Resolves once every mutation queued so far (and any queued while waiting) has been
-// written, for a clean shutdown.
-export async function drain() {
-  let seen;
-  do {
-    seen = mutationQueue;
-    await seen;
-  } while (seen !== mutationQueue);
-}
-
 async function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
   const result = await scrypt(password, salt, 64, { N: 16_384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
   return { salt, hash: result.toString("hex") };
 }
 
-async function saveSnapshot(state) {
-  const temp = `${file}.${process.pid}.${crypto.randomUUID()}.tmp`;
-  let handle;
-  try {
-    handle = await fs.open(temp, "wx", 0o600);
-    await handle.writeFile(`${JSON.stringify(state, null, 2)}\n`, "utf8");
-    await handle.sync();
-    await handle.close();
-    handle = undefined;
-    await fs.rename(temp, file);
-    await syncDataDirectory();
-    await fs.chmod(file, 0o600).catch(() => {});
-    // The snapshot already contains every applied journal sequence. Leaving an
-    // old journal behind is safe because replay skips those sequence numbers.
-    await fs.rm(usageJournal, { force: true });
-    await syncDataDirectory();
-  } catch (error) {
-    if (handle) await handle.close().catch(() => {});
-    await fs.rm(temp, { force: true }).catch(() => {});
-    throw error;
-  }
-}
-
-async function syncDataDirectory() {
-  let handle;
-  try {
-    handle = await fs.open(path.dirname(file), "r");
-    await handle.sync();
-  } catch (error) {
-    const unsupportedOnWindows = process.platform === "win32"
-      && ["EINVAL", "EPERM", "EISDIR", "EBADF"].includes(error?.code);
-    if (!unsupportedOnWindows) throw error;
-  } finally {
-    await handle?.close().catch(() => {});
-  }
-}
-
-async function appendUsage(state, username, delta, unit) {
-  state.lastUsageSeq += 1;
-  const record = { seq: state.lastUsageSeq, username, delta, at: new Date().toISOString() };
-  if (unit) record.unit = unit;
-  const handle = await fs.open(usageJournal, "a", 0o600);
-  try {
-    await handle.writeFile(`${JSON.stringify(record)}\n`, "utf8");
-    await handle.sync();
-  } finally {
-    await handle.close();
-  }
-}
-
-function publicClient(username, client) {
+function publicClient(row) {
   return {
-    username,
-    quotaBytes: client.quotaBytes,
-    usedBytes: client.usedBytes ?? 0,
-    remainingBytes: Math.max(0, client.quotaBytes - (client.usedBytes ?? 0)),
-    balanceMicros: client.balanceMicros ?? 0,
-    enabled: client.enabled !== false,
-    createdAt: client.createdAt,
-    email: client.email ?? null,
-    emailVerified: client.emailVerified === true,
+    username: row.username,
+    quotaBytes: row.quota_bytes,
+    usedBytes: row.used_bytes,
+    remainingBytes: Math.max(0, row.quota_bytes - row.used_bytes),
+    balanceMicros: row.balance_micros,
+    enabled: row.enabled,
+    createdAt: row.created_at.toISOString(),
+    email: row.email ?? null,
+    emailVerified: row.email_verified,
   };
 }
 
+const USERNAME_PATTERN = /^[A-Za-z0-9._-]{3,64}$/;
+
+async function findClient(username) {
+  if (typeof username !== "string" || !USERNAME_PATTERN.test(username)) return undefined;
+  return (await query("SELECT * FROM clients WHERE username = $1", [username])).rows[0];
+}
+
+// Row lock: concurrent changes to one account run one after another.
+async function lockClient(db, username) {
+  if (typeof username !== "string" || !USERNAME_PATTERN.test(username)) return undefined;
+  return (await db.query("SELECT * FROM clients WHERE username = $1 FOR UPDATE", [username])).rows[0];
+}
+
 export async function createClient(username, password, quotaBytes) {
-  if (!/^[A-Za-z0-9._-]{3,64}$/.test(username)) throw new Error("Username must be 3-64 safe characters");
+  if (typeof username !== "string" || !USERNAME_PATTERN.test(username)) throw new Error("Username must be 3-64 safe characters");
   if (typeof password !== "string" || password.length < 16 || password.length > 256) {
     throw new Error("Password must be 16-256 characters");
   }
   if (!Number.isSafeInteger(quotaBytes) || quotaBytes < 0) throw new Error("Quota must be a non-negative integer");
-  const passwordRecord = await hashPassword(password);
-  return mutate(async (state) => {
-    if (hasOwn(state.clients, username)) throw new Error("Client already exists");
-    state.clients[username] = {
-      ...passwordRecord,
-      quotaBytes,
-      usedBytes: 0,
-      enabled: true,
-      createdAt: new Date().toISOString(),
-    };
-    await saveSnapshot(state);
-    return publicClient(username, state.clients[username]);
-  });
+  const record = await hashPassword(password);
+  try {
+    const { rows } = await query(
+      "INSERT INTO clients (username, salt, hash, quota_bytes, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [username, record.salt, record.hash, quotaBytes, new Date()],
+    );
+    return publicClient(rows[0]);
+  } catch (error) {
+    if (error.code === UNIQUE_VIOLATION) throw new Error("Client already exists");
+    throw error;
+  }
 }
 
 // Cheap check against recently verified credentials: the client, or null on a miss.
@@ -456,11 +162,10 @@ export async function authenticateCached(username, password) {
   const digest = credentialDigest(username, password);
   const cached = verifiedCredentials.get(digest);
   if (!cached) return null;
-  const clients = (await readState()).clients;
-  const current = hasOwn(clients, username) ? clients[username] : undefined;
+  const current = await findClient(username);
   if (cached.expiresAt > Date.now() && cached.username === username
-    && current && current.enabled !== false && current.hash === cached.hash) {
-    return publicClient(username, current);
+    && current && current.enabled && current.hash === cached.hash) {
+    return publicClient(current);
   }
   verifiedCredentials.delete(digest);
   return null;
@@ -469,93 +174,76 @@ export async function authenticateCached(username, password) {
 export async function authenticate(username, password) {
   const fast = await authenticateCached(username, password);
   if (fast) return fast;
+  if (typeof username !== "string" || typeof password !== "string") return null;
   const digest = credentialDigest(username, password);
 
-  const state = await readState();
-  const candidate = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+  const candidate = await findClient(username);
   const salt = candidate?.salt ?? DUMMY_SALT;
   const expectedHex = candidate?.hash ?? DUMMY_HASH;
   const actual = await hashPassword(password, salt);
   const expected = Buffer.from(expectedHex, "hex");
   const supplied = Buffer.from(actual.hash, "hex");
   const valid = expected.length === supplied.length && crypto.timingSafeEqual(expected, supplied);
-  if (!valid || !candidate || candidate.enabled === false) return null;
+  if (!valid || !candidate || !candidate.enabled) return null;
 
-  const latest = await readState();
-  const current = hasOwn(latest.clients, username) ? latest.clients[username] : undefined;
-  if (!current
-    || current.enabled === false
-    || current.salt !== salt
-    || current.hash !== expectedHex) return null;
+  // The hash took a while: make sure the password was not replaced meanwhile.
+  const current = await findClient(username);
+  if (!current || !current.enabled || current.salt !== salt || current.hash !== expectedHex) return null;
   rememberCredentials(digest, username, current.hash);
-  return publicClient(username, current);
+  return publicClient(current);
 }
 
 export async function getClient(username) {
-  const clients = (await readState()).clients;
-  const client = hasOwn(clients, username) ? clients[username] : undefined;
-  return client ? publicClient(username, client) : null;
+  const client = await findClient(username);
+  return client ? publicClient(client) : null;
 }
 
 export async function reserveUsage(username, requestedBytes) {
   if (!Number.isSafeInteger(requestedBytes) || requestedBytes <= 0) return 0;
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client || client.enabled === false) return 0;
-    const granted = Math.min(requestedBytes, Math.max(0, client.quotaBytes - client.usedBytes));
-    if (granted === 0) return 0;
-    client.usedBytes += granted;
-    await appendUsage(state, username, granted);
-    return granted;
-  });
+  const { rows } = await query(
+    `WITH locked AS (
+       SELECT username, LEAST($2::bigint, quota_bytes - used_bytes) AS granted
+       FROM clients WHERE username = $1 AND enabled FOR UPDATE
+     )
+     UPDATE clients c SET used_bytes = c.used_bytes + locked.granted
+     FROM locked WHERE c.username = locked.username AND locked.granted > 0
+     RETURNING locked.granted`,
+    [username, requestedBytes],
+  );
+  return rows[0]?.granted ?? 0;
 }
 
 export async function releaseUsage(username, bytes) {
   if (!Number.isSafeInteger(bytes) || bytes <= 0) return;
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client) return;
-    const released = Math.min(bytes, client.usedBytes);
-    if (released === 0) return;
-    client.usedBytes -= released;
-    await appendUsage(state, username, -released);
-  });
+  await query("UPDATE clients SET used_bytes = GREATEST(0, used_bytes - $2::bigint) WHERE username = $1", [username, bytes]);
 }
 
 export async function credit(username, bytes) {
   if (!Number.isSafeInteger(bytes) || bytes <= 0) throw new Error("Credit must be a positive integer");
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+  return transaction(async (db) => {
+    const client = await lockClient(db, username);
     if (!client) throw new Error("Unknown client");
-    if (!Number.isSafeInteger(client.quotaBytes + bytes)) throw new Error("Quota is too large");
-    client.quotaBytes += bytes;
-    await saveSnapshot(state);
-    return publicClient(username, client);
+    if (!Number.isSafeInteger(client.quota_bytes + bytes)) throw new Error("Quota is too large");
+    const { rows } = await db.query("UPDATE clients SET quota_bytes = quota_bytes + $2::bigint WHERE username = $1 RETURNING *", [username, bytes]);
+    return publicClient(rows[0]);
   });
 }
 
 // ---- USD wallet ---------------------------------------------------------------
 // Balances are integer micro-dollars (1 USD = 1,000,000) so prices like $0.0008 per
-// request stay exact. Credits are snapshotted; per-request debits and releases go
-// through the fsynced usage journal like traffic does, so a crash never loses them.
+// request stay exact. Every debit is a conditional UPDATE or runs under the account's
+// row lock, so concurrent requests can never spend the same funds twice.
 export const MICROS_PER_USD = 1_000_000;
 const GIB = 1024 ** 3;
 
-function walletClient(state, username) {
-  const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-  return client && client.enabled !== false ? client : undefined;
-}
-
 export async function creditWallet(username, micros) {
   if (!Number.isSafeInteger(micros) || micros <= 0) throw new Error("Credit must be a positive integer");
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
+  return transaction(async (db) => {
+    const client = await lockClient(db, username);
     if (!client) throw new Error("Unknown client");
-    const next = (client.balanceMicros ?? 0) + micros;
-    if (!Number.isSafeInteger(next)) throw new Error("Balance is too large");
-    client.balanceMicros = next;
-    await saveSnapshot(state);
-    return publicClient(username, client);
+    if (!Number.isSafeInteger(client.balance_micros + micros)) throw new Error("Balance is too large");
+    const { rows } = await db.query("UPDATE clients SET balance_micros = balance_micros + $2::bigint WHERE username = $1 RETURNING *", [username, micros]);
+    return publicClient(rows[0]);
   });
 }
 
@@ -563,23 +251,16 @@ export async function creditWallet(username, micros) {
 // whole amount was taken from the balance.
 export async function reserveFunds(username, micros) {
   if (!Number.isSafeInteger(micros) || micros <= 0) return false;
-  return mutate(async (state) => {
-    const client = walletClient(state, username);
-    if (!client || (client.balanceMicros ?? 0) < micros) return false;
-    client.balanceMicros -= micros;
-    await appendUsage(state, username, -micros, "micros");
-    return true;
-  });
+  const result = await query(
+    "UPDATE clients SET balance_micros = balance_micros - $2::bigint WHERE username = $1 AND enabled AND balance_micros >= $2::bigint",
+    [username, micros],
+  );
+  return result.rowCount === 1;
 }
 
 export async function releaseFunds(username, micros) {
   if (!Number.isSafeInteger(micros) || micros <= 0) return;
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client) return;
-    client.balanceMicros = (client.balanceMicros ?? 0) + micros;
-    await appendUsage(state, username, micros, "micros");
-  });
+  await query("UPDATE clients SET balance_micros = balance_micros + $2::bigint WHERE username = $1", [username, micros]);
 }
 
 const trafficCost = (bytes, pricePerGbMicros) => Math.ceil((bytes * pricePerGbMicros) / GIB);
@@ -590,29 +271,29 @@ const trafficCost = (bytes, pricePerGbMicros) => Math.ceil((bytes * pricePerGbMi
 export async function reserveTraffic(username, requestedBytes, { pricePerGbMicros = 0, allowQuota = true } = {}) {
   const none = { bytes: 0, quotaBytes: 0, walletBytes: 0 };
   if (!Number.isSafeInteger(requestedBytes) || requestedBytes <= 0) return none;
-  return mutate(async (state) => {
-    const client = walletClient(state, username);
-    if (!client) return none;
-    let quotaBytes = 0;
-    if (allowQuota) {
-      quotaBytes = Math.min(requestedBytes, Math.max(0, client.quotaBytes - client.usedBytes));
-      if (quotaBytes > 0) {
-        client.usedBytes += quotaBytes;
-        await appendUsage(state, username, quotaBytes);
-      }
-    }
+  return transaction(async (db) => {
+    const client = await lockClient(db, username);
+    if (!client || !client.enabled) return none;
+    const quotaBytes = allowQuota
+      ? Math.min(requestedBytes, Math.max(0, client.quota_bytes - client.used_bytes))
+      : 0;
     let walletBytes = 0;
+    let cost = 0;
     const wanted = requestedBytes - quotaBytes;
     if (wanted > 0 && pricePerGbMicros > 0) {
-      const balance = client.balanceMicros ?? 0;
+      const balance = client.balance_micros;
       walletBytes = Math.min(wanted, Math.floor((balance * GIB) / pricePerGbMicros));
-      const cost = trafficCost(walletBytes, pricePerGbMicros);
-      if (walletBytes > 0 && cost > 0 && cost <= balance) {
-        client.balanceMicros = balance - cost;
-        await appendUsage(state, username, -cost, "micros");
-      } else {
+      cost = trafficCost(walletBytes, pricePerGbMicros);
+      if (!(walletBytes > 0 && cost > 0 && cost <= balance)) {
         walletBytes = 0;
+        cost = 0;
       }
+    }
+    if (quotaBytes > 0 || cost > 0) {
+      await db.query(
+        "UPDATE clients SET used_bytes = used_bytes + $2::bigint, balance_micros = balance_micros - $3::bigint WHERE username = $1",
+        [username, quotaBytes, cost],
+      );
     }
     return { bytes: quotaBytes + walletBytes, quotaBytes, walletBytes };
   });
@@ -629,51 +310,32 @@ export async function releaseTraffic(username, { quotaBytes = 0, walletBytes = 0
 }
 
 export async function setEnabled(username, enabled) {
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client) throw new Error("Unknown client");
-    client.enabled = Boolean(enabled);
-    await saveSnapshot(state);
-    return publicClient(username, client);
-  });
+  const { rows } = await query("UPDATE clients SET enabled = $2 WHERE username = $1 RETURNING *", [username, Boolean(enabled)]);
+  if (!rows[0]) throw new Error("Unknown client");
+  return publicClient(rows[0]);
 }
 
 export async function listClients() {
-  const state = await readState();
-  return Object.entries(state.clients).map(([username, client]) => publicClient(username, client));
+  const { rows } = await query("SELECT * FROM clients ORDER BY created_at, username");
+  return rows.map(publicClient);
 }
 
 function accountError(code, message) {
   return Object.assign(new Error(message), { code });
 }
 
-function findByEmail(state, email) {
-  return Object.entries(state.clients).find(([, client]) => client.email === email) ?? null;
+async function findByEmail(email) {
+  return (await query("SELECT * FROM clients WHERE email = $1", [email])).rows[0];
 }
 
 // Accepts a proxy username or an account email; returns the username or null.
 export async function findUsername(identifier) {
   if (typeof identifier !== "string") return null;
-  const state = await readState();
   if (identifier.includes("@")) {
     const email = normalizeEmail(identifier);
-    const found = email ? findByEmail(state, email) : null;
-    return found ? found[0] : null;
+    return (email ? await findByEmail(email) : undefined)?.username ?? null;
   }
-  return hasOwn(state.clients, identifier) ? identifier : null;
-}
-
-function newProxyUsername(state) {
-  for (;;) {
-    const username = `px${crypto.randomBytes(5).toString("hex")}`;
-    if (!hasOwn(state.clients, username)) return username;
-  }
-}
-
-function pruneSessions(state, now) {
-  for (const [key, session] of Object.entries(state.sessions)) {
-    if (session.expiresAt <= now || !hasOwn(state.clients, session.username)) delete state.sessions[key];
-  }
+  return (await findClient(identifier))?.username ?? null;
 }
 
 // A web account is a client record with an email and a separate web password.
@@ -688,125 +350,112 @@ export async function createAccount(email, password) {
     hashPassword(password),
     hashPassword(crypto.randomBytes(24).toString("base64url")),
   ]);
-  return mutate(async (state) => {
-    if (findByEmail(state, normalized)) throw accountError("EMAIL_TAKEN", "An account with this email already exists");
-    const username = newProxyUsername(state);
-    state.clients[username] = {
-      ...proxyRecord,
-      quotaBytes: 0,
-      usedBytes: 0,
-      balanceMicros: 1_000_000,
-      enabled: true,
-      createdAt: new Date().toISOString(),
-      email: normalized,
-      webSalt: webRecord.salt,
-      webHash: webRecord.hash,
-    };
-    await saveSnapshot(state);
-    return publicClient(username, state.clients[username]);
-  });
+  for (;;) {
+    const username = `px${crypto.randomBytes(5).toString("hex")}`;
+    try {
+      const { rows } = await query(
+        `INSERT INTO clients (username, salt, hash, balance_micros, created_at, email, web_salt, web_hash)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        [username, proxyRecord.salt, proxyRecord.hash, 1_000_000, new Date(), normalized, webRecord.salt, webRecord.hash],
+      );
+      return publicClient(rows[0]);
+    } catch (error) {
+      if (error.code !== UNIQUE_VIOLATION) throw error;
+      if (error.constraint === "clients_email_key") {
+        throw accountError("EMAIL_TAKEN", "An account with this email already exists");
+      }
+      // The random proxy username collided: draw another.
+    }
+  }
 }
 
 export async function createVerificationToken(username) {
   const token = crypto.randomBytes(32).toString("base64url");
-  await mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client) throw new Error("Unknown client");
-    client.verificationToken = sessionKey(token);
-    client.verificationExpiresAt = Date.now() + VERIFICATION_TOKEN_TTL_MS;
-    await saveSnapshot(state);
-  });
+  const result = await query(
+    "UPDATE clients SET verification_token = $2, verification_expires_at = $3 WHERE username = $1",
+    [username, sessionKey(token), new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS)],
+  );
+  if (result.rowCount !== 1) throw new Error("Unknown client");
   return token;
 }
 
 export async function confirmEmail(token) {
   if (typeof token !== "string" || !token) return null;
-  const digest = sessionKey(token);
-  return mutate(async (state) => {
-    for (const [username, client] of Object.entries(state.clients)) {
-      if (client.verificationToken === digest && client.verificationExpiresAt > Date.now()) {
-        client.emailVerified = true;
-        delete client.verificationToken;
-        delete client.verificationExpiresAt;
-        await saveSnapshot(state);
-        return publicClient(username, client);
-      }
-    }
-    return null;
-  });
+  const { rows } = await query(
+    `UPDATE clients SET email_verified = true, verification_token = NULL, verification_expires_at = NULL
+     WHERE verification_token = $1 AND verification_expires_at > $2 RETURNING *`,
+    [sessionKey(token), new Date()],
+  );
+  return rows[0] ? publicClient(rows[0]) : null;
 }
 
 export async function verifyAccount(email, password) {
   if (typeof password !== "string" || password.length > 256) return null;
   const normalized = normalizeEmail(email);
-  const found = normalized ? findByEmail(await readState(), normalized) : null;
-  const client = found?.[1];
+  const client = normalized ? await findByEmail(normalized) : undefined;
   // Unknown emails still pay for a hash so response time does not reveal which emails exist.
-  const expectedHex = client?.webHash ?? DUMMY_HASH;
-  const actual = await hashPassword(password, client?.webSalt ?? DUMMY_SALT);
+  const expectedHex = client?.web_hash ?? DUMMY_HASH;
+  const actual = await hashPassword(password, client?.web_salt ?? DUMMY_SALT);
   const valid = crypto.timingSafeEqual(Buffer.from(expectedHex, "hex"), Buffer.from(actual.hash, "hex"));
-  if (!valid || !client || client.enabled === false) return null;
-  return publicClient(found[0], client);
+  if (!valid || !client || !client.enabled) return null;
+  return publicClient(client);
 }
 
 export async function createSession(username) {
   const token = crypto.randomBytes(32).toString("base64url");
-  await mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client || client.enabled === false) throw new Error("Unknown client");
+  await transaction(async (db) => {
+    const client = await lockClient(db, username);
+    if (!client || !client.enabled) throw new Error("Unknown client");
     const now = Date.now();
-    pruneSessions(state, now);
-    const own = Object.entries(state.sessions)
-      .filter(([, session]) => session.username === username)
-      .sort(([, left], [, right]) => left.expiresAt - right.expiresAt);
+    await db.query("DELETE FROM sessions WHERE expires_at <= $1", [new Date(now)]);
     // Signing in on one device too many signs out the oldest session.
-    while (own.length >= MAX_SESSIONS_PER_CLIENT) delete state.sessions[own.shift()[0]];
-    state.sessions[sessionKey(token)] = { username, expiresAt: now + SESSION_TTL_MS };
-    await saveSnapshot(state);
+    await db.query(
+      `DELETE FROM sessions WHERE token_hash IN (
+         SELECT token_hash FROM sessions WHERE username = $1
+         ORDER BY expires_at DESC, token_hash OFFSET $2
+       )`,
+      [username, MAX_SESSIONS_PER_CLIENT - 1],
+    );
+    await db.query(
+      "INSERT INTO sessions (token_hash, username, expires_at) VALUES ($1, $2, $3)",
+      [sessionKey(token), username, new Date(now + SESSION_TTL_MS)],
+    );
   });
   return { token, maxAgeSeconds: SESSION_TTL_MS / 1000 };
 }
 
 export async function getSessionClient(token) {
   if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
-  const state = await readState();
-  const key = sessionKey(token);
-  const session = hasOwn(state.sessions, key) ? state.sessions[key] : undefined;
-  if (!session || session.expiresAt <= Date.now()) return null;
-  const client = hasOwn(state.clients, session.username) ? state.clients[session.username] : undefined;
-  if (!client || client.enabled === false) return null;
-  return publicClient(session.username, client);
+  const { rows } = await query(
+    `SELECT c.* FROM sessions s JOIN clients c ON c.username = s.username
+     WHERE s.token_hash = $1 AND s.expires_at > $2 AND c.enabled`,
+    [sessionKey(token), new Date()],
+  );
+  return rows[0] ? publicClient(rows[0]) : null;
 }
 
 // Returns the new proxy password once; only its hash is kept, so it cannot be shown again.
 export async function regenerateProxyPassword(username) {
   const password = crypto.randomBytes(24).toString("base64url");
   const record = await hashPassword(password);
-  await mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client || client.enabled === false) throw new Error("Unknown client");
-    client.salt = record.salt;
-    client.hash = record.hash;
-    await saveSnapshot(state);
-  });
+  const result = await query(
+    "UPDATE clients SET salt = $2, hash = $3 WHERE username = $1 AND enabled",
+    [username, record.salt, record.hash],
+  );
+  if (result.rowCount !== 1) throw new Error("Unknown client");
   return password;
 }
 
 export async function deleteSession(token) {
   if (typeof token !== "string") return;
-  const key = sessionKey(token);
-  return mutate(async (state) => {
-    if (!hasOwn(state.sessions, key)) return;
-    delete state.sessions[key];
-    await saveSnapshot(state);
-  });
+  await query("DELETE FROM sessions WHERE token_hash = $1", [sessionKey(token)]);
 }
 
 // API keys authenticate the unlocker API. The key itself is 256 random bits, so a
 // SHA-256 digest is enough to store it (no slow hash needed, unlike passwords); it is
 // shown once at creation and never again.
-function apiKeyView(apiKey) {
-  return { id: apiKey.id, name: apiKey.name, prefix: apiKey.prefix, createdAt: apiKey.createdAt };
+function apiKeyView(row) {
+  return { id: row.id, name: row.name, prefix: row.prefix, createdAt: row.created_at.toISOString() };
 }
 
 export async function createApiKey(username, name = "") {
@@ -815,86 +464,83 @@ export async function createApiKey(username, name = "") {
     throw accountError("INVALID_NAME", `Key name must be at most ${API_KEY_NAME_MAX} printable characters`);
   }
   const key = `vy_live_${crypto.randomBytes(32).toString("base64url")}`;
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client || client.enabled === false) throw new Error("Unknown client");
-    const own = Object.values(state.apiKeys).filter((apiKey) => apiKey.username === username);
-    if (own.length >= MAX_API_KEYS_PER_CLIENT) {
+  return transaction(async (db) => {
+    const client = await lockClient(db, username);
+    if (!client || !client.enabled) throw new Error("Unknown client");
+    const { rows: [{ count }] } = await db.query("SELECT count(*)::int AS count FROM api_keys WHERE username = $1", [username]);
+    if (count >= MAX_API_KEYS_PER_CLIENT) {
       throw accountError("TOO_MANY_KEYS", `At most ${MAX_API_KEYS_PER_CLIENT} API keys per account. Revoke one first.`);
     }
-    const record = {
-      id: `key_${crypto.randomBytes(8).toString("hex")}`,
-      username,
-      name: label,
-      prefix: key.slice(0, 12),
-      createdAt: new Date().toISOString(),
-    };
-    state.apiKeys[sessionKey(key)] = record;
-    await saveSnapshot(state);
-    return { ...apiKeyView(record), key };
+    const { rows } = await db.query(
+      "INSERT INTO api_keys (key_hash, id, username, name, prefix, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [sessionKey(key), `key_${crypto.randomBytes(8).toString("hex")}`, username, label, key.slice(0, 12), new Date()],
+    );
+    return { ...apiKeyView(rows[0]), key };
   });
 }
 
 export async function listApiKeys(username) {
-  const state = await readState();
-  return Object.values(state.apiKeys)
-    .filter((apiKey) => apiKey.username === username)
-    .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
-    .map(apiKeyView);
+  const { rows } = await query("SELECT * FROM api_keys WHERE username = $1 ORDER BY created_at, seq", [username]);
+  return rows.map(apiKeyView);
 }
 
 export async function revokeApiKey(username, id) {
   if (typeof id !== "string") return false;
-  return mutate(async (state) => {
-    const entry = Object.entries(state.apiKeys).find(([, apiKey]) => apiKey.id === id && apiKey.username === username);
-    if (!entry) return false;
-    delete state.apiKeys[entry[0]];
-    await saveSnapshot(state);
-    return true;
-  });
+  const result = await query("DELETE FROM api_keys WHERE id = $1 AND username = $2", [id, username]);
+  return result.rowCount === 1;
 }
 
 // Returns the account behind a key, or null for unknown, revoked or disabled.
 export async function authenticateApiKey(key) {
   if (typeof key !== "string" || !API_KEY_PATTERN.test(key)) return null;
-  const state = await readState();
-  const digest = sessionKey(key);
-  const apiKey = hasOwn(state.apiKeys, digest) ? state.apiKeys[digest] : undefined;
-  if (!apiKey) return null;
-  const client = hasOwn(state.clients, apiKey.username) ? state.clients[apiKey.username] : undefined;
-  if (!client || client.enabled === false) return null;
-  return { ...publicClient(apiKey.username, client), apiKeyId: apiKey.id };
+  const { rows } = await query(
+    `SELECT c.*, k.id AS api_key_id FROM api_keys k JOIN clients c ON c.username = k.username
+     WHERE k.key_hash = $1 AND c.enabled`,
+    [sessionKey(key)],
+  );
+  return rows[0] ? { ...publicClient(rows[0]), apiKeyId: rows[0].api_key_id } : null;
+}
+
+function pendingView(row) {
+  return {
+    purchaseId: row.purchase_id,
+    username: row.username,
+    packageId: row.package_id,
+    bytes: row.bytes,
+    ...(row.micros ? { micros: row.micros } : {}),
+    cents: row.cents,
+    currency: row.currency,
+    createdAt: row.created_at.toISOString(),
+    expiresAt: row.expires_at.getTime(),
+    sessionId: row.session_id,
+  };
 }
 
 export async function createPendingPayment(username, packageInfo) {
   if (!validPackageInfo(packageInfo)) throw new Error("Invalid package");
-  return mutate(async (state) => {
-    const client = hasOwn(state.clients, username) ? state.clients[username] : undefined;
-    if (!client || client.enabled === false) throw new Error("Unknown client");
+  return transaction(async (db) => {
+    const client = await lockClient(db, username);
+    if (!client || !client.enabled) throw new Error("Unknown client");
     const now = Date.now();
-    for (const [pendingId, pending] of Object.entries(state.pendingPayments)) {
-      if (pending.expiresAt <= now) delete state.pendingPayments[pendingId];
-    }
-    const pending = Object.values(state.pendingPayments);
-    if (pending.length >= MAX_PENDING_PAYMENTS
-      || pending.filter((payment) => payment.username === username).length >= MAX_PENDING_PAYMENTS_PER_CLIENT) {
+    await db.query("DELETE FROM pending_payments WHERE expires_at <= $1", [new Date(now)]);
+    const { rows: [counts] } = await db.query(
+      "SELECT count(*)::int AS total, (count(*) FILTER (WHERE username = $1))::int AS own FROM pending_payments",
+      [username],
+    );
+    if (counts.total >= MAX_PENDING_PAYMENTS || counts.own >= MAX_PENDING_PAYMENTS_PER_CLIENT) {
       throw new Error("Too many pending purchases");
     }
-    const purchaseId = crypto.randomUUID();
-    state.pendingPayments[purchaseId] = {
-      purchaseId,
-      username,
-      packageId: packageInfo.id,
-      bytes: packageInfo.micros ? 0 : packageInfo.bytes,
-      ...(packageInfo.micros ? { micros: packageInfo.micros } : {}),
-      cents: packageInfo.cents,
-      currency: packageInfo.currency.toLowerCase(),
-      createdAt: new Date(now).toISOString(),
-      expiresAt: now + PENDING_PAYMENT_TTL_MS,
-      sessionId: null,
-    };
-    await saveSnapshot(state);
-    return { ...state.pendingPayments[purchaseId] };
+    const { rows } = await db.query(
+      `INSERT INTO pending_payments (purchase_id, username, package_id, bytes, micros, cents, currency, created_at, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [
+        crypto.randomUUID(), username, packageInfo.id,
+        packageInfo.micros ? 0 : packageInfo.bytes, packageInfo.micros || 0,
+        packageInfo.cents, packageInfo.currency.toLowerCase(),
+        new Date(now), new Date(now + PENDING_PAYMENT_TTL_MS),
+      ],
+    );
+    return pendingView(rows[0]);
   });
 }
 
@@ -902,23 +548,21 @@ export async function bindPaymentSession(purchaseId, sessionId) {
   if (!validPurchaseId(purchaseId) || !validPaymentRef(sessionId, "session")) {
     throw new Error("Invalid payment session");
   }
-  return mutate(async (state) => {
-    const pending = hasOwn(state.pendingPayments, purchaseId) ? state.pendingPayments[purchaseId] : undefined;
-    if (!pending || pending.sessionId) throw new Error("Unknown purchase");
-    pending.sessionId = sessionId;
-    await saveSnapshot(state);
-  });
+  const result = await query(
+    "UPDATE pending_payments SET session_id = $2 WHERE purchase_id = $1 AND session_id IS NULL",
+    [purchaseId, sessionId],
+  );
+  if (result.rowCount !== 1) throw new Error("Unknown purchase");
 }
 
 export async function cancelPendingPayment(purchaseId) {
   if (!validPurchaseId(purchaseId)) throw new Error("Invalid purchase");
-  return mutate(async (state) => {
-    if (!hasOwn(state.pendingPayments, purchaseId)) return;
-    delete state.pendingPayments[purchaseId];
-    await saveSnapshot(state);
-  });
+  await query("DELETE FROM pending_payments WHERE purchase_id = $1", [purchaseId]);
 }
 
+// Credits a paid purchase exactly once. The whole check-credit-record sequence is one
+// transaction under the account's row lock, and the event id is a primary key, so a
+// replayed or concurrent webhook for the same event can never credit twice.
 export async function completePayment({ eventId, purchaseId, sessionId, amountTotal, currency }) {
   if (!validPaymentRef(eventId, "event")
     || !validPurchaseId(purchaseId)
@@ -929,40 +573,40 @@ export async function completePayment({ eventId, purchaseId, sessionId, amountTo
     || !/^[a-zA-Z]{3}$/.test(currency)) {
     throw new Error("Invalid payment event");
   }
-  return mutate(async (state) => {
-    if (hasOwn(state.processedPayments, eventId)) return { credited: false, duplicate: true };
-    const pending = hasOwn(state.pendingPayments, purchaseId) ? state.pendingPayments[purchaseId] : undefined;
-    if (!pending || pending.expiresAt < Date.now()) throw new Error("Unknown or expired purchase");
-    if (!pending.sessionId || pending.sessionId !== sessionId) throw new Error("Payment session mismatch");
-    if (pending.cents !== amountTotal || pending.currency !== String(currency).toLowerCase()) {
+  const duplicate = { credited: false, duplicate: true };
+  return transaction(async (db) => {
+    const processed = (id) => db.query("SELECT 1 FROM processed_payments WHERE event_id = $1", [id]).then((r) => r.rowCount > 0);
+    if (await processed(eventId)) return duplicate;
+
+    // Lock order is always account first, then purchase.
+    const owner = (await db.query("SELECT username FROM pending_payments WHERE purchase_id = $1", [purchaseId])).rows[0];
+    const client = owner ? await lockClient(db, owner.username) : undefined;
+    const pending = client
+      ? (await db.query("SELECT * FROM pending_payments WHERE purchase_id = $1 FOR UPDATE", [purchaseId])).rows[0]
+      : undefined;
+    if (!pending) {
+      // A concurrent delivery of the same event may have just finished.
+      if (await processed(eventId)) return duplicate;
+      throw new Error("Unknown or expired purchase");
+    }
+    if (pending.expires_at.getTime() < Date.now()) throw new Error("Unknown or expired purchase");
+    if (!pending.session_id || pending.session_id !== sessionId) throw new Error("Payment session mismatch");
+    if (pending.cents !== amountTotal || pending.currency !== currency.toLowerCase()) {
       throw new Error("Payment amount mismatch");
     }
-    const client = hasOwn(state.clients, pending.username) ? state.clients[pending.username] : undefined;
-    if (!client) throw new Error("Unknown client");
     if (pending.micros) {
-      const nextBalance = (client.balanceMicros ?? 0) + pending.micros;
-      if (!Number.isSafeInteger(nextBalance)) throw new Error("Balance is too large");
-      client.balanceMicros = nextBalance;
+      if (!Number.isSafeInteger(client.balance_micros + pending.micros)) throw new Error("Balance is too large");
+      await db.query("UPDATE clients SET balance_micros = balance_micros + $2::bigint WHERE username = $1", [client.username, pending.micros]);
     } else {
-      if (!Number.isSafeInteger(client.quotaBytes + pending.bytes)) throw new Error("Quota is too large");
-      client.quotaBytes += pending.bytes;
+      if (!Number.isSafeInteger(client.quota_bytes + pending.bytes)) throw new Error("Quota is too large");
+      await db.query("UPDATE clients SET quota_bytes = quota_bytes + $2::bigint WHERE username = $1", [client.username, pending.bytes]);
     }
-    state.processedPayments = pruneProcessedPayments(
-      state.processedPayments,
-      Math.max(0, processedPaymentLimit - 1),
+    await db.query(
+      `INSERT INTO processed_payments (event_id, purchase_id, session_id, username, package_id, bytes, micros, processed_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [eventId, purchaseId, sessionId, client.username, pending.package_id, pending.bytes, pending.micros, new Date()],
     );
-    state.processedPayments[eventId] = {
-      eventId,
-      purchaseId,
-      sessionId,
-      username: pending.username,
-      packageId: pending.packageId,
-      bytes: pending.bytes,
-      ...(pending.micros ? { micros: pending.micros } : {}),
-      processedAt: new Date().toISOString(),
-    };
-    delete state.pendingPayments[purchaseId];
-    await saveSnapshot(state);
-    return { credited: true, username: pending.username, bytes: pending.bytes, micros: pending.micros ?? 0 };
+    await db.query("DELETE FROM pending_payments WHERE purchase_id = $1", [purchaseId]);
+    return { credited: true, username: client.username, bytes: pending.bytes, micros: pending.micros };
   });
 }

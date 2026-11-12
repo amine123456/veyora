@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import './helpers/database.js';
 
 const run = promisify(execFile);
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-admin-'));

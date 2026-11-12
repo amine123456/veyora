@@ -5,6 +5,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import './helpers/database.js';
 
 function request(port, { path: requestPath, body = '', headers = {}, method = 'POST' }) {
   return new Promise((resolve, reject) => {
@@ -22,7 +23,6 @@ test('checkout and webhook enforce authorization, binding, signature, and replay
   const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-payment-'));
   process.env.DATA_FILE = path.join(directory, 'state.json');
   process.env.PACKAGES = 'one-gb:1000:200:usd';
-  process.env.PROCESSED_PAYMENT_HISTORY_LIMIT = '20';
 
   const webhookSecret = 'whsec_test_only_not_live';
   const stripeKey = 'sk_test_only_not_live';

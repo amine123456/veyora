@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { databaseDump, query } from './helpers/database.js';
 
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-accounts-'));
 const dataFile = path.join(directory, 'state.json');
@@ -66,11 +67,11 @@ test('signup creates an account with its own proxy user and a hardened session c
     assert.equal(me.status, 200);
     assert.equal(me.json.username, signup.json.username);
 
-    // The session token itself is never written to disk, only its hash.
-    const state = JSON.parse(await readFile(process.env.DATA_FILE, 'utf8'));
+    // The session token itself is never stored, only its hash.
     const token = cookieOf(signup).split('=')[1];
-    assert.ok(!JSON.stringify(state).includes(token));
-    assert.equal(state.clients[signup.json.username].email, 'ada@example.com');
+    assert.ok(!(await databaseDump()).includes(token));
+    const { rows } = await query('SELECT email FROM clients WHERE username = $1', [signup.json.username]);
+    assert.equal(rows[0].email, 'ada@example.com');
 
     const duplicate = await request(port, { path: '/api/signup', body: { email: 'ADA@example.com', password: 'another long password' } });
     assert.equal(duplicate.status, 409);
@@ -215,24 +216,6 @@ test('when turnstile is configured, signup requires a valid token', async () => 
   }
 });
 
-test('version 2 state files upgrade with an empty session table', async () => {
-  const legacyDirectory = await mkdtemp(path.join(os.tmpdir(), 'proxy-legacy-'));
-  const legacyFile = path.join(legacyDirectory, 'state.json');
-  try {
-    await writeFile(legacyFile, JSON.stringify({ version: 2, clients: {}, processedPayments: {}, pendingPayments: {}, lastUsageSeq: 0 }));
-    process.env.DATA_FILE = legacyFile;
-    const legacyStore = await import(`../src/store.js?legacy=${Date.now()}`);
-    const account = await legacyStore.createAccount('legacy@example.com', 'legacy password 1');
-    const saved = JSON.parse(await readFile(legacyFile, 'utf8'));
-    assert.equal(saved.version, 3);
-    assert.deepEqual(saved.sessions, {});
-    assert.equal(saved.clients[account.username].email, 'legacy@example.com');
-  } finally {
-    process.env.DATA_FILE = dataFile;
-    await rm(legacyDirectory, { recursive: true, force: true });
-  }
-});
-
 test('dashboard data includes the public proxy endpoint', async () => {
   await withServer(async (port) => {
     const signup = await request(port, { path: '/api/signup', body: { email: 'endpoint@example.com', password: 'endpoint password' } });
@@ -263,8 +246,7 @@ test('regenerating the proxy password shows it once and retires the old one', as
     assert.equal(await store.authenticate(username, first.json.password), null);
     assert.equal((await store.authenticate(username, second.json.password)).username, username);
 
-    const state = JSON.parse(await readFile(process.env.DATA_FILE, 'utf8'));
-    assert.ok(!JSON.stringify(state).includes(second.json.password));
+    assert.ok(!(await databaseDump()).includes(second.json.password));
   });
 });
 

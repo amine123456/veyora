@@ -3,6 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import './helpers/database.js';
 
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-wallet-'));
 const dataFile = path.join(directory, 'state.json');

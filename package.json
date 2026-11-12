@@ -1,16 +1,25 @@
 {
-  "name": "private-proxy-gateway",
+  "name": "veyora",
   "version": "0.1.0",
   "private": true,
-  "description": "Authenticated quota gateway over an upstream HTTP proxy",
+  "description": "Veyora proxy gateway, Web Unlocker and account API",
   "type": "module",
   "scripts": {
     "start": "node --env-file=.env src/server.js",
     "admin": "node --env-file=.env src/admin.js",
     "test": "node --test --test-concurrency=1",
-    "smoke:live": "node scripts/live-smoke.js"
+    "smoke:live": "node scripts/live-smoke.js",
+    "migrate": "node --env-file=.env scripts/migrate.js",
+    "db:test:up": "docker run -d --name veyora-test-pg -e POSTGRES_PASSWORD=veyora_test -e POSTGRES_DB=veyora_test -p 127.0.0.1:54329:5432 postgres:16-alpine || docker start veyora-test-pg"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  },
+  "optionalDependencies": {
+    "patchright": "1.64.3",
+    "playwright": "1.58.0"
   }
 }

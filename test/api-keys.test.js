@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { databaseDump } from './helpers/database.js';
 
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-api-keys-'));
 process.env.DATA_FILE = path.join(directory, 'state.json');
@@ -60,8 +61,7 @@ test('a key is shown once, stored only as a hash, and authenticates its account'
 
   const listed = await store.listApiKeys(account.username);
   assert.deepEqual(listed, [{ id: created.id, name: 'scraper', prefix: created.prefix, createdAt: created.createdAt }]);
-  const disk = await readFile(process.env.DATA_FILE, 'utf8');
-  assert.equal(disk.includes(created.key), false);
+  assert.equal((await databaseDump()).includes(created.key), false);
 
   const found = await store.authenticateApiKey(created.key);
   assert.equal(found.username, account.username);

@@ -40,7 +40,7 @@ Destinations are still checked locally (names that resolve to private or special
 
 ## 2. Create the first 30 GB account
 
-Stop the gateway before running an administration command; the JSON store is intentionally single-process.
+Administration commands work whether or not the gateway is running: all state is in PostgreSQL.
 
 ```powershell
 node --env-file=.env src/admin.js create cousin 30
@@ -138,13 +138,14 @@ Content-Type: application/json
 
 Keep `PAYMENTS_HOST` on loopback. Publish it through an HTTPS reverse proxy, then configure Stripe to send `checkout.session.completed` to `https://YOUR_DOMAIN/stripe/webhook`. A signed webhook grants quota only when its Stripe session, local purchase ID, exact amount, and currency match a checkout created by this server. Duplicate events do not grant quota twice.
 
-`PROCESSED_PAYMENT_HISTORY_LIMIT` bounds the retained Stripe event ledger (default `10000`). Replays for pruned events remain harmless because their one-time pending purchase has already been consumed. State snapshots and their containing directory are synced before journal cleanup for crash-safe replacement.
+Every credited provider event is kept in `processed_payments`, keyed by its event id, and crediting runs in one transaction under the account's row lock, so a replayed or concurrent webhook never credits twice.
 
 ## Storage and deployment limits
 
 - Client passwords are scrypt-hashed; upstream credentials remain in the environment and are never returned to clients.
-- Quota usage is recorded in an append-only journal and account/payment changes use atomic snapshots.
-- This store supports one running gateway process. Do not run the admin CLI concurrently with it, and do not run multiple gateway replicas against the same files.
-- Move state and atomic quota reservations to PostgreSQL or Redis before adding replicas or a larger customer base. Put the service behind monitored infrastructure, retain audit logs outside this process, and rotate upstream and client credentials regularly.
+- State lives in PostgreSQL (`DATABASE_URL`). The schema is in `db/migrations`; pending migrations are applied at startup, or by hand with `npm run migrate`.
+- Balance and quota changes are single conditional updates or run under the account's row lock, and the database itself refuses a negative balance or usage beyond quota.
+- Rate limits and the unlocker's per-site memory are still per process, so run one gateway process until those move to Redis.
+- Put the service behind monitored infrastructure, keep database backups off the server, and rotate upstream and client credentials regularly.
 
-Automated tests are available with `node --test`.
+Tests need a throwaway Postgres: `npm run db:test:up` starts one in Docker (port 54329), then `npm test`. Each test file uses its own schema and drops it afterwards. Set `TEST_DATABASE_URL` to use another server.
