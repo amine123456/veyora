@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { promisify } from "node:util";
 import { query, transaction } from "./db.js";
+import { canonicalEmail, isDisposableEmail } from "./email-policy.js";
 
 export { drain } from "./db.js";
 
@@ -343,6 +344,9 @@ export async function findUsername(identifier) {
 export async function createAccount(email, password) {
   const normalized = normalizeEmail(email);
   if (!normalized) throw accountError("INVALID_EMAIL", "Enter a valid email address");
+  if (isDisposableEmail(normalized)) {
+    throw accountError("DISPOSABLE_EMAIL", "Temporary email addresses can't be used. Sign up with your permanent email.");
+  }
   if (typeof password !== "string" || password.length < 10 || password.length > 256) {
     throw accountError("WEAK_PASSWORD", "Password must be 10-256 characters");
   }
@@ -354,14 +358,15 @@ export async function createAccount(email, password) {
     const username = `px${crypto.randomBytes(5).toString("hex")}`;
     try {
       const { rows } = await query(
-        `INSERT INTO clients (username, salt, hash, balance_micros, created_at, email, web_salt, web_hash)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-        [username, proxyRecord.salt, proxyRecord.hash, 1_000_000, new Date(), normalized, webRecord.salt, webRecord.hash],
+        `INSERT INTO clients (username, salt, hash, balance_micros, created_at, email, email_canonical, web_salt, web_hash)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+        [username, proxyRecord.salt, proxyRecord.hash, 1_000_000, new Date(), normalized, canonicalEmail(normalized), webRecord.salt, webRecord.hash],
       );
       return publicClient(rows[0]);
     } catch (error) {
       if (error.code !== UNIQUE_VIOLATION) throw error;
-      if (error.constraint === "clients_email_key") {
+      // The same inbox under another spelling (dots, +tag) counts as taken.
+      if (error.constraint === "clients_email_key" || error.constraint === "clients_email_canonical_key") {
         throw accountError("EMAIL_TAKEN", "An account with this email already exists");
       }
       // The random proxy username collided: draw another.

@@ -10,7 +10,8 @@
     "test": "node --test --test-concurrency=1",
     "smoke:live": "node scripts/live-smoke.js",
     "migrate": "node --env-file=.env scripts/migrate.js",
-    "db:test:up": "docker run -d --name veyora-test-pg -e POSTGRES_PASSWORD=veyora_test -e POSTGRES_DB=veyora_test -p 127.0.0.1:54329:5432 postgres:16-alpine || docker start veyora-test-pg"
+    "db:test:up": "docker run -d --name veyora-test-pg -e POSTGRES_PASSWORD=veyora_test -e POSTGRES_DB=veyora_test -p 127.0.0.1:54329:5432 postgres:16-alpine || docker start veyora-test-pg",
+    "update-disposable-domains": "node scripts/update-disposable-domains.js"
   },
   "engines": {
     "node": ">=20"

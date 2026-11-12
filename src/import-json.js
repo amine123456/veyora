@@ -2,6 +2,7 @@
 // Everything is inserted in one transaction and checked against the source before commit.
 import fs from "node:fs/promises";
 import { transaction } from "./db.js";
+import { canonicalEmail } from "./email-policy.js";
 
 async function readJson(file) {
   const state = JSON.parse(await fs.readFile(file, "utf8"));
@@ -47,14 +48,15 @@ export async function importJsonStore(file) {
     for (const [username, client] of clients) {
       await db.query(
         `INSERT INTO clients (username, salt, hash, quota_bytes, used_bytes, balance_micros, enabled, created_at,
-           email, web_salt, web_hash, email_verified, verification_token, verification_expires_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+           email, web_salt, web_hash, email_verified, verification_token, verification_expires_at, email_canonical)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
         [
           username, client.salt.toLowerCase(), client.hash.toLowerCase(), client.quotaBytes, client.usedBytes,
           client.balanceMicros ?? 0, client.enabled !== false, date(client.createdAt),
           client.email ?? null, client.webSalt?.toLowerCase() ?? null, client.webHash?.toLowerCase() ?? null,
           client.emailVerified === true, client.verificationToken ?? null,
           client.verificationExpiresAt ? date(client.verificationExpiresAt) : null,
+          client.email ? canonicalEmail(client.email) : null,
         ],
       );
     }
