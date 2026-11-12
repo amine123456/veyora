@@ -805,3 +805,34 @@ test('probe supports browser pool types', async () => {
   await upstream.close();
   await target.close();
 });
+
+test('a custom fetchImpl replaces the Node fetcher for plain HTTP rungs', async () => {
+  let curlCalls = 0;
+  const curlFetch = async ({ url, proxy, timeoutMs, maxBytes, cookie, referer }) => {
+    curlCalls += 1;
+    assert.ok(proxy.host, 'proxy host is passed');
+    assert.ok(proxy.authorization, 'proxy auth is passed');
+    return {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8' },
+      body: Buffer.from(PAGE),
+      wireBytes: PAGE.length,
+      protocol: 'h2',
+    };
+  };
+  const target = await tlsTarget((req, res) => res.end(PAGE));
+  const upstream = await fakeUpstream({ 'shop.example:443': target.port });
+  const gateway = {
+    upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+    upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+  };
+  const unlocker = createUnlocker({
+    gateway, pricing, config: settings(),
+    fetchImpl: curlFetch, lookup: publicLookup, tlsOptions: { ca: targetCert }, log: { warn() {}, error() {} },
+  });
+  const result = await unlocker.unlock({ username: 'curl-test', url: new URL('https://shop.example/'), country: 'fr', session: null });
+  assert.equal(result.outcome, 'ok');
+  assert.equal(curlCalls, 1, 'custom fetchImpl was used for the HTTP rung');
+  await upstream.close();
+  await target.close();
+});

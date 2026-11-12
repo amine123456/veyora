@@ -7,6 +7,7 @@ import { migrate } from './db.js';
 import { drain } from './store.js';
 import { browserAvailable, fetchWithBrowser, fetchWithCamoufox } from './browser-fetcher.js';
 import { camoufoxAvailable } from './camoufox-launcher.js';
+import { curlAvailable, fetchWithCurl } from './curl-fetcher.js';
 import { createUnlocker } from './unlocker.js';
 
 function listen(server, port, host) {
@@ -33,11 +34,13 @@ async function main() {
   const pricing = pricingConfig();
   const proxyServer = await createGateway(gateway, { pricing });
   const unlockerSettings = unlockerConfig();
+  const hasCurl = await curlAvailable();
   const hasBrowser = await browserAvailable();
   const hasCamoufox = await camoufoxAvailable();
   const unlocker = unlockerSettings.enabled
     ? createUnlocker({
         gateway, pricing, config: unlockerSettings,
+        fetchImpl: hasCurl ? fetchWithCurl : undefined,
         browserFetchImpl: hasBrowser ? fetchWithBrowser : null,
         camoufoxFetchImpl: hasCamoufox ? fetchWithCamoufox : null,
       })
@@ -70,6 +73,8 @@ async function main() {
   console.log(`Payment API listening on http://${payments.host}:${payments.port}`);
   console.log(adminServer ? `Admin API listening on http://127.0.0.1:${admin.port}` : 'Admin API disabled: set ADMIN_TOKEN to top up accounts while running');
   console.log(unlocker ? 'Web Unlocker enabled at POST /v1/unlock' : 'Web Unlocker disabled (UNLOCKER_ENABLED=false)');
+  if (unlocker && hasCurl) console.log('curl_cffi fetcher enabled: Chrome TLS impersonation for anti-bot bypass');
+  else if (unlocker) console.log('curl_cffi not available: using Node TLS (install curl_cffi for better anti-bot bypass)');
   if (unlocker && hasBrowser) console.log('Browser fetcher enabled: blocked sites will escalate to Chromium');
   else if (unlocker) console.log('Browser fetcher not available: install patchright or playwright for browser escalation');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
