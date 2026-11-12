@@ -51,6 +51,9 @@ const publicFiles = new Map([
   ['/favicon.ico', { file: 'favicon.svg', type: 'image/svg+xml' }],
   ['/docs', { file: 'docs.html', type: html }],
   ['/verify-email', { file: 'verify-email.html', type: html }],
+  ['/verify-email.js', { file: 'verify-email.js', type: 'text/javascript; charset=utf-8' }],
+  ['/nav.js', { file: 'nav.js', type: 'text/javascript; charset=utf-8' }],
+  ['/docs.css', { file: 'docs.css', type: 'text/css; charset=utf-8' }],
 ]);
 
 async function staticFile(response, asset, headOnly = false) {
