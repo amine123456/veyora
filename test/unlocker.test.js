@@ -696,6 +696,41 @@ test('escalation reaches the browser rung when HTTP rungs are blocked', async ()
   });
 });
 
+test('plain HTTP gets three different IPs before any browser is used', async () => {
+  let browserCalls = 0;
+  const browserFetch = async ({ url }) => {
+    browserCalls += 1;
+    return { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: Buffer.from(PAGE), wireBytes: 500, protocol: 'browser', url: url instanceof URL ? url : new URL(url) };
+  };
+  let served = 0;
+  await harness((req, res) => {
+    served += 1;
+    if (served <= 2) {
+      res.writeHead(403, { 'content-type': 'text/html' });
+      res.end(CHALLENGE);
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/html' });
+    res.end(PAGE);
+  }, {}, async ({ upstream }) => {
+    const gateway = {
+      upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+      upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000,
+    };
+    const unlocker = createUnlocker({
+      gateway, pricing, config: settings({ maxAttempts: 8, browserEnabled: true }),
+      browserFetchImpl: browserFetch, lookup: publicLookup, tlsOptions: { ca: targetCert }, log: { warn() {}, error() {} },
+    });
+    assert.deepEqual(unlocker.rungs, ['residential', 'browser-residential', 'ref-browser-residential']);
+    const result = await unlocker.unlock({ username: 'http-retry', url: new URL('https://shop.example/'), country: 'fr', session: null });
+    assert.equal(result.outcome, 'ok');
+    assert.deepEqual(result.attempts.map((a) => [a.browser, a.outcome]), [[false, 'blocked'], [false, 'blocked'], [false, 'ok']]);
+    assert.equal(browserCalls, 0);
+    const sids = upstream.logins.map((entry) => loginParts(entry.login)[3]);
+    assert.equal(new Set(sids).size, 3, 'each HTTP try uses a new IP');
+  });
+});
+
 test('probe supports browser pool types', async () => {
   const browserFetch = async ({ url }) => ({
     status: 200, headers: { 'content-type': 'text/html; charset=utf-8' }, body: Buffer.from(PAGE), wireBytes: 300, protocol: 'browser',

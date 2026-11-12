@@ -314,7 +314,10 @@ export function createUnlocker({
   const activeByAccount = new Map();
   let active = 0;
 
-  const httpPools = ["residential"];
+  // Several plain HTTP tries, each on a new IP, before any browser: DataDome sites such as
+  // leboncoin.fr block some IPs but serve plain requests from others, while every browser
+  // engine gets caught there. Blocked HTTP answers are tiny, so retries cost little.
+  const httpPools = Array.from({ length: config.httpAttempts ?? 3 }, () => "residential");
   const browserOk = Boolean(browserFetchImpl) && config.browserEnabled !== false;
   const camoufoxOk = Boolean(camoufoxFetchImpl) && config.browserEnabled !== false;
   // Escalation ladder: HTTP → Chromium browser → Camoufox (stealth Firefox).
@@ -755,7 +758,7 @@ export function createUnlocker({
     ledger,
     stop,
     probe,
-    rungs: [...pools],
+    rungs: [...new Set(pools)],
     stats: () => ledger.stats(),
     memory: () => ({ bookedBytes, budgetBytes: memoryBudget, active, inFlight }),
   };
