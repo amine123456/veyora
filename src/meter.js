@@ -12,6 +12,7 @@ export function meter(username, shouldCharge, onExhausted, reservationBytes = 64
   let quotaBytes = 0;
   let walletBytes = 0;
   let released = false;
+  let totalBytesCharged = 0;
 
   async function releaseUnused() {
     if (released) return;
@@ -28,7 +29,7 @@ export function meter(username, shouldCharge, onExhausted, reservationBytes = 64
     walletBytes -= bytes - fromQuota;
   }
 
-  return new Transform({
+  const transform = new Transform({
     transform(chunk, _encoding, callback) {
       if (!shouldCharge) return callback(null, chunk);
       void (async () => {
@@ -52,6 +53,7 @@ export function meter(username, shouldCharge, onExhausted, reservationBytes = 64
           return;
         }
         spend(chunk.length);
+        totalBytesCharged += chunk.length;
         callback(null, chunk);
       })().catch(callback);
     },
@@ -62,4 +64,6 @@ export function meter(username, shouldCharge, onExhausted, reservationBytes = 64
       void releaseUnused().then(() => callback(error), (releaseError) => callback(error ?? releaseError));
     },
   });
+  Object.defineProperty(transform, 'bytesCharged', { get: () => totalBytesCharged });
+  return transform;
 }

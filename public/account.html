@@ -64,6 +64,9 @@
       <a class="snav__a" href="#connection"><svg class="ic" aria-hidden="true"><use href="#i-router"/></svg>Connection</a>
       <a class="snav__a" href="#targeting"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>Targeting</a>
       <a class="snav__a" href="#test"><svg class="ic" aria-hidden="true"><use href="#i-terminal"/></svg>Test it</a>
+      <p class="snav__label">Activity</p>
+      <a class="snav__a" href="#usage"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Usage</a>
+      <a class="snav__a" href="#payments"><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg>Payments</a>
       <p class="snav__label">Developers</p>
       <a class="snav__a" href="#unlocker" data-unlocker-nav hidden><svg class="ic" aria-hidden="true"><use href="#i-api"/></svg>Web Unlocker</a>
       <a class="snav__a" href="#keys" data-unlocker-nav hidden><svg class="ic" aria-hidden="true"><use href="#i-key"/></svg>API keys</a>
@@ -239,6 +242,48 @@
         <button class="btn btn--primary" type="submit"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>Create API key</button>
       </form>
       <p class="notice notice--err form__error" data-key-error role="alert" hidden></p>
+    </section>
+
+    <!-- Usage -->
+    <section class="card" id="usage" aria-labelledby="usage-title">
+      <header class="card__head">
+        <span class="chip-ic"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg></span>
+        <div>
+          <h2 id="usage-title">Usage</h2>
+          <p>Daily requests and spend over the last 30 days.</p>
+        </div>
+      </header>
+      <div class="usage-chart" data-usage-chart aria-label="Daily usage chart">
+        <p class="muted" style="font-size:14px">Loading…</p>
+      </div>
+      <div class="divider"></div>
+      <header class="card__head card__head--sub">
+        <span class="chip-ic"><svg class="ic" aria-hidden="true"><use href="#i-timer"/></svg></span>
+        <div><h3>Recent requests</h3><p>Your last proxy and unlocker requests.</p></div>
+      </header>
+      <div class="usage-table-wrap" data-usage-events>
+        <p class="muted" style="font-size:14px">Loading…</p>
+      </div>
+      <div class="card__actions" data-usage-pager hidden>
+        <button class="btn btn--ghost btn--sm" type="button" data-usage-prev disabled>Previous</button>
+        <span class="muted" style="font-size:13px" data-usage-page-info></span>
+        <button class="btn btn--ghost btn--sm" type="button" data-usage-next>Next</button>
+      </div>
+    </section>
+
+    <!-- Payments -->
+    <section class="card" id="payments" aria-labelledby="payments-title">
+      <header class="card__head">
+        <span class="chip-ic"><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg></span>
+        <div>
+          <h2 id="payments-title">Payment history</h2>
+          <p>Completed top-ups credited to your balance.</p>
+        </div>
+      </header>
+      <div class="usage-table-wrap" data-payment-list>
+        <p class="muted" style="font-size:14px">Loading…</p>
+      </div>
+      <p class="empty-state" data-no-payments hidden><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg>No payments yet.</p>
     </section>
 
     <footer class="foot">

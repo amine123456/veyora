@@ -268,6 +268,35 @@ code, pre { font-family: var(--font-mono); }
 .empty-state { display: flex; align-items: center; gap: 10px; padding: 18px; border-radius: var(--r-md); border: 1px dashed var(--line-strong); color: var(--muted); font-size: 14px; }
 .keyform { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding-top: 6px; }
 
+/* usage chart */
+.usage-chart { display: flex; align-items: flex-end; gap: 4px; min-height: 120px; padding: 8px 0; }
+.usage-bar { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+.usage-bar__col { width: 100%; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--violet); transition: height .4s var(--ease); cursor: default; position: relative; }
+.usage-bar__col:hover { opacity: .85; }
+.usage-bar__label { font: 500 10px/1 var(--font-mono); color: var(--faint); white-space: nowrap; }
+.usage-bar__tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); padding: 6px 10px; border-radius: var(--r-xs); background: var(--ink); color: #fff; font: 500 12px/1.35 var(--font-ui); white-space: nowrap; z-index: 5; pointer-events: none; }
+.usage-bar__col:hover .usage-bar__tip { display: block; }
+.usage-chart-empty { display: flex; align-items: center; justify-content: center; min-height: 120px; color: var(--faint); font-size: 14px; }
+.usage-legend { display: flex; gap: 16px; padding: 4px 0 0; }
+.usage-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.usage-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.usage-legend .lg-req i { background: var(--violet); }
+.usage-legend .lg-cost i { background: var(--accent); }
+
+/* usage / payment tables */
+.usage-table-wrap { overflow-x: auto; }
+.usage-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.usage-table th { text-align: left; font: 500 11.5px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.usage-table td { padding: 10px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.usage-table tr:last-child td { border-bottom: 0; }
+.usage-table .mono { font-family: var(--font-mono); font-size: 12.5px; }
+.usage-table .right { text-align: right; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; }
+.badge--ok { background: var(--green-soft); color: var(--green); }
+.badge--err { background: var(--red-soft); color: var(--red); }
+.badge--warn { background: var(--amber-soft); color: var(--amber); }
+.badge--muted { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
 .foot { display: flex; flex-wrap: wrap; gap: 6px 22px; padding: 8px 4px; font-size: 13.5px; }
 .foot a { color: var(--muted); text-decoration: none; }
 .foot a:hover { color: var(--ink); text-decoration: underline; }

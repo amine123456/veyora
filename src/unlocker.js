@@ -5,7 +5,7 @@ import { upstreamAuthorization, upstreamEndpoint } from "./auth.js";
 import { fetchThroughProxy } from "./fetcher.js";
 import { createLedger } from "./ledger.js";
 import { resolveTarget } from "./gateway.js";
-import { authenticateApiKey, releaseFunds, reserveFunds } from "./store.js";
+import { authenticateApiKey, insertUsageEvent, releaseFunds, reserveFunds } from "./store.js";
 
 // Web Unlocker: POST /v1/unlock fetches one public page for an API-key holder. Each
 // request is priced up front from the wallet and refunded unless the page came back.
@@ -717,6 +717,13 @@ export function createUnlocker({
           pools: outcome.attempts.map((attempt) => attempt.pool),
           ms: outcome.ms,
         });
+        void insertUsageEvent({
+          username: client.username, kind: "unlocker", pool: outcome.pool,
+          domain: outcome.site, status: outcome.result?.status ?? null,
+          outcome: outcome.outcome, bytes: outcome.wireBytes,
+          costMicros: outcome.billable ? priceMicros : 0,
+          billed: outcome.billable, durationMs: outcome.ms,
+        }).catch(() => {});
 
         const summary = {
           requestId,

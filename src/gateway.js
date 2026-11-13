@@ -7,6 +7,7 @@ import tls from "node:tls";
 import { domainToASCII } from "node:url";
 import { AUTH_BUSY, createClientAuthParser, upstreamAuthorization, upstreamEndpoint } from "./auth.js";
 import { meter } from "./meter.js";
+import { insertUsageEvent } from "./store.js";
 
 const FIXED_HOP_HEADERS = new Set([
   "connection", "proxy-connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
@@ -292,7 +293,16 @@ export async function createGateway(config, { lookup = dns.lookup, pricing = nul
     up.on("error", () => upstreamRequest.destroy());
     // Meters only return unused reservations when they end or are destroyed. An aborted
     // client never ends them, so destroy them when the response closes for any reason.
+    const started = Date.now();
     response.once("close", () => {
+      const bytes = (down?.bytesCharged ?? 0) + (up?.bytesCharged ?? 0);
+      if (bytes > 0) {
+        insertUsageEvent({
+          username: client.username, kind: "proxy", pool: billing.pool,
+          domain: target.hostname, status: response.statusCode, outcome: "ok",
+          bytes, costMicros: 0, billed: true, durationMs: Date.now() - started,
+        }).catch(() => {});
+      }
       up.destroy();
       down?.destroy();
       upstreamRequest.destroy();
@@ -355,9 +365,18 @@ export async function createGateway(config, { lookup = dns.lookup, pricing = nul
       handshakeTimer.unref?.();
       clientSocket.setTimeout(config.idleTimeoutMs, closeBoth);
       upstreamSocket.setTimeout(config.requestTimeoutMs, () => upstreamSocket.destroy(new Error("Upstream timeout")));
+      const tunnelStarted = Date.now();
       clientSocket.once("close", () => {
         clearTimeout(lifetimeTimer);
         clearTimeout(handshakeTimer);
+        const bytes = (down?.bytesCharged ?? 0) + (up?.bytesCharged ?? 0);
+        if (bytes > 0) {
+          insertUsageEvent({
+            username: client.username, kind: "proxy", pool: billing.pool,
+            domain: authority.hostname, outcome: "ok",
+            bytes, costMicros: 0, billed: true, durationMs: Date.now() - tunnelStarted,
+          }).catch(() => {});
+        }
         // A client that drops never ends the meters; destroying them returns unused
         // reservations, and the upstream tunnel has no one left to serve.
         up?.destroy();

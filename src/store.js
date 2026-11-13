@@ -620,3 +620,55 @@ export async function completePayment({ eventId, purchaseId, sessionId, amountTo
     return { credited: true, username: client.username, bytes: pending.bytes, micros: pending.micros };
   });
 }
+
+export async function insertUsageEvent({ username, kind, pool, domain, status, outcome, bytes, costMicros, billed, durationMs }) {
+  await query(
+    `INSERT INTO usage_events (username, kind, pool, domain, status, outcome, bytes, cost_micros, billed, duration_ms)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [username, kind, pool ?? "residential", domain ?? null, status ?? null, outcome ?? null, bytes ?? 0, costMicros ?? 0, billed ?? false, durationMs ?? null],
+  );
+}
+
+export async function getUsageEvents(username, { limit = 20, offset = 0 } = {}) {
+  const { rows } = await query(
+    `SELECT id, kind, pool, domain, status, outcome, bytes, cost_micros, billed, duration_ms, created_at
+     FROM usage_events WHERE username = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+    [username, Math.min(limit, 100), offset],
+  );
+  return rows.map(r => ({
+    id: r.id, kind: r.kind, pool: r.pool, domain: r.domain, status: r.status,
+    outcome: r.outcome, bytes: Number(r.bytes), costMicros: Number(r.cost_micros),
+    billed: r.billed, durationMs: r.duration_ms, createdAt: r.created_at.toISOString(),
+  }));
+}
+
+export async function getUsageSummary(username, days = 30) {
+  const { rows } = await query(
+    `SELECT date_trunc('day', created_at AT TIME ZONE 'UTC')::date AS day,
+            count(*)::int AS requests,
+            count(*) FILTER (WHERE billed)::int AS billed_requests,
+            coalesce(sum(bytes), 0)::bigint AS bytes,
+            coalesce(sum(cost_micros) FILTER (WHERE billed), 0)::bigint AS cost_micros
+     FROM usage_events WHERE username = $1 AND created_at >= now() - ($2 || ' days')::interval
+     GROUP BY 1 ORDER BY 1`,
+    [username, days],
+  );
+  return rows.map(r => ({
+    day: r.day.toISOString().slice(0, 10),
+    requests: r.requests, billedRequests: r.billed_requests,
+    bytes: Number(r.bytes), costMicros: Number(r.cost_micros),
+  }));
+}
+
+export async function getPaymentHistory(username, { limit = 20, offset = 0 } = {}) {
+  const { rows } = await query(
+    `SELECT event_id, package_id, bytes, micros, processed_at
+     FROM processed_payments WHERE username = $1 ORDER BY processed_at DESC LIMIT $2 OFFSET $3`,
+    [username, Math.min(limit, 50), offset],
+  );
+  return rows.map(r => ({
+    eventId: r.event_id, packageId: r.package_id,
+    bytes: Number(r.bytes), micros: Number(r.micros),
+    processedAt: r.processed_at.toISOString(),
+  }));
+}

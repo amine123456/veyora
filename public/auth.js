@@ -408,6 +408,122 @@ if (dash) {
       lbl(regenerate, 'Generate new password');
     }
   });
+  // Usage chart + recent requests + payment history
+  function loadUsage() {
+    fetch('/api/usage/summary?days=30', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(({ summary: days }) => {
+        const wrap = $('[data-usage-chart]');
+        if (!days || !days.length) { wrap.innerHTML = '<p class="usage-chart-empty">No usage data yet. Start sending requests to see your stats here.</p>'; return; }
+        const maxReq = Math.max(...days.map(d => d.requests), 1);
+        const chart = document.createElement('div');
+        chart.className = 'usage-chart';
+        chart.setAttribute('role', 'img');
+        chart.setAttribute('aria-label', `Usage chart: ${days.length} days`);
+        days.forEach(d => {
+          const bar = document.createElement('div');
+          bar.className = 'usage-bar';
+          const h = Math.max(4, Math.round((d.requests / maxReq) * 100));
+          const col = document.createElement('div');
+          col.className = 'usage-bar__col';
+          col.style.height = `${h}px`;
+          if (d.billedRequests === 0) { col.style.background = 'var(--line-strong)'; }
+          const tip = document.createElement('span');
+          tip.className = 'usage-bar__tip';
+          tip.textContent = `${d.day}: ${d.requests} req · ${usd(d.costMicros)} · ${traffic(d.bytes)}`;
+          col.append(tip);
+          const label = document.createElement('span');
+          label.className = 'usage-bar__label';
+          label.textContent = d.day.slice(8);
+          bar.append(col, label);
+          chart.append(bar);
+        });
+        const legend = document.createElement('div');
+        legend.className = 'usage-legend';
+        legend.innerHTML = '<span class="lg-req"><i></i>Billed</span><span class="lg-cost"><i></i>Not billed</span>';
+        wrap.replaceChildren(chart, legend);
+      })
+      .catch(() => {
+        $('[data-usage-chart]').innerHTML = '<p class="muted" style="font-size:14px">Could not load usage data.</p>';
+      });
+
+    let usagePage = 1;
+    const usageLimit = 20;
+    function loadEvents(page) {
+      usagePage = page;
+      const offset = (page - 1) * usageLimit;
+      fetch(`/api/usage/events?limit=${usageLimit}&page=${page}`, { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(({ events }) => {
+          events = events || [];
+          const wrap = $('[data-usage-events]');
+          if (!events.length && page === 1) {
+            wrap.innerHTML = '<p class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>No requests recorded yet.</p>';
+            $('[data-usage-pager]').hidden = true;
+            return;
+          }
+          const table = document.createElement('table');
+          table.className = 'usage-table';
+          table.innerHTML = '<thead><tr><th>Time</th><th>Type</th><th>Domain</th><th>Status</th><th>Outcome</th><th class="right">Data</th><th class="right">Cost</th><th>Billed</th></tr></thead>';
+          const tbody = document.createElement('tbody');
+          events.forEach(e => {
+            const tr = document.createElement('tr');
+            const time = new Date(e.createdAt);
+            const timeStr = time.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const statusBadge = e.status
+              ? (e.status >= 200 && e.status < 300 ? `<span class="badge badge--ok">${e.status}</span>`
+                : e.status >= 400 ? `<span class="badge badge--err">${e.status}</span>`
+                : `<span class="badge badge--warn">${e.status}</span>`)
+              : '<span class="badge badge--muted">—</span>';
+            const domain = e.domain ? (e.domain.length > 28 ? e.domain.slice(0, 26) + '…' : e.domain) : '—';
+            tr.innerHTML = `<td class="mono">${timeStr}</td><td><span class="badge badge--muted">${e.kind}</span></td><td title="${e.domain || ''}">${domain}</td><td>${statusBadge}</td><td>${e.outcome || '—'}</td><td class="right mono">${traffic(e.bytes)}</td><td class="right mono">${e.billed ? usd(e.costMicros) : '—'}</td><td>${e.billed ? '<span class="badge badge--ok">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>`;
+            tbody.append(tr);
+          });
+          table.append(tbody);
+          wrap.replaceChildren(table);
+          const pager = $('[data-usage-pager]');
+          pager.hidden = false;
+          $('[data-usage-prev]').disabled = page <= 1;
+          $('[data-usage-next]').disabled = events.length < usageLimit;
+          $('[data-usage-page-info]').textContent = `Page ${page}`;
+        })
+        .catch(() => {
+          $('[data-usage-events]').innerHTML = '<p class="muted" style="font-size:14px">Could not load requests.</p>';
+        });
+    }
+    loadEvents(1);
+    $('[data-usage-prev]')?.addEventListener('click', () => { if (usagePage > 1) loadEvents(usagePage - 1); });
+    $('[data-usage-next]')?.addEventListener('click', () => loadEvents(usagePage + 1));
+
+    fetch('/api/payments?limit=20', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(({ payments }) => {
+        payments = payments || [];
+        const wrap = $('[data-payment-list]');
+        if (!payments.length) {
+          wrap.innerHTML = '';
+          $('[data-no-payments]').hidden = false;
+          return;
+        }
+        const table = document.createElement('table');
+        table.className = 'usage-table';
+        table.innerHTML = '<thead><tr><th>Date</th><th>Package</th><th class="right">Amount</th></tr></thead>';
+        const tbody = document.createElement('tbody');
+        payments.forEach(p => {
+          const tr = document.createElement('tr');
+          const date = new Date(p.processedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+          tr.innerHTML = `<td class="mono">${date}</td><td>${p.packageId || p.eventId || '—'}</td><td class="right mono">${usd(p.micros)}</td>`;
+          tbody.append(tr);
+        });
+        table.append(tbody);
+        wrap.replaceChildren(table);
+      })
+      .catch(() => {
+        $('[data-payment-list]').innerHTML = '<p class="muted" style="font-size:14px">Could not load payment history.</p>';
+      });
+  }
+  loadUsage();
+
   // Sidebar: highlight the section being read.
   const links = [...dash.querySelectorAll('.snav__a[href^="#"]')];
   const sections = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);

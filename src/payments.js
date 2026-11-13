@@ -19,7 +19,10 @@ import {
   createSession,
   createVerificationToken,
   deleteSession,
+  getPaymentHistory,
   getSessionClient,
+  getUsageEvents,
+  getUsageSummary,
   listApiKeys,
   regenerateProxyPassword,
   revokeApiKey,
@@ -579,6 +582,34 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
           if (error.code) throw new PublicError(error.code === 'TOO_MANY_KEYS' ? 409 : 400, error.message);
           throw error;
         }
+      }
+
+      if (request.method === 'GET' && request.url.startsWith('/api/usage')) {
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        const url = new URL(request.url, 'http://localhost');
+        if (url.pathname === '/api/usage/events') {
+          const page = Math.max(1, parseInt(url.searchParams.get('page')) || 1);
+          const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit')) || 20));
+          const events = await getUsageEvents(client.username, { limit, offset: (page - 1) * limit });
+          return json(response, 200, { events, page, limit });
+        }
+        if (url.pathname === '/api/usage/summary') {
+          const days = Math.min(90, Math.max(1, parseInt(url.searchParams.get('days')) || 30));
+          const summary = await getUsageSummary(client.username, days);
+          return json(response, 200, { summary, days });
+        }
+        return json(response, 404, { error: 'Not found' });
+      }
+
+      if (request.method === 'GET' && request.url.startsWith('/api/payments')) {
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        const url = new URL(request.url, 'http://localhost');
+        const page = Math.max(1, parseInt(url.searchParams.get('page')) || 1);
+        const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit')) || 20));
+        const payments = await getPaymentHistory(client.username, { limit, offset: (page - 1) * limit });
+        return json(response, 200, { payments, page, limit });
       }
 
       if (request.method === 'POST' && request.url === '/api/checkout') {
