@@ -49,7 +49,8 @@ const CHALLENGE_MARKERS = [
   ["datadome-adblock", /please enable js and disable any ad blocker/i],
   // AWS WAF's JavaScript challenge (Amazon, Booking): served as a 202 with challenge.js.
   ["aws-waf", /awsWafCookieDomainList|gokuProps|token\.awswaf\.com/i],
-  ["captcha", /verify you are human|are you a robot\?|verify that you(?:'|&#39;|’)re not a robot/i],
+  ["captcha", /verify you are human|are you a robot\?|verify that you(?:’|&#39;|’)re not a robot/i],
+  ["bot-block", /(?:que eres|sei) un (?:bot|robot)|(?:you(?:’|&#39;|’)re|you are) a (?:bot|robot)/i],
   // Google's no-results stub that only redirects to its enable-JavaScript page.
   ["google-enablejs", /\/httpservice\/retry\/enablejs/i],
 ];
@@ -320,17 +321,20 @@ export function createUnlocker({
   const httpPools = Array.from({ length: config.httpAttempts ?? 3 }, () => "residential");
   const browserOk = Boolean(browserFetchImpl) && config.browserEnabled !== false;
   const camoufoxOk = Boolean(camoufoxFetchImpl) && config.browserEnabled !== false;
-  // Escalation ladder: HTTP → Chromium browser → Camoufox (stealth Firefox).
-  // Camoufox defeats fingerprint-based detection (DataDome, etc.) that blocks Chromium.
+  const mobileOk = Boolean(gateway.upstreamMobile);
+  // Escalation ladder: HTTP residential → Chromium browser → Camoufox (stealth Firefox)
+  // → mobile HTTP → Camoufox on mobile. Mobile IPs have better reputation and may skip
+  // challenges that block residential exits entirely (DataDome strict tier, etc.).
   const browserPools = browserOk ? ["browser-residential", "ref-browser-residential"] : [];
   const camoufoxPools = camoufoxOk ? ["camoufox-residential"] : [];
-  const pools = [...httpPools, ...browserPools, ...camoufoxPools];
+  const mobilePools = mobileOk ? ["mobile", ...(camoufoxOk ? ["camoufox-mobile"] : [])] : [];
+  const pools = [...httpPools, ...browserPools, ...camoufoxPools, ...mobilePools];
   const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-");
   const isCamoufoxRung = (rung) => rung.startsWith("camoufox-");
   const isRefererRung = (rung) => rung.startsWith("ref-");
   const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "");
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
-  const costPerGb = { residential: pricing.costResidentialPerGbMicros };
+  const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
   let browserActive = 0;
 
   async function checkTarget(url) {
@@ -473,7 +477,7 @@ export function createUnlocker({
     let exit = sessions.get(exitKey) ?? newExit(poolOf(poolForStep(step)));
     if (exit.pool !== poolOf(poolForStep(step)) && !session) exit = newExit(poolOf(poolForStep(step)));
     const attempts = [];
-    const wireByPool = { residential: 0 };
+    const wireByPool = { residential: 0, mobile: 0 };
     const rank = { retry: 0, blocked: 1, small: 2, final: 3, ok: 4 };
     let best = null;
     let bestOutcome = null;
@@ -527,7 +531,7 @@ export function createUnlocker({
       result: best,
       attempts,
       pool: exit.pool,
-      wireBytes: wireByPool.residential,
+      wireBytes: Object.values(wireByPool).reduce((a, b) => a + b, 0),
       costMicros,
       ms: Date.now() - started,
       site,

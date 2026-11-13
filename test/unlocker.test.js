@@ -565,7 +565,7 @@ test('probe tests one rung on a fresh IP, bills nothing and records nothing', as
     res.writeHead(200, { 'content-type': 'text/html', 'set-cookie': '_abck=x; Path=/' });
     res.end(PAGE);
   }, {}, async ({ upstream, unlocker }) => {
-    assert.deepEqual(unlocker.rungs, ['residential']);
+    assert.deepEqual(unlocker.rungs, ['residential', 'mobile']);
     const ok = await unlocker.probe({ url: 'https://shop.example/', country: 'de', pool: 'residential' });
     assert.equal(ok.outcome, 'ok');
     assert.equal(ok.status, 200);
@@ -643,7 +643,7 @@ test('browser rungs appear in the ladder when a browser fetch is provided', asyn
     gateway, pricing, config: settings({ browserEnabled: true }), lookup: publicLookup, tlsOptions: { ca: targetCert },
     browserFetchImpl: fake, log: { warn() {}, error() {} },
   });
-  assert.deepEqual(unlocker.rungs, ['residential', 'browser-residential', 'ref-browser-residential']);
+  assert.deepEqual(unlocker.rungs, ['residential', 'browser-residential', 'ref-browser-residential', 'mobile']);
   await upstream.close();
   await target.close();
 });
@@ -660,7 +660,7 @@ test('browser rungs are absent when browserFetchImpl is null', async () => {
     gateway, pricing, config: settings(), lookup: publicLookup, tlsOptions: { ca: targetCert },
     browserFetchImpl: null, log: { warn() {}, error() {} },
   });
-  assert.deepEqual(unlocker.rungs, ['residential']);
+  assert.deepEqual(unlocker.rungs, ['residential', 'mobile']);
   await upstream.close();
   await target.close();
 });
