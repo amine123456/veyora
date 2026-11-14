@@ -411,6 +411,68 @@ export function DashboardMain() {
           </form>
           <p className="notice notice--err form__error" data-key-error="" role="alert" hidden />
         </section>
+        {/* Usage */}
+        <section className="card" id="usage" aria-labelledby="usage-title">
+          <header className="card__head">
+            <span className="chip-ic">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-chart" />
+              </svg>
+            </span>{' '}
+            <div>
+              <h2 id="usage-title">Usage</h2>
+              <p>Daily requests and spend over the last 30 days.</p>
+            </div>
+          </header>
+          <div className="usage-chart" data-usage-chart="" aria-label="Daily usage chart">
+            <p className="muted" style={{ fontSize: '14px' }}>Loading…</p>
+          </div>
+          <div className="divider" />
+          <header className="card__head card__head--sub">
+            <span className="chip-ic">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-timer" />
+              </svg>
+            </span>{' '}
+            <div>
+              <h3>Recent requests</h3>
+              <p>Your last proxy and unlocker requests.</p>
+            </div>
+          </header>
+          <div className="usage-table-wrap" data-usage-events="">
+            <p className="muted" style={{ fontSize: '14px' }}>Loading…</p>
+          </div>
+          <div className="card__actions" data-usage-pager="" hidden>
+            <button className="btn btn--ghost btn--sm" type="button" data-usage-prev="" disabled>Previous</button>
+            <span className="muted" style={{ fontSize: '13px' }} data-usage-page-info="" />
+            <button className="btn btn--ghost btn--sm" type="button" data-usage-next="">Next</button>
+          </div>
+        </section>{' '}
+
+        {/* Payments */}
+        <section className="card" id="payments" aria-labelledby="payments-title">
+          <header className="card__head">
+            <span className="chip-ic">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-coins" />
+              </svg>
+            </span>{' '}
+            <div>
+              <h2 id="payments-title">Payment history</h2>
+              <p>Completed top-ups credited to your balance.</p>
+            </div>
+          </header>
+          <div className="usage-table-wrap" data-payment-list="">
+            <p className="muted" style={{ fontSize: '14px' }}>Loading…</p>
+          </div>
+          <p className="empty-state" data-no-payments="" hidden>
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-coins" />
+            </svg>
+            No payments yet.
+          </p>
+        </section>{' '}
+
         <footer className="foot">
           <a href="/support">Support</a>
           <a href="/privacy">Privacy</a>

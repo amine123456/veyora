@@ -40,6 +40,19 @@ export function DashboardSidebar() {
             </svg>
             Test it
           </a>{' '}
+          <p className="snav__label">Activity</p>{' '}
+          <a className="snav__a" href="#usage">
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-chart" />
+            </svg>
+            Usage
+          </a>{' '}
+          <a className="snav__a" href="#payments">
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-coins" />
+            </svg>
+            Payments
+          </a>{' '}
           <p className="snav__label">Developers</p>{' '}
           <a className="snav__a" href="#unlocker" data-unlocker-nav="" hidden>
             <svg className="ic" aria-hidden="true">
