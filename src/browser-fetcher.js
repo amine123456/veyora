@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { FetchError } from "./fetcher.js";
 import { solveDataDome, detectDataDome } from "./captcha-solver.js";
-import { launchCamoufox, camoufoxAvailable } from "./camoufox-launcher.js";
+import { camoufoxAvailable } from "./camoufox-launcher.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DD_BYPASS_EXT = join(__dirname, "dd-bypass-ext");
@@ -98,18 +98,42 @@ function contextFor(country) {
 // Stealth patches injected before every page load to defeat common bot
 // detection vectors (navigator.webdriver, missing chrome object, etc.).
 const STEALTH_SCRIPT = `
-  Object.defineProperty(navigator, "webdriver", { get: () => undefined });
-  window.chrome = { runtime: {}, loadTimes: function(){}, csi: function(){} };
+  Object.defineProperty(navigator, "webdriver", { get: () => undefined, configurable: true });
+  window.chrome = { runtime: {}, loadTimes: function(){}, csi: function(){}, app: { isInstalled: false } };
 
-  const origQuery = window.navigator.permissions.query;
-  window.navigator.permissions.query = (p) =>
-    p.name === "notifications"
-      ? Promise.resolve({ state: Notification.permission })
-      : origQuery(p);
+  // Clean automation globals
+  (function() {
+    var props = [
+      '__playwright','__pw_manual','__PW_inspect',
+      '_selenium','__selenium_evaluate','__selenium_unwrapped',
+      'callSelenium','_Selenium_IDE_Recorder',
+      '__nightmare','callPhantom','_phantom',
+      'domAutomation','domAutomationController',
+      '__webdriver_evaluate','__driver_evaluate',
+      '__webdriver_unwrapped','__driver_unwrapped',
+      '_WEBDRIVER_ELEM_CACHE',
+    ];
+    for (var i = 0; i < props.length; i++) {
+      try { delete window[props[i]]; } catch(e) {}
+      try { delete document[props[i]]; } catch(e) {}
+    }
+    // cdc_ Chromium DevTools markers
+    var keys = Object.getOwnPropertyNames(window);
+    for (var i = 0; i < keys.length; i++) {
+      if (/^cdc_/.test(keys[i])) try { delete window[keys[i]]; } catch(e) {}
+    }
+  })();
+
+  var _origQuery = window.navigator.permissions.query;
+  window.navigator.permissions.query = function(p) {
+    if (p.name === "notifications")
+      return Promise.resolve({ state: "prompt", onchange: null });
+    return _origQuery.call(navigator.permissions, p);
+  };
 
   Object.defineProperty(navigator, "plugins", {
     get: () => {
-      const a = [
+      var a = [
         { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer",
           description: "Portable Document Format" },
         { name: "Chrome PDF Viewer",
@@ -117,7 +141,7 @@ const STEALTH_SCRIPT = `
         { name: "Native Client", filename: "internal-nacl-plugin",
           description: "" },
       ];
-      a.refresh = () => {};
+      a.refresh = function() {};
       return a;
     },
   });
@@ -126,27 +150,58 @@ const STEALTH_SCRIPT = `
     get: () => ["en-US", "en"],
   });
 
-  const _gp = WebGLRenderingContext.prototype.getParameter;
+  var _gp = WebGLRenderingContext.prototype.getParameter;
   WebGLRenderingContext.prototype.getParameter = function(p) {
     if (p === 37445) return "Intel Inc.";
     if (p === 37446) return "Intel Iris OpenGL Engine";
     return _gp.call(this, p);
   };
+
+  // Patch Function.prototype.toString to hide overrides
+  (function() {
+    var _nts = Function.prototype.toString;
+    var _ov = new Map();
+    Function.prototype.toString = function() {
+      return _ov.has(this) ? _ov.get(this) : _nts.call(this);
+    };
+    _ov.set(Function.prototype.toString, 'function toString() { [native code] }');
+    _ov.set(navigator.permissions.query, 'function query() { [native code] }');
+  })();
 `;
 
-// Simulate human-like behavior: random mouse moves and a scroll.
+// Stealth init script for Camoufox (Firefox) — cleans up Playwright artifacts
+// that DataDome may detect even through Camoufox's fingerprint spoofing.
+const CAMOUFOX_STEALTH_SCRIPT = `
+  Object.defineProperty(navigator, "webdriver", { get: () => undefined, configurable: true });
+  // Clean up Playwright globals that may leak
+  (function() {
+    var props = [
+      '__playwright', '__pw_manual', '__PW_inspect',
+      'domAutomation', 'domAutomationController',
+    ];
+    for (var i = 0; i < props.length; i++) {
+      try { delete window[props[i]]; } catch(e) {}
+    }
+  })();
+`;
+
+// Simulate human-like behavior with realistic timing and patterns.
 async function simulateHuman(page) {
   const vp = page.viewportSize() ?? { width: 1920, height: 1080 };
-  // Move mouse to a few random positions.
-  for (let i = 0; i < 3; i++) {
-    const x = 100 + Math.floor(Math.random() * (vp.width - 200));
-    const y = 100 + Math.floor(Math.random() * (vp.height - 200));
-    await page.mouse.move(x, y, { steps: 5 + Math.floor(Math.random() * 10) });
+  const moves = 3 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < moves; i++) {
+    const x = 80 + Math.floor(Math.random() * (vp.width - 160));
+    const y = 80 + Math.floor(Math.random() * (vp.height - 160));
+    await page.mouse.move(x, y, { steps: 8 + Math.floor(Math.random() * 15) });
+    await page.waitForTimeout(150 + Math.floor(Math.random() * 400));
+  }
+  await page.mouse.wheel(0, 100 + Math.floor(Math.random() * 500));
+  await page.waitForTimeout(300 + Math.floor(Math.random() * 700));
+  // Small upward scroll to look natural
+  if (Math.random() > 0.5) {
+    await page.mouse.wheel(0, -(50 + Math.floor(Math.random() * 100)));
     await page.waitForTimeout(200 + Math.floor(Math.random() * 300));
   }
-  // Scroll down a bit.
-  await page.mouse.wheel(0, 200 + Math.floor(Math.random() * 400));
-  await page.waitForTimeout(500 + Math.floor(Math.random() * 500));
 }
 
 export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false }) {
@@ -232,22 +287,63 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
     await simulateHuman(page);
 
     // Wait for JS challenges (Cloudflare, DataDome, Akamai, etc.) to resolve.
-    const settleDeadline = Date.now() + Math.min(20_000, timeoutMs - 5000);
+    const settleDeadline = Date.now() + Math.min(25_000, timeoutMs - 5000);
     let captchaSolveAttempted = false;
+    let akamaiReloaded = false;
+    let turnstileClicked = false;
     while (Date.now() < settleDeadline) {
       await page.waitForTimeout(2000);
-      const isChallenge = await page.evaluate(() => {
+      const challengeInfo = await page.evaluate(() => {
         const html = document.documentElement.outerHTML;
-        if (html.length > 10000) return false;
+        if (html.length > 10000) return { isChallenge: false };
         const meta = document.querySelector('meta[http-equiv="refresh"]');
         const cf = document.getElementById("challenge-running") || document.getElementById("cf-challenge-running");
         const title = document.title.toLowerCase();
-        const hasCfChallenge = cf || title.includes("just a moment") || title.includes("checking");
+        const isTurnstile = !!document.querySelector('iframe[src*="challenges.cloudflare.com"]')
+          || !!document.querySelector('.cf-turnstile');
+        const hasCfChallenge = cf || title.includes("just a moment") || title.includes("checking") || isTurnstile;
         const hasDataDome = /\bdd\s*=\s*\{/.test(html) && /['"]rt['"]\s*:\s*['"]c['"]/.test(html);
         const hasGenericChallenge = meta || /captcha|challenge|verify|blocked/i.test(html);
-        return Boolean(hasCfChallenge || hasDataDome || hasGenericChallenge);
-      }).catch(() => false);
-      if (!isChallenge) break;
+        const isAkamai = /access.denied|zugriff.verweigert/i.test(title)
+          || /akamaighost/i.test(html)
+          || /errors\.edgesuite\.net/i.test(html)
+          || /\/_sec\/cp_challenge/i.test(html);
+        return {
+          isChallenge: Boolean(hasCfChallenge || hasDataDome || hasGenericChallenge),
+          isAkamai,
+          isTurnstile,
+        };
+      }).catch(() => ({ isChallenge: false, isAkamai: false, isTurnstile: false }));
+      if (!challengeInfo.isChallenge) break;
+
+      // Cloudflare Turnstile: find the iframe and click the verification checkbox.
+      if (challengeInfo.isTurnstile && !turnstileClicked) {
+        turnstileClicked = true;
+        const cfFrame = page.frames().find((f) => f.url().includes("challenges.cloudflare.com"));
+        if (cfFrame) {
+          try {
+            await cfFrame.waitForSelector("input[type='checkbox'], .mark, #challenge-stage", { timeout: 5000 }).catch(() => {});
+            const checkbox = (await cfFrame.$("input[type='checkbox']")) || (await cfFrame.$(".mark"));
+            if (checkbox) {
+              const box = await checkbox.boundingBox();
+              if (box) {
+                await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+                await page.waitForTimeout(3000 + Math.floor(Math.random() * 2000));
+              }
+            }
+          } catch {}
+        }
+        continue;
+      }
+
+      // Akamai Bot Manager: sensor JS sets _abck cookie, then page must reload.
+      if (challengeInfo.isAkamai && !akamaiReloaded) {
+        akamaiReloaded = true;
+        await page.waitForTimeout(3000 + Math.floor(Math.random() * 2000));
+        await page.reload({ waitUntil: "domcontentloaded", timeout: Math.min(15_000, settleDeadline - Date.now()) }).catch(() => {});
+        await simulateHuman(page);
+        continue;
+      }
 
       // Try to solve DataDome CAPTCHAs if present and not already attempted.
       if (!captchaSolveAttempted) {
@@ -298,7 +394,10 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
 }
 
 // Camoufox-based fetcher: stealth Firefox that defeats DataDome fingerprinting.
-// Uses the Python camoufox package via subprocess → WebSocket → Playwright connect.
+// Runs entirely in Python (Camoufox context manager) to avoid the Node.js
+// Playwright server/connect protocol mismatch that hangs on newPage().
+const CAMOUFOX_FETCH_SCRIPT = join(__dirname, "camoufox-fetch.py");
+
 export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false }) {
   if (!(await isCamoufoxAvailable())) {
     throw new FetchError("NETWORK", "Camoufox not installed on this server");
@@ -308,140 +407,59 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
   if (!auth) throw new FetchError("PROXY", "Cannot parse proxy credentials for browser");
 
   const scheme = proxy.tls ? "https" : "http";
-  const proxyConfig = {
-    server: `${scheme}://${proxy.host}:${proxy.port}`,
-    username: auth.username,
-    password: auth.password,
-  };
+  const input = JSON.stringify({
+    url: url instanceof URL ? url.href : url,
+    proxy: { server: `${scheme}://${proxy.host}:${proxy.port}`, username: auth.username, password: auth.password },
+    country, cookie, referer, useReferer, timeoutMs, maxBytes,
+    addons: [DD_BYPASS_EXT],
+  });
 
-  let server = null;
-  let browser = null;
-  let wireBytes = 0;
+  const { spawn } = await import("node:child_process");
+  const totalTimeout = timeoutMs + 30_000;
 
-  try {
-    server = await launchCamoufox({
-      proxy: proxyConfig,
-      headless: "virtual",
-      addons: [DD_BYPASS_EXT],
-      timeoutMs: Math.min(30_000, timeoutMs / 2),
+  return new Promise((resolve, reject) => {
+    const child = spawn("python3", ["-u", CAMOUFOX_FETCH_SCRIPT], {
+      stdio: ["pipe", "pipe", "pipe"],
+      timeout: totalTimeout,
     });
 
-    // Camoufox WS server uses the Python playwright's protocol version.
-    // We must connect with a matching Node.js playwright version, not patchright.
-    const pw = await import("playwright");
-    browser = await pw.firefox.connect(server.wsEndpoint, { timeout: 15_000 });
+    let stdout = "";
+    let stderr = "";
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      reject(new FetchError("TIMEOUT", "Camoufox fetch timed out"));
+    }, totalTimeout);
 
-    const viewport = randomViewport();
-    const context = await browser.newContext({
-      viewport,
-      acceptDownloads: false,
-    });
-    const page = await context.newPage();
+    child.stdout.on("data", (d) => { stdout += d; });
+    child.stderr.on("data", (d) => { stderr += d; });
 
-    page.on("response", (resp) => {
-      const cl = resp.headers()["content-length"];
-      if (cl) wireBytes += Number(cl) || 0;
-    });
+    child.stdin.write(input);
+    child.stdin.end();
 
-    const target = url instanceof URL ? url : new URL(url);
-
-    if (cookie) {
-      const pairs = cookie
-        .split("; ")
-        .filter(Boolean)
-        .map((pair) => {
-          const eq = pair.indexOf("=");
-          return eq > 0 ? { name: pair.slice(0, eq), value: pair.slice(eq + 1), domain: target.hostname, path: "/" } : null;
-        })
-        .filter(Boolean);
-      if (pairs.length) await context.addCookies(pairs);
-    }
-
-    if (useReferer) {
-      const googleDomain = country === "de" ? "google.de" : country === "fr" ? "google.fr"
-        : country === "br" ? "google.com.br" : country === "es" ? "google.es"
-        : country === "it" ? "google.it" : country === "nl" ? "google.nl"
-        : country === "jp" ? "google.co.jp" : "google.com";
-      try {
-        await page.goto(`https://www.${googleDomain}/`, { waitUntil: "domcontentloaded", timeout: Math.min(10_000, timeoutMs / 3) });
-        await page.waitForTimeout(500 + Math.floor(Math.random() * 1000));
-        await simulateHuman(page);
-      } catch {}
-    }
-
-    const navReferer = useReferer ? `https://www.google.com/` : referer || undefined;
-
-    const response = await page.goto(target.href, {
-      waitUntil: "domcontentloaded",
-      timeout: timeoutMs,
-      referer: navReferer,
-    });
-
-    await simulateHuman(page);
-
-    // Wait for challenges with longer patience — Camoufox gets solvable CAPTCHAs.
-    // Check for DataDome iframe first (it appears regardless of page size).
-    const settleDeadline = Date.now() + Math.min(30_000, timeoutMs - 5000);
-    let captchaSolveAttempted = false;
-    while (Date.now() < settleDeadline) {
-      await page.waitForTimeout(2000);
-
-      const ddType = await detectDataDome(page).catch(() => "none");
-      if (ddType !== "none" && ddType !== "error") {
-        if (!captchaSolveAttempted) {
-          captchaSolveAttempted = true;
-          const result = await solveDataDome(page, {
-            timeoutMs: Math.min(25_000, settleDeadline - Date.now()),
-          }).catch(() => ({ solved: false }));
-          if (result.solved) break;
-        }
-        continue;
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (!stdout.trim()) {
+        reject(new FetchError("NETWORK", `Camoufox exited ${code}: ${stderr.slice(0, 300)}`));
+        return;
       }
-
-      const isChallenge = await page.evaluate(() => {
-        const html = document.documentElement.outerHTML;
-        if (html.length > 10000) return false;
-        const meta = document.querySelector('meta[http-equiv="refresh"]');
-        const cf = document.getElementById("challenge-running") || document.getElementById("cf-challenge-running");
-        const title = document.title.toLowerCase();
-        const hasCfChallenge = cf || title.includes("just a moment") || title.includes("checking");
-        const hasGenericChallenge = meta || /captcha|challenge|verify|blocked/i.test(html);
-        return Boolean(hasCfChallenge || hasGenericChallenge);
-      }).catch(() => false);
-      if (!isChallenge) break;
-    }
-
-    const finalUrl = page.url();
-    const html = await page.content();
-    const body = Buffer.from(html, "utf-8");
-    if (body.length > maxBytes) throw new FetchError("TOO_LARGE", "Rendered page exceeds size limit");
-
-    const status = response?.status() ?? 200;
-    const headers = { ...(response?.headers() ?? {}) };
-    headers["content-type"] = "text/html; charset=utf-8";
-    delete headers["content-encoding"];
-    delete headers["content-length"];
-    wireBytes = Math.max(wireBytes, body.length);
-
-    const cookies = await context.cookies();
-    if (cookies.length) {
-      headers["set-cookie"] = cookies.map(
-        (c) => `${c.name}=${c.value}; Domain=${c.domain}; Path=${c.path}${c.expires > 0 ? `; Expires=${new Date(c.expires * 1000).toUTCString()}` : ""}`,
-      );
-    }
-
-    return { status, headers, body, wireBytes, protocol: "camoufox", url: new URL(finalUrl) };
-  } catch (error) {
-    if (error instanceof FetchError) {
-      error.wireBytes = wireBytes;
-      throw error;
-    }
-    const code = error.name === "TimeoutError" || error.message?.includes("Timeout") ? "TIMEOUT" : "NETWORK";
-    const wrapped = new FetchError(code, `Camoufox: ${error.message}`);
-    wrapped.wireBytes = wireBytes;
-    throw wrapped;
-  } finally {
-    await browser?.close().catch(() => {});
-    if (server) server.kill();
-  }
+      try {
+        const result = JSON.parse(stdout);
+        if (result.error) {
+          reject(new FetchError(result.error, result.message || result.error));
+          return;
+        }
+        const body = Buffer.from(result.body, "base64");
+        resolve({
+          status: result.status,
+          headers: result.headers,
+          body,
+          wireBytes: result.wireBytes || body.length,
+          protocol: "camoufox",
+          url: new URL(result.finalUrl),
+        });
+      } catch (e) {
+        reject(new FetchError("NETWORK", `Camoufox parse error: ${e.message}`));
+      }
+    });
+  });
 }

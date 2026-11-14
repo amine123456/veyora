@@ -8,7 +8,10 @@ import { drain } from './store.js';
 import { browserAvailable, fetchWithBrowser, fetchWithCamoufox } from './browser-fetcher.js';
 import { camoufoxAvailable } from './camoufox-launcher.js';
 import { curlAvailable, fetchWithCurl } from './curl-fetcher.js';
+import { fetchThroughProxy } from './fetcher.js';
 import { createUnlocker } from './unlocker.js';
+import { createSolver } from './capsolver.js';
+import { createSolverQueue } from './solver-queue.js';
 
 function listen(server, port, host) {
   return new Promise((resolve, reject) => {
@@ -37,18 +40,31 @@ async function main() {
   const hasCurl = await curlAvailable();
   const hasBrowser = await browserAvailable();
   const hasCamoufox = await camoufoxAvailable();
+  const solver = createSolver({ apiKey: unlockerSettings.capsolverApiKey });
+  const keepaliveFetch = hasCurl ? fetchWithCurl : fetchThroughProxy;
+  const solverQueue = unlockerSettings.humanSolverEnabled
+    ? createSolverQueue({
+        gateway,
+        ttlMs: unlockerSettings.solverTaskTtlMs,
+        maxPending: unlockerSettings.solverMaxPending,
+        cookieTtlMs: unlockerSettings.solverCookieTtlMs,
+        keepaliveImpl: keepaliveFetch,
+      })
+    : null;
   const unlocker = unlockerSettings.enabled
     ? createUnlocker({
         gateway, pricing, config: unlockerSettings,
         fetchImpl: hasCurl ? fetchWithCurl : undefined,
         browserFetchImpl: hasBrowser ? fetchWithBrowser : null,
         camoufoxFetchImpl: hasCamoufox ? fetchWithCamoufox : null,
+        solverImpl: solver,
+        solverQueue,
       })
     : null;
   await unlocker?.ledger.load();
   const paymentServer = createPaymentServer(payments, { unlocker, pricing, mobile: Boolean(gateway.upstreamMobile) });
   const admin = adminConfig();
-  const adminServer = admin.token ? createAdminServer(admin, { unlocker }) : null;
+  const adminServer = admin.token ? createAdminServer(admin, { unlocker, solverQueue }) : null;
   let startupComplete = false;
 
   proxyServer.on('error', (error) => {
@@ -77,6 +93,7 @@ async function main() {
   else if (unlocker) console.log('curl_cffi not available: using Node TLS (install curl_cffi for better anti-bot bypass)');
   if (unlocker && hasBrowser) console.log('Browser fetcher enabled: blocked sites will escalate to Chromium');
   else if (unlocker) console.log('Browser fetcher not available: install patchright or playwright for browser escalation');
+  if (solverQueue) console.log('Human solver queue enabled');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
 

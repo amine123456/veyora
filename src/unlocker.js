@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import dns from "node:dns/promises";
 import { StringDecoder } from "node:string_decoder";
 import { upstreamAuthorization, upstreamEndpoint } from "./auth.js";
-import { fetchThroughProxy } from "./fetcher.js";
+import { fetchThroughProxy, chromeHeaders } from "./fetcher.js";
 import { createLedger } from "./ledger.js";
 import { resolveTarget } from "./gateway.js";
 import { authenticateApiKey, insertUsageEvent, releaseFunds, reserveFunds } from "./store.js";
@@ -51,6 +51,8 @@ const CHALLENGE_MARKERS = [
   ["aws-waf", /awsWafCookieDomainList|gokuProps|token\.awswaf\.com/i],
   ["captcha", /verify you are human|are you a robot\?|verify that you(?:’|&#39;|’)re not a robot/i],
   ["bot-block", /(?:que eres|sei) un (?:bot|robot)|(?:you(?:’|&#39;|’)re|you are) a (?:bot|robot)/i],
+  // Cloudflare Turnstile managed challenge: the page embeds Turnstile JS/iframe.
+  ["cloudflare-turnstile", /challenges\.cloudflare\.com|cf-turnstile-response|turnstile\.render/i],
   // Google's no-results stub that only redirects to its enable-JavaScript page.
   ["google-enablejs", /\/httpservice\/retry\/enablejs/i],
 ];
@@ -296,6 +298,8 @@ export function createUnlocker({
   fetchImpl = fetchThroughProxy,
   browserFetchImpl = null,
   camoufoxFetchImpl = null,
+  solverImpl = null,
+  solverQueue = null,
   tlsOptions = {},
   authenticate = authenticateApiKey,
   log = console,
@@ -328,11 +332,14 @@ export function createUnlocker({
   const browserPools = browserOk ? ["browser-residential", "ref-browser-residential"] : [];
   const camoufoxPools = camoufoxOk ? ["camoufox-residential"] : [];
   const mobilePools = mobileOk ? ["mobile", ...(camoufoxOk ? ["camoufox-mobile"] : [])] : [];
-  const pools = [...httpPools, ...browserPools, ...camoufoxPools, ...mobilePools];
+  const solverOk = Boolean(solverImpl);
+  const solverPools = solverOk ? ["solver-residential"] : [];
+  const pools = [...httpPools, ...browserPools, ...camoufoxPools, ...mobilePools, ...solverPools];
   const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-");
   const isCamoufoxRung = (rung) => rung.startsWith("camoufox-");
   const isRefererRung = (rung) => rung.startsWith("ref-");
-  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "");
+  const isSolverRung = (rung) => rung.startsWith("solver-");
+  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "").replace(/^solver-/, "");
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
   const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
   let browserActive = 0;
@@ -460,6 +467,140 @@ export function createUnlocker({
     }
   }
 
+  // Solver-backed fetch: HTTP fetch → detect CAPTCHA → if t=bv (IP banned) retry
+  // with a fresh exit up to SOLVER_IP_TRIES times → once t=fe, submit to CapSolver
+  // → inject clearance cookies → re-fetch on the same exit.
+  // WAF type detected from challenge markers — used to skip futile rungs.
+  const siteWaf = expiringMap(MAX_TRACKED);
+  const firstCamoufoxStep = pools.findIndex((rung) => isCamoufoxRung(rung));
+
+  function wafFromReasons(reasons) {
+    for (const r of reasons) {
+      if (r.startsWith("marker:cloudflare-") || r === "header:cf-mitigated") return "cloudflare";
+      if (r.startsWith("marker:datadome")) return "datadome";
+      if (r.startsWith("marker:akamai-") || r === "marker:access-denied-title") return "akamai";
+      if (r.startsWith("marker:aws-waf")) return "aws";
+      if (r.startsWith("marker:imperva")) return "imperva";
+      if (r.startsWith("marker:perimeterx")) return "perimeterx";
+    }
+    return null;
+  }
+
+  const SOLVER_IP_TRIES = 4;
+  async function solverFetchOnExit(exit, username, country, startUrl, deadline) {
+    const ua = chromeHeaders().find(([k]) => k === "User-Agent")?.[1] ?? "";
+    let totalWireBytes = 0;
+    let currentExit = exit;
+
+    for (let ipTry = 0; ipTry < SOLVER_IP_TRIES && Date.now() < deadline - 2000; ipTry++) {
+      if (ipTry > 0) currentExit = newExit(currentExit.pool);
+      let result;
+      try {
+        result = await fetchOnExit(currentExit, username, country, startUrl, deadline);
+      } catch (error) {
+        totalWireBytes += error.wireBytes ?? 0;
+        throw Object.assign(error, { wireBytes: totalWireBytes });
+      }
+      totalWireBytes += result.wireBytes ?? 0;
+
+      const outcome = classify(result, config.minBodyBytes);
+      if (outcome !== "blocked" || !result.body?.length) {
+        return { ...result, wireBytes: totalWireBytes, solverUsed: false };
+      }
+
+      const detection = solverImpl.detectDatadome(result.body, { websiteURL: startUrl.href });
+      // Not DataDome — try Cloudflare Turnstile before giving up on the solver rung.
+      if (!detection) {
+        const turnstile = solverImpl.detectTurnstile?.(result.body, { websiteURL: startUrl.href });
+        if (turnstile) {
+          log.info?.(`CapSolver: detected Cloudflare Turnstile for ${startUrl.hostname}`);
+          const solution = await solverImpl.solveTurnstile?.({
+            siteKey: turnstile.siteKey,
+            websiteURL: startUrl.href,
+            deadlineMs: Math.min(deadline, Date.now() + 60_000),
+          });
+          if (solution?.token) {
+            // Turnstile token alone can't clear cf_clearance — retry with Camoufox which
+            // can now pass the challenge script that produced the Turnstile.
+            if (camoufoxFetchImpl) {
+              try {
+                const browserResult = await browserFetchOnExit(currentExit, username, country, startUrl, deadline, { useCamoufox: true });
+                totalWireBytes += browserResult.wireBytes ?? 0;
+                const browserOutcome = classify(browserResult, config.minBodyBytes);
+                if (browserOutcome === "ok" || browserOutcome === "final") {
+                  Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
+                  return { ...browserResult, wireBytes: totalWireBytes, solverUsed: true };
+                }
+              } catch (err) {
+                totalWireBytes += err.wireBytes ?? 0;
+              }
+            }
+          }
+        }
+        return { ...result, wireBytes: totalWireBytes, solverUsed: false };
+      }
+
+      if (!detection.solvable) {
+        log.info?.(`CapSolver: IP banned (t=bv) for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+        continue;
+      }
+
+      // t=fe: solvable challenge — submit to CapSolver
+      const endpoint = upstreamEndpoint(gateway, currentExit.pool);
+      const auth = upstreamAuthorization(gateway, { username, country, session: currentExit.sid, pool: currentExit.pool });
+      const decoded = Buffer.from(auth.replace(/^Basic /, ""), "base64").toString();
+      // CapSolver proxy format: host:port:user:pass
+      const colonIdx = decoded.indexOf(":");
+      const proxyUser = decoded.slice(0, colonIdx);
+      const proxyPass = decoded.slice(colonIdx + 1);
+      const proxyString = `${endpoint.host}:${endpoint.port}:${proxyUser}:${proxyPass}`;
+
+      const solution = await solverImpl.solveDatadome({
+        captchaUrl: detection.captchaUrl,
+        html: detection.html,
+        websiteURL: startUrl.href,
+        proxyString,
+        userAgent: ua,
+        deadlineMs: Math.min(deadline, Date.now() + 60_000),
+      });
+      if (solution) {
+        for (const c of solution.cookies) currentExit.jar.store(startUrl.hostname, [`${c.name}=${c.value}`]);
+        const retry = await fetchOnExit(currentExit, username, country, startUrl, deadline);
+        totalWireBytes += retry.wireBytes ?? 0;
+        Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
+        return { ...retry, wireBytes: totalWireBytes, solverUsed: true };
+      }
+
+      // CapSolver failed (proxy banned on captcha page etc.) — fall back to
+      // Camoufox on the same proxy session. A real browser solves DataDome's JS
+      // challenge natively; the resulting datadome cookie works for plain HTTP.
+      if (camoufoxFetchImpl) {
+        log.info?.(`CapSolver failed for ${startUrl.hostname}, falling back to Camoufox on same proxy session`);
+        try {
+          const browserResult = await browserFetchOnExit(currentExit, username, country, startUrl, deadline, { useCamoufox: true });
+          totalWireBytes += browserResult.wireBytes ?? 0;
+          const browserOutcome = classify(browserResult, config.minBodyBytes);
+          if (browserOutcome === "ok" || browserOutcome === "final") {
+            Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
+            return { ...browserResult, wireBytes: totalWireBytes, solverUsed: true };
+          }
+          log.info?.(`Camoufox fallback got ${browserOutcome} for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+        } catch (err) {
+          totalWireBytes += err.wireBytes ?? 0;
+          log.warn?.(`Camoufox fallback error for ${startUrl.hostname}: ${err.message}`);
+        }
+      } else {
+        log.info?.(`CapSolver: solve failed for ${startUrl.hostname}, no Camoufox available, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+      }
+    }
+
+    // All IP tries exhausted (banned or solve failed)
+    const error = new Error("Solver exhausted all IP tries");
+    error.code = "PROXY";
+    error.wireBytes = totalWireBytes;
+    throw error;
+  }
+
   async function unlock({ username, url, country, session }) {
     const started = Date.now();
     const deadline = started + config.totalTimeoutMs;
@@ -469,7 +610,14 @@ export function createUnlocker({
     // second). A site remembered on a browser rung then jumps straight to that rung,
     // except every 20th request, which walks the whole ladder to find cheaper exits again.
     const probeDown = remembered && remembered.step > 0 && remembered.uses % 20 === 19;
-    const jumpTo = remembered && !probeDown ? remembered.step : 0;
+    let jumpTo = remembered && !probeDown ? remembered.step : 0;
+    // WAF-aware fast-track: when we know the site's WAF type, skip futile HTTP/Chromium
+    // rungs and go straight to Camoufox or solver. One cheap HTTP try still runs first to
+    // test whether clearance cookies from a prior request are still valid.
+    const waf = siteWaf.get(site);
+    if (waf && firstCamoufoxStep >= 0 && !probeDown) {
+      jumpTo = Math.max(jumpTo, firstCamoufoxStep);
+    }
     let step = 0;
     // A named session keeps its exit (and cookies) across requests; without one, each
     // customer keeps a warm exit per site so clearance cookies are reused.
@@ -482,6 +630,55 @@ export function createUnlocker({
     let best = null;
     let bestOutcome = null;
     let lastError = null;
+    let solverUsed = false;
+
+    const cached = solverQueue?.cookiesFor(site);
+    if (cached) {
+      // Try plain HTTP first — fast and cheap; clearance cookies often work without a browser.
+      const httpExit = { pool: cached.exitInfo.pool, sid: cached.exitInfo.sid, jar: new CookieJar() };
+      httpExit.jar.store(url.hostname, cached.cookies);
+      log.info?.(`Trying cached solver cookies for ${site} via HTTP (exit ${cached.exitInfo.sid})`);
+      try {
+        const result = await fetchOnExit(httpExit, username, country, url, deadline);
+        wireByPool[httpExit.pool] += result.wireBytes;
+        const outcome = classify(result, config.minBodyBytes);
+        if (outcome === "ok" || outcome === "final") {
+          log.info?.(`Cached solver cookies worked for ${site} (HTTP)`);
+          attempts.push({ pool: httpExit.pool, outcome, status: result.status, ms: Date.now() - started });
+          exit = httpExit;
+          sessions.set(exitKey, exit, sessionTtlMs);
+          const billable = outcome === "ok";
+          const costMicros = (wireByPool[httpExit.pool] * (costPerGb[httpExit.pool] ?? 0)) / GIB;
+          return { billable, outcome, result, attempts, pool: exit.pool, wireBytes: wireByPool[httpExit.pool], costMicros, ms: Date.now() - started, site, solverUsed: false };
+        }
+        attempts.push({ pool: httpExit.pool, outcome, status: result.status, ms: Date.now() - started });
+      } catch (err) {
+        log.info?.(`Cached solver cookies HTTP attempt failed for ${site}: ${err.message}`);
+      }
+
+      // HTTP didn't work — try Camoufox browser with fresh cookies on the same exit.
+      const browserExit = { pool: cached.exitInfo.pool, sid: cached.exitInfo.sid, jar: new CookieJar() };
+      browserExit.jar.store(url.hostname, cached.cookies);
+      log.info?.(`Trying cached solver cookies for ${site} via browser (exit ${cached.exitInfo.sid})`);
+      try {
+        const result = await browserFetchOnExit(browserExit, username, country, url, deadline, { useReferer: false, useCamoufox: true });
+        wireByPool[browserExit.pool] += result.wireBytes;
+        const outcome = classify(result, config.minBodyBytes);
+        if (outcome === "ok" || outcome === "final") {
+          log.info?.(`Cached solver cookies worked for ${site}`);
+          attempts.push({ pool: browserExit.pool, browser: true, camoufox: true, outcome, status: result.status, ms: Date.now() - started });
+          exit = browserExit;
+          sessions.set(exitKey, exit, sessionTtlMs);
+          const billable = outcome === "ok";
+          const costMicros = (wireByPool[browserExit.pool] * (costPerGb[browserExit.pool] ?? 0)) / GIB;
+          return { billable, outcome, result, attempts, pool: exit.pool, wireBytes: wireByPool[browserExit.pool], costMicros, ms: Date.now() - started, site, solverUsed: false };
+        }
+        attempts.push({ pool: browserExit.pool, browser: true, camoufox: true, outcome, status: result.status, ms: Date.now() - started });
+        log.info?.(`Cached solver cookies failed for ${site} (${outcome}), falling through to normal ladder`);
+      } catch (err) {
+        log.warn?.(`Cached solver cookies browser attempt failed: ${err.message}`);
+      }
+    }
 
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250; attempt += 1) {
       if (attempt > 0) {
@@ -492,24 +689,58 @@ export function createUnlocker({
       const rung = poolForStep(step);
       const attemptStarted = Date.now();
       try {
-        const result = isBrowserRung(rung)
-          ? await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung) })
-          : await fetchOnExit(exit, username, country, url, deadline);
+        let result;
+        if (isSolverRung(rung)) {
+          result = await solverFetchOnExit(exit, username, country, url, deadline);
+        } else if (isBrowserRung(rung)) {
+          result = await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung) });
+        } else {
+          result = await fetchOnExit(exit, username, country, url, deadline);
+        }
         wireByPool[exit.pool] += result.wireBytes;
-        const outcome = classify(result, config.minBodyBytes);
-        if (outcome === "blocked") result.body = Buffer.alloc(0);
-        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), camoufox: isCamoufoxRung(rung) || undefined, referer: isRefererRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
+        if (result.solverUsed) solverUsed = true;
+        const { outcome, reasons } = diagnose(result, config.minBodyBytes);
+        if (outcome === "blocked") {
+          result.body = Buffer.alloc(0);
+          const detected = wafFromReasons(reasons);
+          if (detected && !siteWaf.get(site)) {
+            siteWaf.set(site, detected, DOMAIN_MEMORY_MS);
+            log.info?.(`Unlocker: ${site} is behind ${detected} (${reasons.join(", ")})`);
+          }
+        }
+        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), camoufox: isCamoufoxRung(rung) || undefined, referer: isRefererRung(rung) || undefined, solver: isSolverRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
         if (bestOutcome === null || rank[outcome] >= rank[bestOutcome]) {
           best = result;
           bestOutcome = outcome;
         }
         if (outcome === "ok" || outcome === "final") break;
+        // WAF fast-track: once we know the WAF type, skip intermediate rungs.
+        // - HTTP/browser rung blocked → jump to camoufox
+        // - Camoufox rung blocked → jump to solver (or break)
+        const currentWaf = siteWaf.get(site);
+        if (outcome === "blocked" && currentWaf) {
+          if (!isCamoufoxRung(rung) && !isSolverRung(rung) && firstCamoufoxStep >= 0 && step < firstCamoufoxStep) {
+            step = firstCamoufoxStep - 1;
+          } else if (isCamoufoxRung(rung)) {
+            const solverStep = pools.findIndex((r) => isSolverRung(r));
+            if (solverStep >= 0 && step < solverStep) {
+              step = solverStep - 1;
+            } else {
+              break;
+            }
+          } else if (isSolverRung(rung)) {
+            // Solver already tried with fresh IPs/cookies — retrying the same rung won't help.
+            break;
+          }
+        }
       } catch (error) {
         wireByPool[exit.pool] += error.wireBytes ?? 0;
         const code = error.code ?? "NETWORK";
         attempts.push({ pool: exit.pool, outcome: "error", error: code, ms: Date.now() - attemptStarted });
         lastError = code;
         if (!RETRYABLE_ERRORS.has(code)) break;
+        // The solver already tried SOLVER_IP_TRIES fresh IPs — retrying won't help.
+        if (isSolverRung(rung) && code === "PROXY") break;
       }
     }
 
@@ -533,6 +764,7 @@ export function createUnlocker({
       pool: exit.pool,
       wireBytes: Object.values(wireByPool).reduce((a, b) => a + b, 0),
       costMicros,
+      solverUsed,
       ms: Date.now() - started,
       site,
     };
@@ -543,10 +775,12 @@ export function createUnlocker({
   // but nothing is billed, remembered or written to the ledger.
   async function probe({ url: rawUrl, country = null, pool = "residential", username = "unlock-test" }) {
     const browser = pool.includes("browser-") || pool.startsWith("camoufox-");
+    const solver = pool.startsWith("solver-");
     const useCamoufox = pool.startsWith("camoufox-");
     const useReferer = pool.startsWith("ref-");
     const actualPool = poolOf(pool);
     const refused = (error) => ({ pool, outcome: "refused", error, reasons: [], wireBytes: 0, costMicros: 0, ms: 0 });
+    if (solver && !solverImpl) return refused("CAPTCHA solver is not configured (set CAPSOLVER_API_KEY)");
     if (useCamoufox && !camoufoxFetchImpl) return refused("Camoufox is not available (install camoufox Python package)");
     if (browser && !useCamoufox && !browserFetchImpl) return refused("Browser fetcher is not available (install patchright or playwright)");
     if (!pools.includes(pool) && !httpPools.includes(actualPool)) return refused(`The ${pool} pool is not configured`);
@@ -558,11 +792,13 @@ export function createUnlocker({
     }
     const started = Date.now();
     const exit = newExit(actualPool);
-    const timeout = browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
+    const timeout = solver ? 90_000 : browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
     try {
-      const result = browser
-        ? await browserFetchOnExit(exit, username, country, url, started + timeout, { useReferer, useCamoufox })
-        : await fetchOnExit(exit, username, country, url, started + timeout);
+      const result = solver
+        ? await solverFetchOnExit(exit, username, country, url, started + timeout)
+        : browser
+          ? await browserFetchOnExit(exit, username, country, url, started + timeout, { useReferer, useCamoufox })
+          : await fetchOnExit(exit, username, country, url, started + timeout);
       const { outcome, reasons } = diagnose(result, config.minBodyBytes);
       return {
         pool,
@@ -700,6 +936,15 @@ export function createUnlocker({
           throw error;
         }
         if (!outcome.billable) await releaseFunds(client.username, priceMicros);
+        // Solver surcharge: billed only when the solver was actually used and the request succeeded.
+        const solverSurcharge = outcome.solverUsed && outcome.billable ? (config.solverSurchargeMicros ?? 0) : 0;
+        if (solverSurcharge > 0) {
+          if (!(await reserveFunds(client.username, solverSurcharge))) {
+            // Not enough for the surcharge — still deliver the page, just skip the extra charge.
+            log.warn?.(`Unlocker: solver surcharge of ${solverSurcharge} micros could not be reserved for ${client.username}`);
+          }
+        }
+        const totalBilledMicros = outcome.billable ? priceMicros + solverSurcharge : 0;
         const requestId = `unl_${crypto.randomBytes(8).toString("hex")}`;
         void ledger.record({
           at: new Date().toISOString(),
@@ -710,7 +955,8 @@ export function createUnlocker({
           status: outcome.result?.status ?? null,
           outcome: outcome.outcome,
           billed: outcome.billable,
-          priceMicros: outcome.billable ? priceMicros : 0,
+          priceMicros: totalBilledMicros,
+          solverSurchargeMicros: solverSurcharge || undefined,
           costMicros: Math.round(outcome.costMicros * 1000) / 1000,
           wireBytes: outcome.wireBytes,
           attempts: outcome.attempts.length,
@@ -721,14 +967,15 @@ export function createUnlocker({
           username: client.username, kind: "unlocker", pool: outcome.pool,
           domain: outcome.site, status: outcome.result?.status ?? null,
           outcome: outcome.outcome, bytes: outcome.wireBytes,
-          costMicros: outcome.billable ? priceMicros : 0,
+          costMicros: totalBilledMicros,
           billed: outcome.billable, durationMs: outcome.ms,
         }).catch(() => {});
 
         const summary = {
           requestId,
-          billedMicros: outcome.billable ? priceMicros : 0,
-          attempts: outcome.attempts.map(({ pool, browser, camoufox, referer, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(camoufox ? { camoufox: true } : {}), ...(referer ? { referer: true } : {}), result, status, error })),
+          billedMicros: totalBilledMicros,
+          ...(solverSurcharge ? { solverSurchargeMicros: solverSurcharge } : {}),
+          attempts: outcome.attempts.map(({ pool, browser, camoufox, referer, solver, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(camoufox ? { camoufox: true } : {}), ...(referer ? { referer: true } : {}), ...(solver ? { solver: true } : {}), result, status, error })),
         };
         if (["ok", "small", "final", "retry"].includes(outcome.outcome)) {
           const page = outcome.result;
@@ -745,6 +992,10 @@ export function createUnlocker({
           }, page.body, encoding);
         }
         if (outcome.outcome === "blocked") {
+          if (solverQueue) {
+            const queued = solverQueue.push({ site: outcome.site, url: url.href, exitInfo: { pool: outcome.pool, sid: crypto.randomBytes(8).toString("hex") }, markers: outcome.attempts.map((a) => a.result).filter(Boolean) });
+            if (queued) log.info?.(`Queued ${outcome.site} for human solver (task ${queued})`);
+          }
           return send(response, 502, { success: false, error: `The site blocked every attempt (${outcome.attempts.length}). You were not charged.`, ...summary });
         }
         if (outcome.error === "TOO_LARGE") {
