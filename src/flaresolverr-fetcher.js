@@ -98,19 +98,18 @@ export async function fetchWithFlareSolverr({
   const buf = Buffer.from(htmlBody, "utf8");
   if (buf.length > maxBytes) throw new FetchError("TOO_LARGE", `Response ${buf.length} bytes exceeds ${maxBytes}`);
 
-  const headers = new Map();
+  const headers = {};
   if (sol.headers) {
     for (const [k, v] of Object.entries(sol.headers)) {
-      headers.set(k.toLowerCase(), v);
+      headers[k.toLowerCase()] = v;
     }
   }
-  headers.set("content-type", "text/html; charset=utf-8");
+  headers["content-type"] = "text/html; charset=utf-8";
 
   if (sol.cookies?.length) {
-    const setCookie = sol.cookies
+    headers["set-cookie"] = sol.cookies
       .map((c) => `${c.name}=${c.value}; Domain=${c.domain || url.hostname}; Path=${c.path || "/"}`)
       .join(", ");
-    headers.set("set-cookie", setCookie);
   }
 
   return {
