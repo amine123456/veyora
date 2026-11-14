@@ -298,6 +298,7 @@ export function createUnlocker({
   fetchImpl = fetchThroughProxy,
   browserFetchImpl = null,
   camoufoxFetchImpl = null,
+  flareSolverrFetchImpl = null,
   solverImpl = null,
   solverQueue = null,
   tlsOptions = {},
@@ -332,14 +333,18 @@ export function createUnlocker({
   const browserPools = browserOk ? ["browser-residential", "ref-browser-residential"] : [];
   const camoufoxPools = camoufoxOk ? ["camoufox-residential"] : [];
   const mobilePools = mobileOk ? ["mobile", ...(camoufoxOk ? ["camoufox-mobile"] : [])] : [];
+  const flareSolverrOk = Boolean(flareSolverrFetchImpl);
+  const flareSolverrPools = flareSolverrOk ? ["flaresolverr-residential", ...(mobileOk ? ["flaresolverr-mobile"] : [])] : [];
   const solverOk = Boolean(solverImpl);
   const solverPools = solverOk ? ["solver-residential"] : [];
-  const pools = [...httpPools, ...browserPools, ...camoufoxPools, ...mobilePools, ...solverPools];
-  const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-");
+  const pools = [...httpPools, ...browserPools, ...camoufoxPools, ...mobilePools, ...flareSolverrPools, ...solverPools];
+  const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-") || rung.startsWith("flaresolverr-");
+  const isBrowserNotFs = (rung) => isBrowserRung(rung) && !isFlareSolverrRung(rung);
   const isCamoufoxRung = (rung) => rung.startsWith("camoufox-");
+  const isFlareSolverrRung = (rung) => rung.startsWith("flaresolverr-");
   const isRefererRung = (rung) => rung.startsWith("ref-");
   const isSolverRung = (rung) => rung.startsWith("solver-");
-  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "").replace(/^solver-/, "");
+  const poolOf = (rung) => rung.replace(/^ref-/, "").replace(/^browser-/, "").replace(/^camoufox-/, "").replace(/^flaresolverr-/, "").replace(/^solver-/, "");
   const poolForStep = (step) => pools[Math.min(step, pools.length - 1)];
   const costPerGb = { residential: pricing.costResidentialPerGbMicros, mobile: pricing.costMobilePerGbMicros };
   let browserActive = 0;
@@ -486,6 +491,28 @@ export function createUnlocker({
     return null;
   }
 
+  async function flareSolverrFetchOnExit(exit, country, startUrl, deadline) {
+    // FlareSolverr needs at least 15s to load a page through a proxy. If the deadline
+    // is too tight (after camoufox ate most of the budget), extend it.
+    const remaining = deadline - Date.now();
+    const timeoutMs = Math.max(15_000, remaining);
+    const endpoint = upstreamEndpoint(gateway, exit.pool);
+    const auth = upstreamAuthorization(gateway, { country, session: exit.sid, pool: exit.pool });
+    try {
+      return await flareSolverrFetchImpl({
+        url: startUrl,
+        proxy: { host: endpoint.host, port: endpoint.port, tls: gateway.upstreamTls, authorization: auth },
+        timeoutMs,
+        cookie: exit.jar?.header(startUrl.hostname) ?? "",
+      });
+    } catch (err) {
+      const wrapped = new Error(err.message);
+      wrapped.code = err.code ?? "NETWORK";
+      wrapped.wireBytes = 0;
+      throw wrapped;
+    }
+  }
+
   const SOLVER_IP_TRIES = 4;
   async function solverFetchOnExit(exit, username, country, startUrl, deadline) {
     const ua = chromeHeaders().find(([k]) => k === "User-Agent")?.[1] ?? "";
@@ -615,8 +642,11 @@ export function createUnlocker({
     // rungs and go straight to Camoufox or solver. One cheap HTTP try still runs first to
     // test whether clearance cookies from a prior request are still valid.
     const waf = siteWaf.get(site);
-    if (waf && firstCamoufoxStep >= 0 && !probeDown) {
-      jumpTo = Math.max(jumpTo, firstCamoufoxStep);
+    if (waf && !probeDown) {
+      // Cloudflare managed challenges block camoufox too — jump straight to FlareSolverr.
+      const firstFsStep = pools.findIndex((r) => isFlareSolverrRung(r));
+      const target = waf === "cloudflare" && firstFsStep >= 0 ? firstFsStep : firstCamoufoxStep;
+      if (target >= 0) jumpTo = Math.max(jumpTo, target);
     }
     let step = 0;
     // A named session keeps its exit (and cookies) across requests; without one, each
@@ -692,6 +722,8 @@ export function createUnlocker({
         let result;
         if (isSolverRung(rung)) {
           result = await solverFetchOnExit(exit, username, country, url, deadline);
+        } else if (isFlareSolverrRung(rung)) {
+          result = await flareSolverrFetchOnExit(exit, country, url, deadline);
         } else if (isBrowserRung(rung)) {
           result = await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung) });
         } else {
@@ -708,7 +740,7 @@ export function createUnlocker({
             log.info?.(`Unlocker: ${site} is behind ${detected} (${reasons.join(", ")})`);
           }
         }
-        attempts.push({ pool: exit.pool, browser: isBrowserRung(rung), camoufox: isCamoufoxRung(rung) || undefined, referer: isRefererRung(rung) || undefined, solver: isSolverRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
+        attempts.push({ pool: exit.pool, browser: isBrowserNotFs(rung), camoufox: isCamoufoxRung(rung) || undefined, flaresolverr: isFlareSolverrRung(rung) || undefined, referer: isRefererRung(rung) || undefined, solver: isSolverRung(rung) || undefined, outcome, status: result.status, ms: Date.now() - attemptStarted });
         if (bestOutcome === null || rank[outcome] >= rank[bestOutcome]) {
           best = result;
           bestOutcome = outcome;
@@ -722,6 +754,15 @@ export function createUnlocker({
           if (!isCamoufoxRung(rung) && !isSolverRung(rung) && firstCamoufoxStep >= 0 && step < firstCamoufoxStep) {
             step = firstCamoufoxStep - 1;
           } else if (isCamoufoxRung(rung)) {
+            const fsStep = pools.findIndex((r) => isFlareSolverrRung(r));
+            const solverStep = pools.findIndex((r) => isSolverRung(r));
+            const nextStep = fsStep >= 0 && step < fsStep ? fsStep : solverStep;
+            if (nextStep >= 0 && step < nextStep) {
+              step = nextStep - 1;
+            } else {
+              break;
+            }
+          } else if (isFlareSolverrRung(rung)) {
             const solverStep = pools.findIndex((r) => isSolverRung(r));
             if (solverStep >= 0 && step < solverStep) {
               step = solverStep - 1;
@@ -729,7 +770,6 @@ export function createUnlocker({
               break;
             }
           } else if (isSolverRung(rung)) {
-            // Solver already tried with fresh IPs/cookies — retrying the same rung won't help.
             break;
           }
         }

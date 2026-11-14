@@ -9,6 +9,7 @@ import { browserAvailable, fetchWithBrowser, fetchWithCamoufox } from './browser
 import { camoufoxAvailable } from './camoufox-launcher.js';
 import { curlAvailable, fetchWithCurl } from './curl-fetcher.js';
 import { fetchThroughProxy } from './fetcher.js';
+import { flareSolverrAvailable, fetchWithFlareSolverr } from './flaresolverr-fetcher.js';
 import { createUnlocker } from './unlocker.js';
 import { createSolver } from './capsolver.js';
 import { createSolverQueue } from './solver-queue.js';
@@ -40,6 +41,7 @@ async function main() {
   const hasCurl = await curlAvailable();
   const hasBrowser = await browserAvailable();
   const hasCamoufox = await camoufoxAvailable();
+  const hasFlaresolverr = await flareSolverrAvailable();
   const solver = createSolver({ apiKey: unlockerSettings.capsolverApiKey });
   const keepaliveFetch = hasCurl ? fetchWithCurl : fetchThroughProxy;
   const solverQueue = unlockerSettings.humanSolverEnabled
@@ -57,6 +59,7 @@ async function main() {
         fetchImpl: hasCurl ? fetchWithCurl : undefined,
         browserFetchImpl: hasBrowser ? fetchWithBrowser : null,
         camoufoxFetchImpl: hasCamoufox ? fetchWithCamoufox : null,
+        flareSolverrFetchImpl: hasFlaresolverr ? fetchWithFlareSolverr : null,
         solverImpl: solver,
         solverQueue,
       })
@@ -93,6 +96,7 @@ async function main() {
   else if (unlocker) console.log('curl_cffi not available: using Node TLS (install curl_cffi for better anti-bot bypass)');
   if (unlocker && hasBrowser) console.log('Browser fetcher enabled: blocked sites will escalate to Chromium');
   else if (unlocker) console.log('Browser fetcher not available: install patchright or playwright for browser escalation');
+  if (unlocker && hasFlaresolverr) console.log('FlareSolverr enabled: Cloudflare managed challenges will escalate to FlareSolverr');
   if (solverQueue) console.log('Human solver queue enabled');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
