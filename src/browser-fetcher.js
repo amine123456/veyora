@@ -463,3 +463,29 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
     });
   });
 }
+
+// The Camoufox script can leave its browser, driver and virtual display running after an
+// error. Each is 300-500 MB, so a few of them exhaust a small server. This kills any that
+// belong to this service and have outlived every possible request.
+// Anchored to the executable, so a shell command that merely mentions these names never matches.
+const STALE_BROWSER = /^(?:\S*\/)?camoufox-bin(?:\s|$)|^\S*node \S*camoufox\/launchServer|^(?:\S*\/)?Xvfb :\d+ -screen 0 1920x1080x24/;
+
+export async function reapStaleBrowsers(maxAgeSeconds = 240) {
+  const { execFile } = await import("node:child_process");
+  const { readFile } = await import("node:fs/promises");
+  let mine;
+  try { mine = (await readFile("/proc/self/cgroup", "utf8")).trim().split("\n").pop().split("::").pop(); } catch { return 0; }
+  const listing = await new Promise((resolve) => execFile("ps", ["-eo", "pid=,etimes=,args="], { maxBuffer: 4 * 1024 * 1024 }, (error, stdout) => resolve(error ? "" : stdout)));
+  let killed = 0;
+  for (const line of listing.split("\n")) {
+    const match = /^\s*(\d+)\s+(\d+)\s+(.*)$/.exec(line);
+    if (!match || Number(match[2]) < maxAgeSeconds || !STALE_BROWSER.test(match[3])) continue;
+    try {
+      const theirs = (await readFile(`/proc/${match[1]}/cgroup`, "utf8")).trim().split("\n").pop().split("::").pop();
+      if (theirs !== mine || mine === "/") continue; // never touch another service's or user's browsers
+      process.kill(Number(match[1]), "SIGKILL");
+      killed += 1;
+    } catch { /* gone already */ }
+  }
+  return killed;
+}

@@ -5,7 +5,7 @@ import { createPaymentServer } from './payments.js';
 import { createShutdown } from './shutdown.js';
 import { migrate } from './db.js';
 import { drain } from './store.js';
-import { browserAvailable, fetchWithBrowser, fetchWithCamoufox } from './browser-fetcher.js';
+import { browserAvailable, fetchWithBrowser, fetchWithCamoufox, reapStaleBrowsers } from './browser-fetcher.js';
 import { camoufoxAvailable } from './camoufox-launcher.js';
 import { curlAvailable, fetchWithCurl } from './curl-fetcher.js';
 import { fetchThroughProxy } from './fetcher.js';
@@ -101,6 +101,13 @@ async function main() {
   if (solverQueue) console.log('Human solver queue enabled');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;
+
+  // Browsers left behind by a failed stealth-browser run are killed once a minute.
+  if (unlocker && hasCamoufox) {
+    setInterval(() => {
+      void reapStaleBrowsers().then((killed) => { if (killed) console.log(`Reaped ${killed} stale browser process(es)`); }).catch(() => {});
+    }, 60_000).unref();
+  }
 
   // systemd stops the service with SIGTERM: stop listening, let in-flight unlocks and
   // database writes finish (at most 10 s), write the ledger snapshot, then exit.

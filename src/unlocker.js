@@ -131,6 +131,27 @@ function premiumMultiplier(hostname, premiumDomains) {
   return 1;
 }
 
+// Country-code domains whose sites expect visitors from that country. Protected sites
+// (Akamai, Cloudflare country rules) often refuse foreign exits outright: mobile.de passed
+// 5 of 6 tries from German exits and 0 of 4 from random ones. Used only when the caller
+// names no country. Country-code TLDs sold as generic ones (.io, .co, .tv, .me...) are left out.
+const TLD_COUNTRIES = new Map([
+  ...["de", "fr", "es", "it", "nl", "be", "at", "ch", "pl", "cz", "sk", "pt", "ie", "se", "no", "dk", "fi", "gr", "ro", "hu",
+    "bg", "hr", "si", "lt", "lv", "ee", "ca", "au", "nz", "jp", "br", "mx", "ar", "cl", "tr", "in", "za", "us"].map((code) => [code, code]),
+  ["uk", "gb"],
+]);
+
+// The exit country to use for a site when the caller did not choose one, or null.
+export function siteCountry(hostname, overrides = new Map()) {
+  const host = hostname.toLowerCase();
+  for (let candidate = host; candidate; ) {
+    if (overrides.has(candidate)) return overrides.get(candidate);
+    const dot = candidate.indexOf(".");
+    candidate = dot === -1 ? "" : candidate.slice(dot + 1);
+  }
+  return TLD_COUNTRIES.get(host.slice(host.lastIndexOf(".") + 1)) ?? null;
+}
+
 export function siteOf(hostname) {
   return hostname.replace(/^www\./, "");
 }
@@ -750,11 +771,7 @@ export function createUnlocker({
     // A named session keeps its exit (and cookies) across requests; without one, each
     // customer keeps a warm exit per site so clearance cookies are reused.
     const exitKey = session ? `${username}\0session\0${session}` : `${username}\0site\0${site}`;
-    // The exit that last delivered this site. A browser rung tries it first: on sites that
-    // judge the IP (Akamai, DataDome), an exit that passed once is worth far more than a
-    // random new one.
-    let warmExit = sessions.get(exitKey) ?? null;
-    let exit = warmExit ?? newExit(poolOf(poolForStep(step)));
+    let exit = sessions.get(exitKey) ?? newExit(poolOf(poolForStep(step)));
     if (exit.pool !== poolOf(poolForStep(step)) && !session) exit = newExit(poolOf(poolForStep(step)));
     let camoufoxTries = 0;
     const attempts = [];
@@ -817,13 +834,10 @@ export function createUnlocker({
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250 && !aborted(); attempt += 1) {
       if (attempt > 0) {
         step = Math.max(step + 1, jumpTo);
-        const pool = poolOf(poolForStep(step));
-        if (warmExit && warmExit.pool === pool && isBrowserRung(poolForStep(step))) {
-          exit = warmExit; // once; if it fails, later attempts draw new IPs
-          warmExit = null;
-        } else {
-          exit = newExit(pool);
-        }
+        // Browser rungs always get a fresh proxy session (new IP). Measured on mobile.de:
+        // going back to the exit that just delivered a page was blocked 4 times out of 4,
+        // while a new IP passed.
+        exit = newExit(poolOf(poolForStep(step)));
       }
       const rung = poolForStep(step);
       if (isCamoufoxRung(rung)) camoufoxTries += 1;
@@ -1172,7 +1186,8 @@ export function createUnlocker({
       const refund = () => (testMode ? sandboxStore.giveBack(client.username) : releaseFunds(client.username, priceMicros));
       let outcome;
       try {
-        outcome = await unlock({ username: client.username, url, country: input.country, session: input.session, aborted: () => hungUp(response) });
+        const country = input.country ?? siteCountry(url.hostname, config.siteCountries);
+        outcome = await unlock({ username: client.username, url, country, session: input.session, aborted: () => hungUp(response) });
       } catch (error) {
         await refund();
         throw error;

@@ -14,6 +14,14 @@ RestartSec=3
 # The gateway keeps one connection per tunnel; raise the default file limit.
 LimitNOFILE=65536
 
+# Browsers must never exhaust the server: past MemoryMax the kernel kills the largest
+# process inside this service (a browser), never something else on the machine, and the
+# service itself keeps running.
+MemoryHigh=2200M
+MemoryMax=2600M
+MemorySwapMax=512M
+OOMPolicy=continue
+
 # Hardening: the service only needs to write its data directory.
 NoNewPrivileges=true
 ProtectSystem=strict

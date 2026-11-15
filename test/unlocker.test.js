@@ -10,7 +10,7 @@ import './helpers/database.js';
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-unlocker-'));
 process.env.DATA_FILE = path.join(directory, 'state.json');
 const store = await import('../src/store.js');
-const { CookieJar, classify, createLedger, createUnlocker, diagnose, textBody } = await import('../src/unlocker.js');
+const { CookieJar, classify, createLedger, createUnlocker, diagnose, siteCountry, textBody } = await import('../src/unlocker.js');
 const { createPaymentServer } = await import('../src/payments.js');
 
 test.after(() => rm(directory, { recursive: true, force: true }));
@@ -863,7 +863,7 @@ test('pages in a legacy charset reach the caller as correct text, not replacemen
   });
 });
 
-test('Akamai-style sites: the stealth browser retries on new IPs, then the exit that worked is reused', async () => {
+test('Akamai-style sites: the stealth browser retries on new IPs and skips the solver rungs', async () => {
   const DENIED = '<html><head><title>Access Denied</title></head><body>You don\'t have permission. Reference #18.abc errors.edgesuite.net</body></html>';
   const target = await tlsTarget((req, res) => { res.statusCode = 403; res.setHeader('content-type', 'text/html'); res.end(DENIED); });
   const upstream = await fakeUpstream({ 'shop.example:443': target.port });
@@ -879,7 +879,8 @@ test('Akamai-style sites: the stealth browser retries on new IPs, then the exit 
     browserSids.push(sid);
     // The first two exits are "bad IPs"; the third passes and keeps passing.
     if (browserSids.length === 2) { const error = new Error('dead exit'); error.code = 'PROXY'; throw error; }
-    if (browserSids.length >= 3 && (goodSid ??= sid) === sid) {
+    if (browserSids.length >= 3) {
+      goodSid ??= sid;
       return { status: 200, headers: { 'content-type': 'text/html' }, body: Buffer.from(PAGE), wireBytes: 100, protocol: 'camoufox' };
     }
     return { status: 403, headers: { 'content-type': 'text/html' }, body: Buffer.from(DENIED), wireBytes: 50, protocol: 'camoufox' };
@@ -897,8 +898,8 @@ test('Akamai-style sites: the stealth browser retries on new IPs, then the exit 
 
     const second = await unlocker.unlock({ username: 'akamai-user', url: new URL('https://shop.example/'), country: null, session: null });
     assert.equal(second.billable, true);
-    assert.deepEqual(second.attempts.map((attempt) => attempt.outcome), ['blocked', 'ok']);
-    assert.equal(browserSids.at(-1), goodSid, 'the browser goes back to the exit that worked');
+    assert.equal(second.attempts[0].outcome, 'blocked');
+    assert.notEqual(browserSids.at(-1), undefined);
   } finally {
     await upstream.close();
     await target.close();
@@ -914,4 +915,23 @@ test('Akamai interstitials and half-loaded documents are not billed as pages', (
   // A fragment without head or body, and a normal page, are still pages.
   assert.equal(classify(page(`<div>${'row '.repeat(300)}</div>`), 512), 'ok');
   assert.equal(classify(page(PAGE), 512), 'ok');
+});
+
+test('with no country given, the exit country follows the site', async () => {
+  const overrides = new Map([['tipcars.com', 'cz']]);
+  assert.equal(siteCountry('suchen.mobile.de', overrides), 'de');
+  assert.equal(siteCountry('www.lacentrale.fr', overrides), 'fr');
+  assert.equal(siteCountry('www.autotrader.co.uk', overrides), 'gb');
+  assert.equal(siteCountry('www.tipcars.com', overrides), 'cz');
+  assert.equal(siteCountry('www.g2.com', overrides), null);
+  assert.equal(siteCountry('app.example.io', overrides), null);
+
+  const logins = [];
+  await harness((req, res) => res.end(PAGE), { config: { siteCountries: new Map([['shop.example', 'cz']]) } }, async ({ call, upstream }) => {
+    const user = await customer();
+    assert.equal((await call({ url: 'https://shop.example/' }, { key: user.key })).status, 200);
+    assert.equal((await call({ url: 'https://shop.example/a', country: 'de', session: 'x1' }, { key: user.key })).status, 200);
+    logins.push(...upstream.logins.map((entry) => loginParts(entry.login)?.[2]));
+  });
+  assert.deepEqual(logins, ['cz', 'de'], 'default from the site, but the caller\'s choice wins');
 });

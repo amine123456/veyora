@@ -227,6 +227,13 @@ export function unlockerConfig() {
     // Sandbox: free testing. Requests to SANDBOX_HOST are simulated; a vy_test_ key (or the
     // dashboard playground) may also fetch real pages, up to a daily allowance per account
     // and for the whole service, which bounds what free testing can cost.
+    // Exit country used for a site when the caller names none: "domain:cc,domain:cc".
+    // Country-code domains (.de, .fr, .cz...) already default to their own country.
+    siteCountries: new Map((process.env.UNLOCKER_SITE_COUNTRIES ?? 'tipcars.com:cz').split(',').map((entry) => entry.trim()).filter(Boolean).map((entry) => {
+      const [domain, code] = entry.toLowerCase().split(':');
+      if (!/^[a-z0-9.-]+$/.test(domain ?? '') || !/^[a-z]{2}$/.test(code ?? '')) throw new Error(`Invalid UNLOCKER_SITE_COUNTRIES entry: ${entry}`);
+      return [domain, code];
+    })),
     sandboxEnabled: boolean('SANDBOX_ENABLED', true),
     sandboxHost: (process.env.SANDBOX_HOST?.trim() || 'sandbox.veyora.pro').toLowerCase(),
     sandboxLiveDaily: integer('SANDBOX_LIVE_DAILY', 20, { min: 0, max: 100_000 }),
