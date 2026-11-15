@@ -59,7 +59,7 @@ export function createSolver({ apiKey, solverifyKey, log = console }) {
   }
 
   async function solveDatadome({ captchaUrl, html, websiteURL, proxyString, userAgent, deadlineMs }) {
-    log.info?.(`${backend}: solving DataDome challenge for ${websiteURL} captchaUrl=${captchaUrl?.slice(0, 120)} proxy=${proxyString?.replace(/:[^:]+$/, ':***')}`);
+    log.info?.(`${backend}: solving DataDome challenge for ${websiteURL} via ${proxyString?.split(':').slice(0, 2).join(':')}`);
     try {
       let task;
       if (backend === 'solverify') {
@@ -87,7 +87,8 @@ export function createSolver({ apiKey, solverifyKey, log = console }) {
         };
       }
       const solution = await solve(task, deadlineMs);
-      log.info?.(`${backend} DataDome solve result: ${solution ? JSON.stringify(solution) : 'null'}`);
+      // Clearance cookies are credentials for the target site: log their names, never the values.
+      log.info?.(`${backend} DataDome solve result: ${solution ? `cookies=${Object.keys(solution.cookies ?? {}).join(',') || 'none'} ip=${solution.ip ?? '?'}` : 'null'}`);
       if (backend === 'solverify') {
         if (solution?.cookies?.datadome) {
           const domain = new URL(websiteURL).hostname.replace(/^www\./, '');

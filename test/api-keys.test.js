@@ -60,7 +60,7 @@ test('a key is shown once, stored only as a hash, and authenticates its account'
   assert.equal(created.name, 'scraper');
 
   const listed = await store.listApiKeys(account.username);
-  assert.deepEqual(listed, [{ id: created.id, name: 'scraper', prefix: created.prefix, createdAt: created.createdAt }]);
+  assert.deepEqual(listed, [{ id: created.id, name: 'scraper', prefix: created.prefix, mode: 'live', createdAt: created.createdAt }]);
   assert.equal((await databaseDump()).includes(created.key), false);
 
   const found = await store.authenticateApiKey(created.key);

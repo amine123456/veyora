@@ -224,6 +224,14 @@ export function unlockerConfig() {
     solverTaskTtlMs: integer('SOLVER_TASK_TTL_MS', 300_000, { min: 10_000, max: 3_600_000 }),
     solverMaxPending: integer('SOLVER_MAX_PENDING', 50, { max: 10_000 }),
     solverCookieTtlMs: integer('SOLVER_COOKIE_TTL_MS', 1_800_000, { min: 60_000, max: 86_400_000 }),
+    // Sandbox: free testing. Requests to SANDBOX_HOST are simulated; a vy_test_ key (or the
+    // dashboard playground) may also fetch real pages, up to a daily allowance per account
+    // and for the whole service, which bounds what free testing can cost.
+    sandboxEnabled: boolean('SANDBOX_ENABLED', true),
+    sandboxHost: (process.env.SANDBOX_HOST?.trim() || 'sandbox.veyora.pro').toLowerCase(),
+    sandboxLiveDaily: integer('SANDBOX_LIVE_DAILY', 20, { min: 0, max: 100_000 }),
+    sandboxLiveGlobalDaily: integer('SANDBOX_LIVE_GLOBAL_DAILY', 2_000, { min: 0, max: 10_000_000 }),
+    sandboxMaxConcurrentPerAccount: integer('SANDBOX_MAX_CONCURRENT_PER_ACCOUNT', 2, { max: 100 }),
   };
 }
 

@@ -577,11 +577,23 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
           return json(response, 200, { ok: true });
         }
         try {
-          return json(response, 201, await createApiKey(client.username, input?.name));
+          return json(response, 201, await createApiKey(client.username, input?.name, { mode: input?.mode === 'test' ? 'test' : 'live' }));
         } catch (error) {
           if (error.code) throw new PublicError(error.code === 'TOO_MANY_KEYS' ? 409 : 400, error.message);
           throw error;
         }
+      }
+
+      // Sandbox playground: free test requests from the dashboard, for the signed-in account.
+      if (request.url === '/api/sandbox' || request.url === '/api/sandbox/unlock') {
+        if (!unlocker) return json(response, 503, { error: 'The unlocker is not available' });
+        const run = request.url === '/api/sandbox/unlock';
+        if (request.method !== (run ? 'POST' : 'GET')) return json(response, 405, { error: 'Method not allowed' });
+        if (run) assertSameOrigin(request);
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        if (!run) return json(response, 200, await unlocker.sandboxStatus(client.username));
+        return await unlocker.playground(request, response, client.username);
       }
 
       if (request.method === 'GET' && request.url.startsWith('/api/usage')) {

@@ -101,7 +101,7 @@ Everything lives in `/opt/proxora/data/` (accounts, quotas, sessions, payments).
 Run these on the server as root. None of them change anything.
 
 ```bash
-# nginx: the /v1/ block must show the 120 s timeout, and X-Real-IP must appear in both locations
+# nginx: the /v1/ block must show the 720 s timeout, and X-Real-IP must appear in both locations
 nginx -T 2>/dev/null | sed -n '/server_name veyora/,/^}/p' | grep -nE 'location|proxy_read_timeout|X-Real-IP'
 # Mobile upstream configured (prints the variable names only, never the values)
 grep -oE '^UPSTREAM_MOBILE_(USERNAME|PASSWORD|HOST|PORT)=.' /opt/proxora/.env | cut -d= -f1
@@ -117,7 +117,7 @@ du -sh /opt/proxora/data
 journalctl -u proxora -n 20 --no-pager | grep -E 'Unlocker|listening|error'
 ```
 
-Expected: `location /` and `location /v1/` each followed by `X-Real-IP`, `proxy_read_timeout 120s` under `/v1/`; `UPSTREAM_MOBILE_USERNAME` and `UPSTREAM_MOBILE_PASSWORD` listed.
+Expected: `location /` and `location /v1/` each followed by `X-Real-IP`, `proxy_read_timeout 720s` under the `/v1/` and sandbox location; `UPSTREAM_MOBILE_USERNAME` and `UPSTREAM_MOBILE_PASSWORD` listed.
 
 Sizing the memory budget from `free -m`: set `UNLOCKER_MEMORY_BUDGET_BYTES` to about a quarter of the "available" column. Each in-flight unlock books twice `UNLOCKER_MAX_RESPONSE_BYTES` (5 MB pages book 10 MB):
 

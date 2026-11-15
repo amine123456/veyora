@@ -113,6 +113,9 @@ export default function DocsPage() {
                 <a href="#unlocker">Web Unlocker</a>
               </li>
               <li>
+                <a href="#sandbox">Sandbox</a>
+              </li>
+              <li>
                 <a href="#api-keys">API keys</a>
               </li>
               <li>
@@ -372,6 +375,123 @@ export default function DocsPage() {
                 '{\n  "status": 200,\n  "url": "https://example.com",\n  "body": "<!doctype html>...",\n  "headers": { "content-type": "text/html; charset=UTF-8", ... }\n}'
               }
             </pre>{' '}
+            <h2 id="sandbox">Sandbox</h2>
+            <p>
+              Test your integration for free before you spend anything. There are two ways in, and both return the same
+              JSON as a live request plus a <code>sandbox</code> object:
+            </p>
+            <ul>
+              <li>
+                <strong>Playground.</strong> Open the Sandbox section of your <a href="/account#sandbox">dashboard</a>,
+                paste a URL and run it. You see every attempt, the page, the headers and what a live key would pay.
+              </li>
+              <li>
+                <strong>Sandbox keys.</strong> Create a key of type Sandbox (<code>vy_test_…</code>) and call{' '}
+                <code>POST /v1/unlock</code> as usual. Sandbox keys never charge your balance.
+              </li>
+            </ul>
+            <h3>Simulated scenarios</h3>
+            <p>
+              URLs on <code>sandbox.veyora.pro</code> are answered instantly without fetching anything. They are free,
+              unlimited (within the normal rate limit) and work with any key, so you can exercise every branch of your
+              error handling:
+            </p>
+            <table>
+              <tbody>
+                <tr>
+                  <th>URL path</th>
+                  <th>What you get</th>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/ok</code>
+                  </td>
+                  <td>A normal page, first try</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/hard</code>
+                  </td>
+                  <td>Blocked twice, then unlocked by the CAPTCHA solver (shows the solver surcharge)</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/blocked</code>, <code>/unreachable</code>
+                  </td>
+                  <td>
+                    HTTP <code>502</code>, <code>success: false</code>, not charged
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/timeout</code>
+                  </td>
+                  <td>
+                    HTTP <code>504</code>, not charged
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/not-found</code>
+                  </td>
+                  <td>
+                    The site's real 404: returned with <code>status: 404</code> and billed like a page
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/server-error</code>
+                  </td>
+                  <td>
+                    The site's 500 page with <code>success: false</code>, not charged
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/json</code>, <code>/binary</code>, <code>/large</code>
+                  </td>
+                  <td>
+                    A JSON body, a base64-encoded image (<code>encoding: "base64"</code>), about 1 MB of HTML
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/slow?ms=5000</code>
+                  </td>
+                  <td>Success after the delay you choose (10 s at most)</td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/echo</code>
+                  </td>
+                  <td>
+                    The <code>country</code> and <code>session</code> you sent, as JSON
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <code>/insufficient-balance</code>, <code>/rate-limited</code>, <code>/busy</code>
+                  </td>
+                  <td>
+                    HTTP <code>402</code>, <code>429</code> and <code>503</code> (the last two with{' '}
+                    <code>Retry-After</code>)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <pre>
+              {
+                'curl -X POST https://veyora.pro/v1/unlock \\\n  -H "Authorization: Bearer vy_test_YOUR_SANDBOX_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"url": "https://sandbox.veyora.pro/hard"}\''
+              }
+            </pre>
+            <h3>Real pages</h3>
+            <p>
+              With a sandbox key or the playground, any other URL is fetched for real through the full unlocker, free of
+              charge, up to a daily allowance per account (shown in the dashboard). Only successful requests count
+              against it. The response's <code>sandbox.wouldBillMicros</code> tells you what the same request costs
+              with a live key, in millionths of a dollar, and <code>sandbox.liveRemaining</code> how many free requests
+              are left today.
+            </p>{' '}
             <h2 id="api-keys">API keys</h2>
             <p>
               API keys authenticate Web Unlocker requests. Create and manage them in your{' '}
@@ -433,7 +553,7 @@ export default function DocsPage() {
                   <td>
                     <code>502</code>
                   </td>
-                  <td>Bad gateway — upstream connection failed</td>
+                  <td>Bad gateway — the site could not be reached, or blocked every attempt (not charged)</td>
                 </tr>
                 <tr>
                   <td>
@@ -460,6 +580,14 @@ export default function DocsPage() {
                 <strong>$0.20 per 1,000 successful requests</strong> (charged per request from wallet).
               </li>
               <li>Blocked and failed requests are not billed.</li>
+              <li>
+                Pages that need a CAPTCHA solved cost an extra <strong>$0.005</strong> on success. The response lists
+                it as <code>solverSurchargeMicros</code>.
+              </li>
+              <li>
+                Most pages come back in seconds, but heavily protected sites can take several minutes. Set your client
+                timeout to at least <strong>8 minutes</strong>; if you disconnect early you are not charged.
+              </li>
               <li>
                 Only <code>GET</code> requests on standard web ports (80, 443).
               </li>

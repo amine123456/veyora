@@ -54,6 +54,12 @@ export function DashboardSidebar() {
             Payments
           </a>{' '}
           <p className="snav__label">Developers</p>{' '}
+          <a className="snav__a" href="#sandbox" data-unlocker-nav="" hidden>
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-terminal" />
+            </svg>
+            Sandbox
+          </a>{' '}
           <a className="snav__a" href="#unlocker" data-unlocker-nav="" hidden>
             <svg className="ic" aria-hidden="true">
               <use href="#i-api" />

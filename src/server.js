@@ -42,7 +42,7 @@ async function main() {
   const hasBrowser = await browserAvailable();
   const hasCamoufox = await camoufoxAvailable();
   const hasFlaresolverr = await flareSolverrAvailable();
-  const solver = createSolver({ apiKey: unlockerSettings.capsolverApiKey });
+  const solver = createSolver({ apiKey: unlockerSettings.capsolverApiKey, solverifyKey: unlockerSettings.solverifyApiKey });
   const keepaliveFetch = hasCurl ? fetchWithCurl : fetchThroughProxy;
   const solverQueue = unlockerSettings.humanSolverEnabled
     ? createSolverQueue({
@@ -97,6 +97,7 @@ async function main() {
   if (unlocker && hasBrowser) console.log('Browser fetcher enabled: blocked sites will escalate to Chromium');
   else if (unlocker) console.log('Browser fetcher not available: install patchright or playwright for browser escalation');
   if (unlocker && hasFlaresolverr) console.log('FlareSolverr enabled: Cloudflare managed challenges will escalate to FlareSolverr');
+  if (solver) console.log(`CAPTCHA solver: ${solver.backend} backend active`);
   if (solverQueue) console.log('Human solver queue enabled');
   if (!payments.stripeKey) console.log('Stripe disabled: configure STRIPE_SECRET_KEY to enable checkout');
   startupComplete = true;

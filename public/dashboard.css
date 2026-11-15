@@ -337,6 +337,52 @@ code, pre { font-family: var(--font-mono); }
   .hero-card__top .status { display: none; }
 }
 @media (pointer: coarse) { .copy, .btn--sm { min-height: 44px; } }
+/* sandbox playground */
+.field select {
+  height: 48px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--line-strong); background: var(--surface); font: inherit; font-size: 15px; color: var(--ink);
+}
+.field select:hover { border-color: var(--faint); }
+.field select:focus { border-color: var(--ink); box-shadow: var(--ring); outline: none; }
+.keys dt .badge { flex: none; }
+.sbx-quota { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 14px; border-radius: var(--r-md); background: var(--green-soft); border: 1px solid #BFE5CF; color: #0E5F34; font-size: 14px; }
+.sbx-quota .ic { flex: none; font-size: 18px; }
+.sbx-form { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.sbx-form__url { flex: 3 1 320px; }
+.sbx-form__opt { flex: 1 1 110px; min-width: 110px; }
+.sbx-form__url input { font-family: var(--font-mono); font-size: 14px; }
+.sbx-form .field input { width: 100%; min-width: 0; }
+.sbx-form .btn { min-height: 48px; flex: none; }
+.sbx-form .btn[disabled] { opacity: .7; cursor: progress; }
+.sbx-label { margin: 4px 0 -6px; font-size: 12.5px; font-weight: 500; letter-spacing: .02em; text-transform: uppercase; color: var(--faint); }
+.sbx-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.sbx-chip { min-height: 34px; padding: 0 13px; border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: var(--surface); font: inherit; font-size: 13.5px; color: var(--ink); cursor: pointer; transition: border-color .2s, background .2s; }
+.sbx-chip:hover { border-color: var(--ink); background: var(--accent-soft); }
+.sbx-chip:focus-visible { box-shadow: var(--ring); outline: none; }
+.sbx-hint { margin: 0; font-size: 14px; color: var(--muted); }
+.sbx-result { display: grid; gap: 14px; }
+.sbx-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; }
+.sbx-stat { display: grid; gap: 3px; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); min-width: 0; }
+.sbx-stat small { font-size: 12px; color: var(--muted); }
+.sbx-stat b { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.sbx-stat--ok b { color: var(--green); }
+.sbx-stat--err b { color: var(--red); }
+.sbx-attempts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; counter-reset: attempt; }
+.sbx-attempt { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 14px 9px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); border-left: 3px solid var(--red); font-size: 13.5px; counter-increment: attempt; }
+.sbx-attempt--ok { border-left-color: var(--green-dot); }
+.sbx-attempt b { font-weight: 500; }
+.sbx-attempt b::before { content: counter(attempt) ". "; color: var(--faint); font-weight: 400; }
+.sbx-attempt span { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.sbx-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; border-radius: var(--r-md); background: var(--sunken); width: fit-content; max-width: 100%; }
+.sbx-tabs button { min-height: 34px; padding: 0 14px; border: 0; border-radius: var(--r-sm); background: transparent; font: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; }
+.sbx-tabs button:hover { color: var(--ink); }
+.sbx-tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); font-weight: 500; box-shadow: 0 1px 2px rgba(22, 22, 21, .12); }
+.sbx-tabs button:focus-visible { box-shadow: var(--ring); outline: none; }
+.code--scroll pre { max-height: 420px; overflow: auto; }
+@media (max-width: 640px) {
+  .sbx-form .btn, .sbx-form .field { width: 100%; flex-basis: 100%; }
+  .sbx-attempt { flex-direction: column; align-items: flex-start; gap: 2px; }
+}
+@media (pointer: coarse) { .sbx-chip, .sbx-tabs button { min-height: 44px; } }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }

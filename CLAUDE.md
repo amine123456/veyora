@@ -26,6 +26,12 @@ exposing its credentials, or the Web Unlocker API (`POST /v1/unlock`, API keys).
 - `src/unlocker.js` `/v1/unlock`: validation, SSRF/blocklist, escalation ladder, per-site memory,
   sessions and cookies, wallet billing, JSONL cost ledger. `src/fetcher.js` Chrome-shaped GET
   through the upstream CONNECT tunnel (h2/HTTP 1.1, br/gzip, size cap).
+- `src/sandbox.js` simulated scenarios for the sandbox host (`SANDBOX_HOST`, default
+  `sandbox.veyora.pro`): answered inside `/v1/unlock` without any fetch, never billed. `vy_test_`
+  keys and the dashboard playground (`POST /api/sandbox/unlock`, session auth) also fetch real
+  pages for free up to `SANDBOX_LIVE_DAILY` per account per UTC day (`sandbox_usage` table).
+- The dashboard's script and styles live in `web/public/` (`auth.js`, `dashboard.css`); `public/`
+  holds a copy for the legacy static site. Edit `web/public/` and copy across.
 - `src/store.js` account, session, API key, wallet and payment operations on PostgreSQL
   (`src/db.js`: pool, `transaction()`, `migrate()`; schema in `db/migrations/`). Debits are
   conditional updates or run under the account row lock. scrypt password hashes,

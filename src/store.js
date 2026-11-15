@@ -16,7 +16,9 @@ const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_SESSIONS_PER_CLIENT = 10;
 const MAX_API_KEYS_PER_CLIENT = 10;
 const API_KEY_NAME_MAX = 40;
-const API_KEY_PATTERN = /^vy_live_[A-Za-z0-9_-]{43}$/;
+const API_KEY_PATTERN = /^vy_(?:live|test)_[A-Za-z0-9_-]{43}$/;
+// A key's mode is part of the key itself: vy_test_ keys never spend the wallet.
+const keyMode = (prefix) => (String(prefix).startsWith("vy_test_") ? "test" : "live");
 const UNIQUE_VIOLATION = "23505";
 
 // Proxy clients send their password on every request, and scrypt costs tens of
@@ -465,15 +467,16 @@ export async function deleteSession(token) {
 // SHA-256 digest is enough to store it (no slow hash needed, unlike passwords); it is
 // shown once at creation and never again.
 function apiKeyView(row) {
-  return { id: row.id, name: row.name, prefix: row.prefix, createdAt: row.created_at.toISOString() };
+  return { id: row.id, name: row.name, prefix: row.prefix, mode: keyMode(row.prefix), createdAt: row.created_at.toISOString() };
 }
 
-export async function createApiKey(username, name = "") {
+export async function createApiKey(username, name = "", { mode = "live" } = {}) {
+  if (mode !== "live" && mode !== "test") throw accountError("INVALID_MODE", "Key mode must be live or test");
   const label = String(name ?? "").trim();
   if (label.length > API_KEY_NAME_MAX || /[\u0000-\u001f\u007f]/.test(label)) {
     throw accountError("INVALID_NAME", `Key name must be at most ${API_KEY_NAME_MAX} printable characters`);
   }
-  const key = `vy_live_${crypto.randomBytes(32).toString("base64url")}`;
+  const key = `vy_${mode}_${crypto.randomBytes(32).toString("base64url")}`;
   return transaction(async (db) => {
     const client = await lockClient(db, username);
     if (!client || !client.enabled) throw new Error("Unknown client");
@@ -504,11 +507,51 @@ export async function revokeApiKey(username, id) {
 export async function authenticateApiKey(key) {
   if (typeof key !== "string" || !API_KEY_PATTERN.test(key)) return null;
   const { rows } = await query(
-    `SELECT c.*, k.id AS api_key_id FROM api_keys k JOIN clients c ON c.username = k.username
+    `SELECT c.*, k.id AS api_key_id, k.prefix AS api_key_prefix FROM api_keys k JOIN clients c ON c.username = k.username
      WHERE k.key_hash = $1 AND c.enabled`,
     [sessionKey(key)],
   );
-  return rows[0] ? { ...publicClient(rows[0]), apiKeyId: rows[0].api_key_id } : null;
+  return rows[0] ? { ...publicClient(rows[0]), apiKeyId: rows[0].api_key_id, keyMode: keyMode(rows[0].api_key_prefix) } : null;
+}
+
+// Sandbox live allowance: takes one request from today's (UTC) allowance, or returns null
+// when the account's or the whole service's daily cap is reached. One statement per check,
+// under the account row lock, so parallel requests cannot overshoot.
+export async function takeSandboxLive(username, { perAccount, global = Infinity }) {
+  return transaction(async (db) => {
+    const client = await lockClient(db, username);
+    if (!client || !client.enabled) return null;
+    const { rows: [totals] } = await db.query(
+      `SELECT coalesce(sum(live_requests), 0)::int AS everyone,
+              coalesce(sum(live_requests) FILTER (WHERE username = $1), 0)::int AS mine
+       FROM sandbox_usage WHERE day = (now() AT TIME ZONE 'UTC')::date`,
+      [username],
+    );
+    if (totals.mine >= perAccount || totals.everyone >= global) return null;
+    await db.query(
+      `INSERT INTO sandbox_usage (username, day, live_requests) VALUES ($1, (now() AT TIME ZONE 'UTC')::date, 1)
+       ON CONFLICT (username, day) DO UPDATE SET live_requests = sandbox_usage.live_requests + 1`,
+      [username],
+    );
+    return { used: totals.mine + 1, remaining: perAccount - totals.mine - 1 };
+  });
+}
+
+// Gives a request back (the fetch failed, so it does not count).
+export async function returnSandboxLive(username) {
+  await query(
+    `UPDATE sandbox_usage SET live_requests = live_requests - 1
+     WHERE username = $1 AND day = (now() AT TIME ZONE 'UTC')::date AND live_requests > 0`,
+    [username],
+  );
+}
+
+export async function sandboxLiveUsed(username) {
+  const { rows } = await query(
+    "SELECT live_requests FROM sandbox_usage WHERE username = $1 AND day = (now() AT TIME ZONE 'UTC')::date",
+    [username],
+  );
+  return rows[0]?.live_requests ?? 0;
 }
 
 function pendingView(row) {

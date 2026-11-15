@@ -25,7 +25,7 @@ function post(port, path, body, headers = {}) {
   return request(port, {
     path,
     method: 'POST',
-    headers: { 'content-type': 'application/json', origin: 'https://localhost', ...headers },
+    headers: { 'content-type': 'application/json', origin: `http://127.0.0.1:${port}`, host: `127.0.0.1:${port}`, ...headers },
     body: JSON.stringify(body),
   });
 }
@@ -41,9 +41,9 @@ test('usage and payment API endpoints', async (t) => {
   const store = await import('../src/store.js');
   const { createPaymentServer } = await import('../src/payments.js');
 
-  const username = 'usage-test-user';
+  const email = 'usage-test-user@example.com';
   const password = 'test-password-long-enough';
-  await store.createClient(username, password, 0);
+  const { username } = await store.createAccount(email, password);
 
   const config = {
     authAttemptsPerMinute: 30,
@@ -59,7 +59,7 @@ test('usage and payment API endpoints', async (t) => {
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   // Log in to get a session cookie
-  const loginRes = await post(port, '/api/login', { email: username, password });
+  const loginRes = await post(port, '/api/login', { email, password });
   assert.equal(loginRes.status, 200);
   const cookie = extractCookie(loginRes);
   assert.ok(cookie, 'login should set a session cookie');

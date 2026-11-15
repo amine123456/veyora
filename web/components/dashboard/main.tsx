@@ -308,6 +308,143 @@ export function DashboardMain() {
             {'\n      '}
           </div>
         </section>{' '}
+        <section className="card" id="sandbox" aria-labelledby="sandbox-title" data-sandbox="" hidden>
+          <header className="card__head">
+            <span className="chip-ic chip-ic--accent">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-terminal" />
+              </svg>
+            </span>{' '}
+            <div>
+              <h2 id="sandbox-title">Sandbox</h2>
+              <p>
+                Try the Web Unlocker for free, right here. Fetch any public page with your daily test allowance, or
+                run a simulated scenario to see exactly what your code will receive. Nothing here touches your balance.
+              </p>
+            </div>
+          </header>
+          <p className="sbx-quota" role="status">
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-shield" />
+            </svg>
+            <span data-field="sbx-quota">Loading your test allowance…</span>
+          </p>
+          <form className="sbx-form" data-sbx-form="" noValidate>
+            <label className="field sbx-form__url">
+              <span className="field__label">Page URL</span>
+              <input type="url" name="url" required maxLength={2048} autoComplete="off" spellCheck={false} placeholder="https://example.com/" />
+            </label>
+            <label className="field sbx-form__opt">
+              <span className="field__label">
+                Country <small>optional</small>
+              </span>
+              <input type="text" name="country" maxLength={2} autoComplete="off" spellCheck={false} placeholder="any" />
+            </label>
+            <label className="field sbx-form__opt">
+              <span className="field__label">
+                Session <small>optional</small>
+              </span>
+              <input type="text" name="session" maxLength={32} autoComplete="off" spellCheck={false} placeholder="none" />
+            </label>
+            <button className="btn btn--primary" type="submit" data-sbx-run="">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-api" />
+              </svg>
+              <span className="lbl">Run request</span>
+            </button>
+          </form>
+          <p className="sbx-label">Simulated scenarios: instant, free, unlimited</p>
+          <div className="sbx-chips" data-sbx-scenarios="" role="group" aria-label="Simulated scenarios" />
+          <p className="sbx-hint" data-sbx-hint="" hidden />
+          <p className="notice notice--err form__error" data-sbx-error="" role="alert" hidden />
+          <div className="sbx-result" data-sbx-result="" hidden>
+            <div className="sbx-stats" data-sbx-stats="" aria-live="polite" />
+            <ol className="sbx-attempts" data-sbx-attempts="" aria-label="Attempts" />
+            <div className="sbx-tabs" role="tablist" aria-label="Response view" data-sbx-views="">
+              <button type="button" role="tab" data-view="page" aria-selected="true">Page</button>
+              <button type="button" role="tab" data-view="body" aria-selected="false">Body</button>
+              <button type="button" role="tab" data-view="headers" aria-selected="false">Headers</button>
+              <button type="button" role="tab" data-view="json" aria-selected="false">Full response</button>
+            </div>
+            <div className="code code--scroll">
+              {'\n        '}
+              <span className="code__bar">
+                <i />
+                <i />
+                <i />
+                <em data-field="sbx-output-title">{'Response'}</em>
+              </span>
+              {'\n        '}
+              <pre>
+                <code data-field="sbx-output" />
+              </pre>
+              {'\n        '}
+              <button className="copy copy--dark" type="button" data-copy="sbx-output">
+                <svg className="ic" aria-hidden="true">
+                  <use href="#i-copy" />
+                </svg>
+                <span className="lbl">{'Copy'}</span>
+              </button>
+              {'\n      '}
+            </div>
+          </div>
+          <div className="divider" />
+          <header className="card__head card__head--sub">
+            <span className="chip-ic">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-key" />
+              </svg>
+            </span>{' '}
+            <div>
+              <h3>Run it from your code</h3>
+              <p>
+                The same request with a sandbox key (<code>vy_test_…</code>). Sandbox keys work exactly like live keys
+                but never charge: swap in a live key when you go to production.
+              </p>
+            </div>
+          </header>
+          <div className="sbx-tabs" role="tablist" aria-label="Language" data-sbx-langs="">
+            <button type="button" role="tab" data-lang="curl" aria-selected="true">cURL</button>
+            <button type="button" role="tab" data-lang="python" aria-selected="false">Python</button>
+            <button type="button" role="tab" data-lang="node" aria-selected="false">Node.js</button>
+          </div>
+          <div className="code">
+            {'\n        '}
+            <span className="code__bar">
+              <i />
+              <i />
+              <i />
+              <em>{'POST /v1/unlock'}</em>
+            </span>
+            {'\n        '}
+            <pre>
+              <code data-field="sbx-snippet">{'…'}</code>
+            </pre>
+            {'\n        '}
+            <button className="copy copy--dark" type="button" data-copy="sbx-snippet">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-copy" />
+              </svg>
+              <span className="lbl">{'Copy'}</span>
+            </button>
+            {'\n      '}
+          </div>
+          <p className="notice notice--warn" data-sbx-key-notice="" hidden role="status">
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-alert" />
+            </svg>
+            Your new sandbox key is in the snippet above. Copy it now: it will not be shown again.
+          </p>
+          <p className="notice notice--err form__error" data-sbx-key-error="" role="alert" hidden />
+          <div className="card__actions">
+            <button className="btn btn--secondary" type="button" data-sbx-key="">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-plus" />
+              </svg>
+              <span className="lbl">Create a sandbox key</span>
+            </button>
+          </div>
+        </section>{' '}
         <section className="card" id="unlocker" aria-labelledby="unlocker-title" data-unlocker="" hidden>
           <header className="card__head">
             <span className="chip-ic chip-ic--accent">
@@ -401,6 +538,13 @@ export function DashboardMain() {
                 Key name <small>optional, for your own reference</small>
               </span>{' '}
               <input type="text" name="name" maxLength={40} autoComplete="off" placeholder="e.g. price-monitor" />{' '}
+            </label>{' '}
+            <label className="field field--mode">
+              <span className="field__label">Type</span>
+              <select name="mode" defaultValue="live">
+                <option value="live">Live: charges your balance</option>
+                <option value="test">Sandbox: free, for testing</option>
+              </select>
             </label>{' '}
             <button className="btn btn--primary" type="submit">
               <svg className="ic" aria-hidden="true">

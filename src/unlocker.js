@@ -5,7 +5,8 @@ import { upstreamAuthorization, upstreamEndpoint } from "./auth.js";
 import { fetchThroughProxy, chromeHeaders } from "./fetcher.js";
 import { createLedger } from "./ledger.js";
 import { resolveTarget } from "./gateway.js";
-import { authenticateApiKey, insertUsageEvent, releaseFunds, reserveFunds } from "./store.js";
+import { authenticateApiKey, insertUsageEvent, releaseFunds, reserveFunds, returnSandboxLive, sandboxLiveUsed, takeSandboxLive } from "./store.js";
+import { scenarioList, simulate } from "./sandbox.js";
 
 // Web Unlocker: POST /v1/unlock fetches one public page for an API-key holder. Each
 // request is priced up front from the wallet and refunded unless the page came back.
@@ -49,8 +50,8 @@ const CHALLENGE_MARKERS = [
   ["datadome-adblock", /please enable js and disable any ad blocker/i],
   // AWS WAF's JavaScript challenge (Amazon, Booking): served as a 202 with challenge.js.
   ["aws-waf", /awsWafCookieDomainList|gokuProps|token\.awswaf\.com/i],
-  ["captcha", /verify you are human|are you a robot\?|verify that you(?:’|&#39;|’)re not a robot/i],
-  ["bot-block", /(?:que eres|sei) un (?:bot|robot)|(?:you(?:’|&#39;|’)re|you are) a (?:bot|robot)/i],
+  ["captcha", /verify you are human|are you a robot\?|verify that you['’]re not a robot/i],
+  ["bot-block", /(?:que eres|sei) un (?:bot|robot)|(?:you['’]re|you are) a (?:bot|robot)/i],
   // Cloudflare Turnstile managed challenge: the page embeds Turnstile JS/iframe.
   ["cloudflare-turnstile", /challenges\.cloudflare\.com|cf-turnstile-response|turnstile\.render/i],
   // Google's no-results stub that only redirects to its enable-JavaScript page.
@@ -303,6 +304,7 @@ export function createUnlocker({
   solverQueue = null,
   tlsOptions = {},
   authenticate = authenticateApiKey,
+  sandboxStore = { take: takeSandboxLive, giveBack: returnSandboxLive, used: sandboxLiveUsed },
   log = console,
 }) {
   const ledger = createLedger(config.ledgerFile, {
@@ -691,7 +693,7 @@ export function createUnlocker({
     throw error;
   }
 
-  async function unlock({ username, url, country, session }) {
+  async function unlock({ username, url, country, session, aborted = () => false }) {
     const started = Date.now();
     const deadline = started + config.totalTimeoutMs;
     const site = siteOf(url.hostname);
@@ -773,7 +775,8 @@ export function createUnlocker({
       }
     }
 
-    for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250; attempt += 1) {
+    // A caller that hung up gets no further attempts: nobody is left to receive the page.
+    for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250 && !aborted(); attempt += 1) {
       if (attempt > 0) {
         step = Math.max(step + 1, jumpTo);
         // Browser rungs always get a fresh proxy session (new IP) for maximum coverage.
@@ -963,13 +966,13 @@ export function createUnlocker({
   const memoryBudget = config.memoryBudgetBytes ?? Infinity;
   let bookedBytes = 0;
 
-  function acquire(username) {
+  function acquire(username, perAccount = config.maxConcurrentPerAccount) {
     const mine = activeByAccount.get(username) ?? 0;
     if (active >= config.maxConcurrent || bookedBytes + bytesPerRequest > memoryBudget) {
       throw new PublicError(503, "Unlocker busy, retry shortly", { headers: { "Retry-After": "5" } });
     }
-    if (mine >= config.maxConcurrentPerAccount) {
-      throw new PublicError(429, `At most ${config.maxConcurrentPerAccount} requests at a time per account`);
+    if (mine >= perAccount) {
+      throw new PublicError(429, `At most ${perAccount} requests at a time per account`);
     }
     active += 1;
     bookedBytes += bytesPerRequest;
@@ -1007,6 +1010,11 @@ export function createUnlocker({
     return inFlight === 0 ? Promise.resolve() : new Promise((resolve) => idleWaiters.push(resolve));
   }
 
+  const sandboxOn = config.sandboxEnabled !== false && Boolean(config.sandboxHost);
+  const priceFor = (hostname) => Math.round(pricing.unlockerPerRequestMicros * premiumMultiplier(hostname.toLowerCase(), pricing.premiumDomains));
+  // True once the caller's connection is gone (they hung up, or a proxy in front timed out).
+  const hungUp = (response) => response.destroyed || !response.socket || response.socket.destroyed;
+
   async function handleRequest(request, response, clientIp) {
     try {
       const { pathname } = new URL(request.url, "http://local");
@@ -1022,110 +1030,186 @@ export function createUnlocker({
         authFailures.take(clientIp);
         return send(response, 401, { error: "Missing or invalid API key" }, { "WWW-Authenticate": "Bearer" });
       }
-      if (!keyRequests.take(client.apiKeyId)) return send(response, 429, { error: "Rate limit exceeded" }, { "Retry-After": "60" });
-      if (!String(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) {
-        throw new PublicError(415, "Content-Type must be application/json");
-      }
-      const input = parseInput(await readRequestBody(request));
-      const url = await checkTarget(input.url);
-      const priceMicros = Math.round(pricing.unlockerPerRequestMicros * premiumMultiplier(url.hostname.toLowerCase(), pricing.premiumDomains));
-
-      const release = acquire(client.username);
-      try {
-        if (!(await reserveFunds(client.username, priceMicros))) {
-          throw new PublicError(402, "Insufficient balance. Top up your wallet to keep unlocking.");
-        }
-        let outcome;
-        try {
-          outcome = await unlock({ username: client.username, url, country: input.country, session: input.session });
-        } catch (error) {
-          await releaseFunds(client.username, priceMicros);
-          throw error;
-        }
-        if (!outcome.billable) await releaseFunds(client.username, priceMicros);
-        // Solver surcharge: billed only when the solver was actually used and the request succeeded.
-        const solverSurcharge = outcome.solverUsed && outcome.billable ? (config.solverSurchargeMicros ?? 0) : 0;
-        if (solverSurcharge > 0) {
-          if (!(await reserveFunds(client.username, solverSurcharge))) {
-            // Not enough for the surcharge — still deliver the page, just skip the extra charge.
-            log.warn?.(`Unlocker: solver surcharge of ${solverSurcharge} micros could not be reserved for ${client.username}`);
-          }
-        }
-        const totalBilledMicros = outcome.billable ? priceMicros + solverSurcharge : 0;
-        const requestId = `unl_${crypto.randomBytes(8).toString("hex")}`;
-        void ledger.record({
-          at: new Date().toISOString(),
-          id: requestId,
-          username: client.username,
-          apiKeyId: client.apiKeyId,
-          site: outcome.site,
-          status: outcome.result?.status ?? null,
-          outcome: outcome.outcome,
-          billed: outcome.billable,
-          priceMicros: totalBilledMicros,
-          solverSurchargeMicros: solverSurcharge || undefined,
-          costMicros: Math.round(outcome.costMicros * 1000) / 1000,
-          wireBytes: outcome.wireBytes,
-          attempts: outcome.attempts.length,
-          pools: outcome.attempts.map((attempt) => attempt.pool),
-          ms: outcome.ms,
-        });
-        void insertUsageEvent({
-          username: client.username, kind: "unlocker", pool: outcome.pool,
-          domain: outcome.site, status: outcome.result?.status ?? null,
-          outcome: outcome.outcome, bytes: outcome.wireBytes,
-          costMicros: totalBilledMicros,
-          billed: outcome.billable, durationMs: outcome.ms,
-        }).catch(() => {});
-
-        const summary = {
-          requestId,
-          billedMicros: totalBilledMicros,
-          ...(solverSurcharge ? { solverSurchargeMicros: solverSurcharge } : {}),
-          attempts: outcome.attempts.map(({ pool, browser, camoufox, referer, solver, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(camoufox ? { camoufox: true } : {}), ...(referer ? { referer: true } : {}), ...(solver ? { solver: true } : {}), result, status, error })),
-        };
-        if (["ok", "small", "final", "retry"].includes(outcome.outcome)) {
-          const page = outcome.result;
-          const encoding = bodyEncoding(page.headers);
-          const headers = { ...page.headers };
-          delete headers["set-cookie"]; // cookies stay with the session's jar
-          return await sendPage(response, {
-            success: outcome.billable,
-            status: page.status,
-            url: page.url.href,
-            headers,
-            encoding,
-            ...summary,
-          }, page.body, encoding);
-        }
-        if (outcome.outcome === "blocked") {
-          if (solverQueue) {
-            const queued = solverQueue.push({ site: outcome.site, url: url.href, exitInfo: { pool: outcome.pool, sid: crypto.randomBytes(8).toString("hex") }, markers: outcome.attempts.map((a) => a.result).filter(Boolean) });
-            if (queued) log.info?.(`Queued ${outcome.site} for human solver (task ${queued})`);
-          }
-          return send(response, 502, { success: false, error: `The site blocked every attempt (${outcome.attempts.length}). You were not charged.`, ...summary });
-        }
-        if (outcome.error === "TOO_LARGE") {
-          return send(response, 502, { success: false, error: "The page is larger than the response limit. You were not charged.", ...summary });
-        }
-        const timedOut = outcome.error === "TIMEOUT";
-        return send(response, timedOut ? 504 : 502, {
-          success: false,
-          error: timedOut ? "The site did not answer in time. You were not charged." : "Could not reach the site. You were not charged.",
-          ...summary,
-        });
-      } finally {
-        release();
-      }
+      return await serve(request, response, client);
     } catch (error) {
-      if (error instanceof PublicError) return send(response, error.status, { error: error.message }, error.extra.headers);
-      log.error?.(`Unlocker error: ${error.message}`);
-      return send(response, 500, { error: "Internal error" });
+      return fail(response, error);
+    }
+  }
+
+  function fail(response, error) {
+    if (error instanceof PublicError) return send(response, error.status, { error: error.message }, error.extra.headers);
+    log.error?.(`Unlocker error: ${error.message}`);
+    return send(response, 500, { error: "Internal error" });
+  }
+
+  // The dashboard playground: the same pipeline as a vy_test_ key, for a signed-in account.
+  function playground(request, response, username) {
+    if (stopping) return Promise.resolve(send(response, 503, { error: "Shutting down, retry shortly" }, { "Retry-After": "5", Connection: "close" }));
+    if (!sandboxOn) return Promise.resolve(send(response, 503, { error: "The sandbox is not available" }));
+    inFlight += 1;
+    return serve(request, response, { username, apiKeyId: `playground:${username}`, keyMode: "test" })
+      .catch((error) => fail(response, error))
+      .finally(settleOne);
+  }
+
+  async function sandboxStatus(username) {
+    return {
+      enabled: sandboxOn,
+      host: config.sandboxHost,
+      liveDailyLimit: config.sandboxLiveDaily,
+      liveUsed: sandboxOn ? await sandboxStore.used(username) : 0,
+      scenarios: sandboxOn ? scenarioList(config.sandboxHost) : [],
+    };
+  }
+
+  // A sandbox URL: answered from the scenario table. Works with any key, never billed.
+  async function serveSimulated(response, input) {
+    const outcome = await simulate(input);
+    if (!outcome) {
+      throw new PublicError(404, `Unknown sandbox scenario. Try https://${config.sandboxHost}/ok (see the docs for the full list).`);
+    }
+    if (outcome.kind === "refusal") return send(response, outcome.httpStatus, { error: outcome.error, sandbox: { mode: "simulated", scenario: outcome.scenario } }, outcome.headers);
+    const wouldBillMicros = outcome.kind === "page" && outcome.billable
+      ? pricing.unlockerPerRequestMicros + (outcome.solver ? (config.solverSurchargeMicros ?? 0) : 0)
+      : 0;
+    const summary = {
+      requestId: `unl_test_${crypto.randomBytes(8).toString("hex")}`,
+      billedMicros: 0,
+      attempts: outcome.attempts,
+      sandbox: { mode: "simulated", scenario: outcome.scenario, wouldBillMicros },
+    };
+    if (outcome.kind === "error") return send(response, outcome.httpStatus, { success: false, error: outcome.error, ...summary });
+    const headers = { "content-type": outcome.type, "content-length": String(outcome.body.length) };
+    const encoding = bodyEncoding(headers);
+    return await sendPage(response, { success: outcome.billable, status: outcome.status, url: input.url.href, headers, encoding, ...summary }, outcome.body, encoding);
+  }
+
+  async function serve(request, response, client) {
+    if (!keyRequests.take(client.apiKeyId)) return send(response, 429, { error: "Rate limit exceeded" }, { "Retry-After": "60" });
+    if (!String(request.headers["content-type"] ?? "").toLowerCase().startsWith("application/json")) {
+      throw new PublicError(415, "Content-Type must be application/json");
+    }
+    const input = parseInput(await readRequestBody(request));
+    if (sandboxOn && input.url.hostname.toLowerCase() === config.sandboxHost) return await serveSimulated(response, input);
+
+    // A vy_test_ key fetches real pages for free, up to the daily sandbox allowance.
+    const testMode = client.keyMode === "test";
+    if (testMode && !sandboxOn) throw new PublicError(403, "The sandbox is not available. Use a live API key.");
+    const url = await checkTarget(input.url);
+    const priceMicros = priceFor(url.hostname);
+
+    const release = acquire(client.username, testMode ? (config.sandboxMaxConcurrentPerAccount ?? 2) : config.maxConcurrentPerAccount);
+    try {
+      let allowance = null;
+      if (testMode) {
+        allowance = await sandboxStore.take(client.username, { perAccount: config.sandboxLiveDaily, global: config.sandboxLiveGlobalDaily });
+        if (!allowance) {
+          throw new PublicError(429, `Sandbox allowance used up (${config.sandboxLiveDaily} live test requests per day). `
+            + `Simulated pages at https://${config.sandboxHost}/ stay free and unlimited; add funds and use a live key to continue on real sites.`);
+        }
+      } else if (!(await reserveFunds(client.username, priceMicros))) {
+        throw new PublicError(402, "Insufficient balance. Top up your wallet to keep unlocking.");
+      }
+      const refund = () => (testMode ? sandboxStore.giveBack(client.username) : releaseFunds(client.username, priceMicros));
+      let outcome;
+      try {
+        outcome = await unlock({ username: client.username, url, country: input.country, session: input.session, aborted: () => hungUp(response) });
+      } catch (error) {
+        await refund();
+        throw error;
+      }
+      // Only a page that can still be delivered is charged: a caller that disconnected
+      // (or whose reverse proxy timed out) while we worked pays nothing.
+      const delivered = !hungUp(response);
+      const charged = outcome.billable && delivered;
+      if (!charged) await refund();
+      if (outcome.billable && !delivered) log.info?.(`Unlocker: ${outcome.site} came back after the caller disconnected (${outcome.ms} ms); not charged`);
+      // Solver surcharge: only when the solver was used, the page was delivered, and the wallet covers it.
+      let solverSurcharge = 0;
+      const surchargeDue = outcome.solverUsed && outcome.billable ? (config.solverSurchargeMicros ?? 0) : 0;
+      if (surchargeDue > 0 && charged && !testMode) {
+        if (await reserveFunds(client.username, surchargeDue)) solverSurcharge = surchargeDue;
+        else log.warn?.(`Unlocker: solver surcharge of ${surchargeDue} micros could not be reserved for ${client.username}`);
+      }
+      const totalBilledMicros = charged && !testMode ? priceMicros + solverSurcharge : 0;
+      const requestId = `${testMode ? "unl_test_" : "unl_"}${crypto.randomBytes(8).toString("hex")}`;
+      void ledger.record({
+        at: new Date().toISOString(),
+        id: requestId,
+        username: client.username,
+        apiKeyId: client.apiKeyId,
+        site: outcome.site,
+        status: outcome.result?.status ?? null,
+        outcome: outcome.outcome,
+        billed: outcome.billable,
+        priceMicros: totalBilledMicros,
+        solverSurchargeMicros: solverSurcharge || undefined,
+        sandbox: testMode || undefined,
+        costMicros: Math.round(outcome.costMicros * 1000) / 1000,
+        wireBytes: outcome.wireBytes,
+        attempts: outcome.attempts.length,
+        pools: outcome.attempts.map((attempt) => attempt.pool),
+        ms: outcome.ms,
+      });
+      void insertUsageEvent({
+        username: client.username, kind: testMode ? "sandbox" : "unlocker", pool: outcome.pool,
+        domain: outcome.site, status: outcome.result?.status ?? null,
+        outcome: outcome.outcome, bytes: outcome.wireBytes,
+        costMicros: totalBilledMicros,
+        billed: totalBilledMicros > 0, durationMs: outcome.ms,
+      }).catch(() => {});
+
+      const summary = {
+        requestId,
+        billedMicros: totalBilledMicros,
+        ...(solverSurcharge ? { solverSurchargeMicros: solverSurcharge } : {}),
+        attempts: outcome.attempts.map(({ pool, browser, camoufox, flaresolverr, referer, solver, outcome: result, status, error }) => ({ pool, ...(browser ? { browser: true } : {}), ...(camoufox ? { camoufox: true } : {}), ...(flaresolverr ? { flaresolverr: true } : {}), ...(referer ? { referer: true } : {}), ...(solver ? { solver: true } : {}), result, status, error })),
+        ...(testMode ? { sandbox: {
+          mode: "live",
+          wouldBillMicros: outcome.billable ? priceMicros + surchargeDue : 0,
+          liveRemaining: allowance.remaining + (charged ? 0 : 1),
+          liveDailyLimit: config.sandboxLiveDaily,
+        } } : {}),
+      };
+      if (["ok", "small", "final", "retry"].includes(outcome.outcome)) {
+        const page = outcome.result;
+        const encoding = bodyEncoding(page.headers);
+        const headers = { ...page.headers };
+        delete headers["set-cookie"]; // cookies stay with the session's jar
+        return await sendPage(response, {
+          success: outcome.billable,
+          status: page.status,
+          url: page.url.href,
+          headers,
+          encoding,
+          ...summary,
+        }, page.body, encoding);
+      }
+      if (outcome.outcome === "blocked") {
+        if (solverQueue) {
+          const queued = solverQueue.push({ site: outcome.site, url: url.href, exitInfo: { pool: outcome.pool, sid: crypto.randomBytes(8).toString("hex") }, markers: outcome.attempts.map((a) => a.result).filter(Boolean) });
+          if (queued) log.info?.(`Queued ${outcome.site} for human solver (task ${queued})`);
+        }
+        return send(response, 502, { success: false, error: `The site blocked every attempt (${outcome.attempts.length}). You were not charged.`, ...summary });
+      }
+      if (outcome.error === "TOO_LARGE") {
+        return send(response, 502, { success: false, error: "The page is larger than the response limit. You were not charged.", ...summary });
+      }
+      const timedOut = outcome.error === "TIMEOUT";
+      return send(response, timedOut ? 504 : 502, {
+        success: false,
+        error: timedOut ? "The site did not answer in time. You were not charged." : "Could not reach the site. You were not charged.",
+        ...summary,
+      });
+    } finally {
+      release();
     }
   }
 
   return {
     handle,
+    playground,
+    sandboxStatus,
     unlock,
     ledger,
     stop,

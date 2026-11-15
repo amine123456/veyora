@@ -227,6 +227,7 @@ if (dash) {
         values['unlock-curl'] = `curl -X POST ${location.origin}/v1/unlock \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url": "https://example.com/"}'`;
         set('unlock-curl', values['unlock-curl']);
         loadKeys();
+        loadSandbox();
       }
 
       values.username = me.username;
@@ -304,6 +305,12 @@ if (dash) {
       const row = document.createElement('div');
       const dt = document.createElement('dt');
       dt.append(icon('key'), key.name || 'Unnamed key');
+      if (key.mode === 'test') {
+        const badge = document.createElement('span');
+        badge.className = 'badge badge--warn';
+        badge.textContent = 'Sandbox';
+        dt.append(badge);
+      }
       const dd = document.createElement('dd');
       const code = document.createElement('code');
       code.textContent = `${key.prefix}…`;
@@ -329,7 +336,7 @@ if (dash) {
     const submit = event.target.querySelector('button[type="submit"]');
     submit.disabled = true;
     try {
-      const { ok, data } = await post('/api/keys', { name: event.target.name.value.trim() });
+      const { ok, data } = await post('/api/keys', { name: event.target.name.value.trim(), mode: event.target.mode?.value === 'test' ? 'test' : 'live' });
       if (!ok) throw new Error(data.error || 'Could not create a key. Try again.');
       values['new-key'] = data.key;
       set('new-key', data.key);
@@ -357,6 +364,236 @@ if (dash) {
     if (!ok) showKeyError(data.error || 'Could not revoke the key. Try again.');
     loadKeys();
   });
+
+
+  /* ================= sandbox playground ================= */
+  // Free test requests: simulated scenarios (never leave the server) and real pages on
+  // the daily allowance. Fetched pages are only ever shown as text, never rendered.
+  const sbx = $('[data-sandbox]');
+  let sandbox = null;
+  let sbxKey = 'YOUR_SANDBOX_KEY';
+  let sbxLang = 'curl';
+  let sbxView = 'page';
+  let sbxLast = null;
+  const sbxForm = sbx?.querySelector('[data-sbx-form]');
+  const sbxError = sbx?.querySelector('[data-sbx-error]');
+  const sbxInput = () => {
+    const body = { url: sbxForm.url.value.trim() || `https://${sandbox?.host || 'sandbox.veyora.pro'}/ok` };
+    const country = sbxForm.country.value.trim().toLowerCase();
+    const session = sbxForm.session.value.trim();
+    if (country) body.country = country;
+    if (session) body.session = session;
+    return body;
+  };
+  const sbxQuota = (used, limit) => {
+    const left = Math.max(0, limit - used);
+    set('sbx-quota', limit > 0
+      ? `${left} of ${limit} free live test requests left today. Simulated scenarios are unlimited. Failed requests don't count.`
+      : 'Live test requests are not available right now. Simulated scenarios are free and unlimited.');
+  };
+  function renderSnippet() {
+    if (!sbx) return;
+    const body = sbxInput();
+    const json = JSON.stringify(body);
+    const endpoint = `${location.origin}/v1/unlock`;
+    const pretty = JSON.stringify(body, null, 2);
+    const snippets = {
+      curl: `curl -X POST ${endpoint} \\\n  -H "Authorization: Bearer ${sbxKey}" \\\n  -H "Content-Type: application/json" \\\n  -d '${json.replace(/'/g, "'\\''")}'`,
+      python: `import requests\n\nresponse = requests.post(\n    "${endpoint}",\n    headers={"Authorization": "Bearer ${sbxKey}"},\n    json=${pretty.replace(/\n/g, '\n    ')},\n    timeout=600,\n)\ndata = response.json()\nif data.get("success"):\n    print(data["status"], len(data["body"]), "characters")\nelse:\n    print("Failed:", response.status_code, data.get("error"))`,
+      node: `const response = await fetch("${endpoint}", {\n  method: "POST",\n  headers: {\n    Authorization: "Bearer ${sbxKey}",\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify(${pretty.replace(/\n/g, '\n  ')}),\n});\nconst data = await response.json();\nif (data.success) console.log(data.status, data.body.length, "characters");\nelse console.error("Failed:", response.status, data.error);`,
+    };
+    values['sbx-snippet'] = snippets[sbxLang];
+    set('sbx-snippet', snippets[sbxLang]);
+  }
+  const tabs = (group, attribute, selected) => group.querySelectorAll('[role="tab"]').forEach(tab => tab.setAttribute('aria-selected', String(tab.dataset[attribute] === selected)));
+  // What a person wants to know about a page, read from an inert parse (no scripts, no loads).
+  function pageSummary(data) {
+    if (data.encoding === 'base64') return `Binary response (${data.headers?.['content-type'] || 'unknown type'}), ${traffic(Math.floor(data.body.length * 3 / 4))}.\nThe body is base64-encoded: decode it to get the file.`;
+    const type = String(data.headers?.['content-type'] || '');
+    if (!/html/i.test(type)) return data.body.slice(0, 4000) + (data.body.length > 4000 ? '\n…' : '');
+    // Style blocks are dropped first: the parsed copy inherits this page's policy and would log a violation for each.
+    const doc = new DOMParser().parseFromString(data.body.replace(/<style[\s\S]*?<\/style>/gi, ''), 'text/html');
+    const text = selector => doc.querySelector(selector)?.textContent.trim().replace(/\s+/g, ' ') || '—';
+    doc.querySelectorAll('script, style, noscript, template').forEach(node => node.remove());
+    const visible = (doc.body?.textContent || '').replace(/\s+/g, ' ').trim();
+    return [
+      `Title:        ${text('title')}`,
+      `Description:  ${doc.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() || '—'}`,
+      `First H1:     ${text('h1')}`,
+      `Links:        ${doc.querySelectorAll('a[href]').length}`,
+      `Images:       ${doc.querySelectorAll('img').length}`,
+      `Size:         ${traffic(new Blob([data.body]).size)}`,
+      '',
+      'Visible text:',
+      visible.slice(0, 1500) + (visible.length > 1500 ? ' …' : '') || '(none)',
+    ].join('\n');
+  }
+  function renderOutput() {
+    if (!sbxLast) return;
+    const { data } = sbxLast;
+    const hasPage = typeof data.body === 'string';
+    const { body, ...rest } = data;
+    const output = {
+      page: () => (hasPage ? pageSummary(data) : (data.error || 'No page was returned.')),
+      body: () => (hasPage ? body.slice(0, 200000) + (body.length > 200000 ? '\n… (truncated here; the API returns the full body)' : '') : 'No body: the request did not return a page.'),
+      headers: () => (data.headers ? Object.entries(data.headers).map(([name, value]) => `${name}: ${value}`).join('\n') : 'No headers: the request did not return a page.'),
+      json: () => JSON.stringify(hasPage ? { ...rest, body: `<${body.length} characters, see the Body tab>` } : data, null, 2),
+    }[sbxView]();
+    values['sbx-output'] = sbxView === 'body' && hasPage ? body : output;
+    set('sbx-output', output);
+    set('sbx-output-title', { page: 'Page summary', body: 'body', headers: 'headers', json: `HTTP ${sbxLast.status}` }[sbxView]);
+  }
+  function renderResult() {
+    const { data, status, ms } = sbxLast;
+    const stats = sbx.querySelector('[data-sbx-stats]');
+    stats.replaceChildren();
+    const stat = (label, value, tone) => {
+      const item = document.createElement('div');
+      item.className = `sbx-stat${tone ? ` sbx-stat--${tone}` : ''}`;
+      const small = document.createElement('small'); small.textContent = label;
+      const strong = document.createElement('b'); strong.textContent = value;
+      item.append(small, strong);
+      stats.append(item);
+    };
+    stat('Result', data.success ? 'Success' : 'Failed', data.success ? 'ok' : 'err');
+    stat('API status', `HTTP ${status}`);
+    if (data.status) stat('Site status', String(data.status));
+    stat('Time', ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`);
+    if (data.sandbox) {
+      stat('Charged', usd(0), 'ok');
+      stat('A live key would pay', usd(data.sandbox.wouldBillMicros ?? 0));
+      stat('Mode', data.sandbox.mode === 'simulated' ? 'Simulated' : 'Live fetch');
+    }
+    const list = sbx.querySelector('[data-sbx-attempts]');
+    list.replaceChildren();
+    (data.attempts ?? []).forEach(attempt => {
+      const item = document.createElement('li');
+      const good = attempt.result === 'ok' || attempt.result === 'small' || attempt.result === 'final';
+      item.className = `sbx-attempt sbx-attempt--${good ? 'ok' : 'err'}`;
+      const how = attempt.solver ? 'CAPTCHA solver' : attempt.flaresolverr ? 'challenge solver' : attempt.camoufox ? 'stealth browser' : attempt.browser ? 'browser' : 'HTTP';
+      const name = document.createElement('b');
+      name.textContent = `${attempt.pool === 'mobile' ? 'Mobile' : 'Residential'} · ${how}`;
+      const outcome = document.createElement('span');
+      outcome.textContent = `${attempt.result}${attempt.status ? ` (${attempt.status})` : ''}${attempt.error ? ` (${attempt.error})` : ''}`;
+      item.append(name, outcome);
+      list.append(item);
+    });
+    list.hidden = !data.attempts?.length;
+    sbx.querySelector('[data-sbx-result]').hidden = false;
+    renderOutput();
+  }
+  function loadSandbox() {
+    if (!sbx) return;
+    fetch('/api/sandbox', { credentials: 'same-origin' })
+      .then(response => (response.ok ? response.json() : null))
+      .then(data => {
+        if (!data?.enabled) return;
+        sandbox = data;
+        sbx.hidden = false;
+        sbxQuota(data.liveUsed, data.liveDailyLimit);
+        const chips = sbx.querySelector('[data-sbx-scenarios]');
+        chips.replaceChildren();
+        data.scenarios.forEach(scenario => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'sbx-chip';
+          chip.dataset.url = scenario.url;
+          chip.dataset.summary = scenario.summary;
+          chip.textContent = scenario.title;
+          chip.title = scenario.summary;
+          chips.append(chip);
+        });
+        sbxForm.url.value = data.scenarios[0]?.url ?? '';
+        renderSnippet();
+      })
+      .catch(() => {});
+  }
+  if (sbx) {
+    const run = sbx.querySelector('[data-sbx-run]');
+    const hint = sbx.querySelector('[data-sbx-hint]');
+    sbxForm.addEventListener('input', () => { hint.hidden = true; renderSnippet(); });
+    sbx.querySelector('[data-sbx-scenarios]').addEventListener('click', event => {
+      const chip = event.target.closest('[data-url]');
+      if (!chip) return;
+      sbxForm.url.value = chip.dataset.url;
+      hint.textContent = chip.dataset.summary;
+      hint.hidden = false;
+      renderSnippet();
+      sbxForm.requestSubmit();
+    });
+    sbx.querySelector('[data-sbx-langs]').addEventListener('click', event => {
+      const tab = event.target.closest('[data-lang]');
+      if (!tab) return;
+      sbxLang = tab.dataset.lang;
+      tabs(sbx.querySelector('[data-sbx-langs]'), 'lang', sbxLang);
+      renderSnippet();
+    });
+    sbx.querySelector('[data-sbx-views]').addEventListener('click', event => {
+      const tab = event.target.closest('[data-view]');
+      if (!tab) return;
+      sbxView = tab.dataset.view;
+      tabs(sbx.querySelector('[data-sbx-views]'), 'view', sbxView);
+      renderOutput();
+    });
+    sbxForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      sbxError.hidden = true;
+      const body = sbxInput();
+      let target;
+      try { target = new URL(body.url); } catch { target = null; }
+      if (!target || !/^https?:$/.test(target.protocol)) {
+        sbxError.textContent = 'Enter a full page URL starting with https://';
+        sbxError.hidden = false;
+        return;
+      }
+      const simulated = target.hostname === sandbox?.host;
+      run.disabled = true;
+      const started = Date.now();
+      const tick = () => lbl(run, simulated ? 'Running…' : `Fetching… ${Math.round((Date.now() - started) / 1000)} s`);
+      tick();
+      const timer = setInterval(tick, 1000);
+      try {
+        const response = await fetch('/api/sandbox/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'same-origin',
+        });
+        const data = await response.json().catch(() => null);
+        if (response.status === 401) { location.assign('/login'); return; }
+        if (!data) throw new Error(response.status === 504 ? 'The request took too long for the dashboard. Hard sites can take a few minutes: run it from your code with a sandbox key instead.' : 'The server returned an unexpected answer. Try again.');
+        sbxLast = { data, status: response.status, ms: Date.now() - started };
+        renderResult();
+        if (data.sandbox?.mode === 'live') sbxQuota(data.sandbox.liveDailyLimit - data.sandbox.liveRemaining, data.sandbox.liveDailyLimit);
+      } catch (error) {
+        sbxError.textContent = error.message || 'Could not reach the server. Check your connection and try again.';
+        sbxError.hidden = false;
+      } finally {
+        clearInterval(timer);
+        run.disabled = false;
+        lbl(run, 'Run request');
+      }
+    });
+    const keyButton = sbx.querySelector('[data-sbx-key]');
+    const keyProblem = sbx.querySelector('[data-sbx-key-error]');
+    keyButton.addEventListener('click', async () => {
+      keyProblem.hidden = true;
+      keyButton.disabled = true;
+      try {
+        const { ok, data } = await post('/api/keys', { name: 'Sandbox', mode: 'test' });
+        if (!ok) throw new Error(data.error || 'Could not create a sandbox key. Try again.');
+        sbxKey = data.key;
+        renderSnippet();
+        sbx.querySelector('[data-sbx-key-notice]').hidden = false;
+        loadKeys();
+      } catch (error) {
+        keyProblem.textContent = error.message;
+        keyProblem.hidden = false;
+      } finally {
+        keyButton.disabled = false;
+      }
+    });
+  }
 
   // Copy buttons
   dash.addEventListener('click', async event => {
@@ -408,6 +645,122 @@ if (dash) {
       lbl(regenerate, 'Generate new password');
     }
   });
+  // Usage chart + recent requests + payment history
+  function loadUsage() {
+    fetch('/api/usage/summary?days=30', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(({ summary: days }) => {
+        const wrap = $('[data-usage-chart]');
+        if (!days || !days.length) { wrap.innerHTML = '<p class="usage-chart-empty">No usage data yet. Start sending requests to see your stats here.</p>'; return; }
+        const maxReq = Math.max(...days.map(d => d.requests), 1);
+        const chart = document.createElement('div');
+        chart.className = 'usage-chart';
+        chart.setAttribute('role', 'img');
+        chart.setAttribute('aria-label', `Usage chart: ${days.length} days`);
+        days.forEach(d => {
+          const bar = document.createElement('div');
+          bar.className = 'usage-bar';
+          const h = Math.max(4, Math.round((d.requests / maxReq) * 100));
+          const col = document.createElement('div');
+          col.className = 'usage-bar__col';
+          col.style.height = `${h}px`;
+          if (d.billedRequests === 0) { col.style.background = 'var(--line-strong)'; }
+          const tip = document.createElement('span');
+          tip.className = 'usage-bar__tip';
+          tip.textContent = `${d.day}: ${d.requests} req · ${usd(d.costMicros)} · ${traffic(d.bytes)}`;
+          col.append(tip);
+          const label = document.createElement('span');
+          label.className = 'usage-bar__label';
+          label.textContent = d.day.slice(8);
+          bar.append(col, label);
+          chart.append(bar);
+        });
+        const legend = document.createElement('div');
+        legend.className = 'usage-legend';
+        legend.innerHTML = '<span class="lg-req"><i></i>Billed</span><span class="lg-cost"><i></i>Not billed</span>';
+        wrap.replaceChildren(chart, legend);
+      })
+      .catch(() => {
+        $('[data-usage-chart]').innerHTML = '<p class="muted" style="font-size:14px">Could not load usage data.</p>';
+      });
+
+    let usagePage = 1;
+    const usageLimit = 20;
+    function loadEvents(page) {
+      usagePage = page;
+      const offset = (page - 1) * usageLimit;
+      fetch(`/api/usage/events?limit=${usageLimit}&page=${page}`, { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(({ events }) => {
+          events = events || [];
+          const wrap = $('[data-usage-events]');
+          if (!events.length && page === 1) {
+            wrap.innerHTML = '<p class="empty-state"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>No requests recorded yet.</p>';
+            $('[data-usage-pager]').hidden = true;
+            return;
+          }
+          const table = document.createElement('table');
+          table.className = 'usage-table';
+          table.innerHTML = '<thead><tr><th>Time</th><th>Type</th><th>Domain</th><th>Status</th><th>Outcome</th><th class="right">Data</th><th class="right">Cost</th><th>Billed</th></tr></thead>';
+          const tbody = document.createElement('tbody');
+          events.forEach(e => {
+            const tr = document.createElement('tr');
+            const time = new Date(e.createdAt);
+            const timeStr = time.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const statusBadge = e.status
+              ? (e.status >= 200 && e.status < 300 ? `<span class="badge badge--ok">${e.status}</span>`
+                : e.status >= 400 ? `<span class="badge badge--err">${e.status}</span>`
+                : `<span class="badge badge--warn">${e.status}</span>`)
+              : '<span class="badge badge--muted">—</span>';
+            const domain = e.domain ? (e.domain.length > 28 ? e.domain.slice(0, 26) + '…' : e.domain) : '—';
+            tr.innerHTML = `<td class="mono">${timeStr}</td><td><span class="badge badge--muted">${e.kind}</span></td><td title="${e.domain || ''}">${domain}</td><td>${statusBadge}</td><td>${e.outcome || '—'}</td><td class="right mono">${traffic(e.bytes)}</td><td class="right mono">${e.billed ? usd(e.costMicros) : '—'}</td><td>${e.billed ? '<span class="badge badge--ok">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>`;
+            tbody.append(tr);
+          });
+          table.append(tbody);
+          wrap.replaceChildren(table);
+          const pager = $('[data-usage-pager]');
+          pager.hidden = false;
+          $('[data-usage-prev]').disabled = page <= 1;
+          $('[data-usage-next]').disabled = events.length < usageLimit;
+          $('[data-usage-page-info]').textContent = `Page ${page}`;
+        })
+        .catch(() => {
+          $('[data-usage-events]').innerHTML = '<p class="muted" style="font-size:14px">Could not load requests.</p>';
+        });
+    }
+    loadEvents(1);
+    $('[data-usage-prev]')?.addEventListener('click', () => { if (usagePage > 1) loadEvents(usagePage - 1); });
+    $('[data-usage-next]')?.addEventListener('click', () => loadEvents(usagePage + 1));
+
+    fetch('/api/payments?limit=20', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(({ payments }) => {
+        payments = payments || [];
+        const wrap = $('[data-payment-list]');
+        if (!payments.length) {
+          wrap.innerHTML = '';
+          $('[data-no-payments]').hidden = false;
+          return;
+        }
+        const table = document.createElement('table');
+        table.className = 'usage-table';
+        table.innerHTML = '<thead><tr><th>Date</th><th>Package</th><th class="right">Amount</th></tr></thead>';
+        const tbody = document.createElement('tbody');
+        payments.forEach(p => {
+          const tr = document.createElement('tr');
+          const date = new Date(p.processedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+          tr.innerHTML = `<td class="mono">${date}</td><td>${p.packageId || p.eventId || '—'}</td><td class="right mono">${usd(p.micros)}</td>`;
+          tbody.append(tr);
+        });
+        table.append(tbody);
+        wrap.replaceChildren(table);
+      })
+      .catch(() => {
+        $('[data-payment-list]').innerHTML = '<p class="muted" style="font-size:14px">Could not load payment history.</p>';
+      });
+  }
+  loadUsage();
+
   // Sidebar: highlight the section being read.
   const links = [...dash.querySelectorAll('.snav__a[href^="#"]')];
   const sections = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
