@@ -862,3 +862,56 @@ test('pages in a legacy charset reach the caller as correct text, not replacemen
     assert.equal(response.json.body.includes('\ufffd'), false);
   });
 });
+
+test('Akamai-style sites: the stealth browser retries on new IPs, then the exit that worked is reused', async () => {
+  const DENIED = '<html><head><title>Access Denied</title></head><body>You don\'t have permission. Reference #18.abc errors.edgesuite.net</body></html>';
+  const target = await tlsTarget((req, res) => { res.statusCode = 403; res.setHeader('content-type', 'text/html'); res.end(DENIED); });
+  const upstream = await fakeUpstream({ 'shop.example:443': target.port });
+  const gateway = {
+    upstreamHost: '127.0.0.1', upstreamPort: upstream.port, upstreamUsername: 'res-user', upstreamPassword: 'r',
+    upstreamTls: false, upstreamSessionTtlSeconds: 600, dnsTimeoutMs: 1_000, upstreamMobile: null,
+  };
+  const sidOf = (proxy) => /-sid-([0-9a-f]{16})-/.exec(Buffer.from(proxy.authorization.replace(/^Basic /, ''), 'base64').toString())[1];
+  const browserSids = [];
+  let goodSid = null;
+  const camoufox = async ({ proxy }) => {
+    const sid = sidOf(proxy);
+    browserSids.push(sid);
+    // The first two exits are "bad IPs"; the third passes and keeps passing.
+    if (browserSids.length === 2) { const error = new Error('dead exit'); error.code = 'PROXY'; throw error; }
+    if (browserSids.length >= 3 && (goodSid ??= sid) === sid) {
+      return { status: 200, headers: { 'content-type': 'text/html' }, body: Buffer.from(PAGE), wireBytes: 100, protocol: 'camoufox' };
+    }
+    return { status: 403, headers: { 'content-type': 'text/html' }, body: Buffer.from(DENIED), wireBytes: 50, protocol: 'camoufox' };
+  };
+  const flaresolverr = async () => { throw new Error('FlareSolverr must not be tried for Akamai'); };
+  const unlocker = createUnlocker({
+    gateway, pricing, config: settings({ maxAttempts: 8, browserEnabled: true }), lookup: publicLookup, tlsOptions: { ca: targetCert },
+    camoufoxFetchImpl: camoufox, flareSolverrFetchImpl: flaresolverr, log: { info() {}, warn() {}, error() {} },
+  });
+  try {
+    const first = await unlocker.unlock({ username: 'akamai-user', url: new URL('https://shop.example/'), country: null, session: null });
+    assert.equal(first.billable, true);
+    assert.deepEqual(first.attempts.map((attempt) => [attempt.camoufox ?? false, attempt.outcome]), [[false, 'blocked'], [true, 'blocked'], [false, 'error'], [true, 'ok']]);
+    assert.equal(new Set(browserSids).size, 3, 'each browser retry uses a new IP');
+
+    const second = await unlocker.unlock({ username: 'akamai-user', url: new URL('https://shop.example/'), country: null, session: null });
+    assert.equal(second.billable, true);
+    assert.deepEqual(second.attempts.map((attempt) => attempt.outcome), ['blocked', 'ok']);
+    assert.equal(browserSids.at(-1), goodSid, 'the browser goes back to the exit that worked');
+  } finally {
+    await upstream.close();
+    await target.close();
+  }
+});
+
+test('Akamai interstitials and half-loaded documents are not billed as pages', () => {
+  const page = (body) => ({ status: 200, headers: { 'content-type': 'text/html' }, body: Buffer.from(body) });
+  const interstitial = `<!DOCTYPE html><html><head></head><body><script src="/Vs337o4E/x?v=1"></script><div id="sec-if-cpt-container" role="main"><div class="scf-akamai-logo-msg">Powered and protected by</div></div>${' '.repeat(2000)}</body></html>`;
+  assert.deepEqual(diagnose(page(interstitial), 512), { outcome: 'blocked', reasons: ['marker:akamai-behavioral'] });
+  const headOnly = `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">${'<link rel="stylesheet" href="/a.css">'.repeat(120)}</head></html>`;
+  assert.deepEqual(diagnose(page(headOnly), 512), { outcome: 'retry', reasons: ['incomplete:no-body'] });
+  // A fragment without head or body, and a normal page, are still pages.
+  assert.equal(classify(page(`<div>${'row '.repeat(300)}</div>`), 512), 'ok');
+  assert.equal(classify(page(PAGE), 512), 'ok');
+});

@@ -44,6 +44,8 @@ const CHALLENGE_MARKERS = [
   ["akamai-access-denied", /<title>\s*access denied\s*<\/title>[\s\S]*reference\s*#/i],
   ["akamai-edgesuite", /errors\.edgesuite\.net/i],
   ["akamai-challenge", /\/_sec\/cp_challenge/i],
+  // Akamai Bot Manager's behavioural ("press and hold") interstitial, served as a 200.
+  ["akamai-behavioral", /sec-if-cpt-container|scf-akamai-logo|sec-bc-tile-container/i],
   // Site-styled denial pages, e.g. mobile.de's "Zugriff verweigert / Access denied".
   // The title must be only the phrase(s), so "Help: access denied errors" is not a match.
   ["access-denied-title", /<title>\s*(?:(?:access denied|zugriff verweigert)\s*[/|:–-]?\s*)+<\/title>/i],
@@ -265,6 +267,12 @@ export function diagnose(result, minBodyBytes) {
   // challenge vendors use 202 for "come back after running this script".
   if (result.status === 202 && isHtml(result.headers) && result.body.length <= MARKER_SCAN_LIMIT) {
     return { outcome: "blocked", reasons: [status, ...reasons] };
+  }
+  // A document that has a head but no body is a page caught mid-load (a browser read it
+  // before the server finished streaming): not the page, and worth another try.
+  if (isHtml(result.headers) && result.status === 200 && result.body.length <= MARKER_SCAN_LIMIT) {
+    const text = result.body.toString("latin1");
+    if (/<head[\s>]/i.test(text) && !/<body[\s>]/i.test(text)) return { outcome: "retry", reasons: [...reasons, "incomplete:no-body"] };
   }
   if (isHtml(result.headers) && result.status === 200 && result.body.length < minBodyBytes) {
     return { outcome: "small", reasons: [...reasons, "size:" + result.body.length] };
@@ -540,6 +548,7 @@ export function createUnlocker({
   }
 
   const SOLVER_IP_TRIES = 4;
+  const CAMOUFOX_IP_TRIES = 3;
 
   function solverProxyString(currentExit, username, country) {
     const endpoint = upstreamEndpoint(gateway, currentExit.pool);
@@ -741,8 +750,13 @@ export function createUnlocker({
     // A named session keeps its exit (and cookies) across requests; without one, each
     // customer keeps a warm exit per site so clearance cookies are reused.
     const exitKey = session ? `${username}\0session\0${session}` : `${username}\0site\0${site}`;
-    let exit = sessions.get(exitKey) ?? newExit(poolOf(poolForStep(step)));
+    // The exit that last delivered this site. A browser rung tries it first: on sites that
+    // judge the IP (Akamai, DataDome), an exit that passed once is worth far more than a
+    // random new one.
+    let warmExit = sessions.get(exitKey) ?? null;
+    let exit = warmExit ?? newExit(poolOf(poolForStep(step)));
     if (exit.pool !== poolOf(poolForStep(step)) && !session) exit = newExit(poolOf(poolForStep(step)));
+    let camoufoxTries = 0;
     const attempts = [];
     const wireByPool = { residential: 0, mobile: 0 };
     const rank = { retry: 0, blocked: 1, small: 2, final: 3, ok: 4 };
@@ -803,10 +817,16 @@ export function createUnlocker({
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250 && !aborted(); attempt += 1) {
       if (attempt > 0) {
         step = Math.max(step + 1, jumpTo);
-        // Browser rungs always get a fresh proxy session (new IP) for maximum coverage.
-        exit = newExit(poolOf(poolForStep(step)));
+        const pool = poolOf(poolForStep(step));
+        if (warmExit && warmExit.pool === pool && isBrowserRung(poolForStep(step))) {
+          exit = warmExit; // once; if it fails, later attempts draw new IPs
+          warmExit = null;
+        } else {
+          exit = newExit(pool);
+        }
       }
       const rung = poolForStep(step);
+      if (isCamoufoxRung(rung)) camoufoxTries += 1;
       const attemptStarted = Date.now();
       try {
         let result;
@@ -843,6 +863,18 @@ export function createUnlocker({
         if (outcome === "blocked" && currentWaf) {
           if (!isCamoufoxRung(rung) && !isSolverRung(rung) && firstCamoufoxStep >= 0 && step < firstCamoufoxStep) {
             step = firstCamoufoxStep - 1;
+          } else if (isCamoufoxRung(rung) && currentWaf !== "cloudflare" && currentWaf !== "datadome") {
+            // Akamai, Imperva, PerimeterX, AWS: no solver rung helps, the outcome depends
+            // on the exit IP. Try the stealth browser on fresh IPs, then on the next
+            // stealth-browser pool (mobile), and stop there.
+            if (camoufoxTries < CAMOUFOX_IP_TRIES) {
+              step -= 1;
+            } else {
+              const nextCamoufox = pools.findIndex((r, index) => index > step && isCamoufoxRung(r));
+              if (nextCamoufox < 0) break;
+              step = nextCamoufox - 1;
+              camoufoxTries = 0;
+            }
           } else if (isCamoufoxRung(rung)) {
             const fsStep = pools.findIndex((r) => isFlareSolverrRung(r));
             const solverStep = pools.findIndex((r) => isSolverRung(r));
@@ -869,6 +901,9 @@ export function createUnlocker({
         attempts.push({ pool: exit.pool, outcome: "error", error: code, ms: Date.now() - attemptStarted });
         lastError = code;
         if (!RETRYABLE_ERRORS.has(code)) break;
+        // A stealth-browser attempt lost to a dead proxy exit says nothing about the site:
+        // repeat the rung on a new IP.
+        if (isCamoufoxRung(rung) && camoufoxTries < CAMOUFOX_IP_TRIES) step -= 1;
         // The solver already tried SOLVER_IP_TRIES fresh IPs on this pool — but
         // the next solver rung may use a different pool (mobile vs residential).
         if (isSolverRung(rung) && code === "PROXY") {

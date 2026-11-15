@@ -39,7 +39,8 @@ def main():
             url,
             headers=headers,
             proxies=proxies,
-            timeout=timeout_s,
+            # A dead proxy exit should cost seconds, not the whole attempt budget.
+            timeout=(min(10, timeout_s), timeout_s),
             impersonate="chrome",
             max_recv_speed=max_bytes * 2,
             allow_redirects=False,
