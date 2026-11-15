@@ -289,6 +289,30 @@ function bodyEncoding(headers) {
   return /charset=["']?(iso-8859-1|latin1|windows-1252|us-ascii)/.test(type) ? "latin1" : "utf8";
 }
 
+// The charset a text page declares: the Content-Type header first, else an HTML <meta> tag.
+function declaredCharset(headers, body) {
+  const fromHeader = /charset=["']?([\w-]+)/i.exec(String(headers["content-type"] ?? ""))?.[1];
+  if (fromHeader) return fromHeader.toLowerCase();
+  if (!isHtml(headers)) return null;
+  return /<meta[^>]+charset\s*=\s*["']?\s*([\w-]+)/i.exec(body.subarray(0, 4096).toString("latin1"))?.[1]?.toLowerCase() ?? null;
+}
+
+// How the body is put into the JSON response. Text in a legacy charset (windows-1250,
+// iso-8859-2, shift_jis...) is converted to UTF-8 first: sent as it is, every accented
+// letter would arrive as U+FFFD. Unknown charsets fall back to UTF-8 decoding.
+export function textBody(headers, body) {
+  const encoding = bodyEncoding(headers);
+  if (encoding !== "utf8") return { encoding, body };
+  const charset = declaredCharset(headers, body);
+  if (!charset || charset === "utf-8" || charset === "utf8") return { encoding, body };
+  if (/^(iso-8859-1|latin1|windows-1252|us-ascii)$/.test(charset)) return { encoding: "latin1", body };
+  try {
+    return { encoding, body: Buffer.from(new TextDecoder(charset).decode(body), "utf8") };
+  } catch {
+    return { encoding, body };
+  }
+}
+
 export { createLedger };
 
 export function createUnlocker({
@@ -1173,7 +1197,7 @@ export function createUnlocker({
       };
       if (["ok", "small", "final", "retry"].includes(outcome.outcome)) {
         const page = outcome.result;
-        const encoding = bodyEncoding(page.headers);
+        const { encoding, body } = textBody(page.headers, page.body);
         const headers = { ...page.headers };
         delete headers["set-cookie"]; // cookies stay with the session's jar
         return await sendPage(response, {
@@ -1183,7 +1207,7 @@ export function createUnlocker({
           headers,
           encoding,
           ...summary,
-        }, page.body, encoding);
+        }, body, encoding);
       }
       if (outcome.outcome === "blocked") {
         if (solverQueue) {

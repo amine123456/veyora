@@ -10,7 +10,7 @@ import './helpers/database.js';
 const directory = await mkdtemp(path.join(os.tmpdir(), 'proxy-unlocker-'));
 process.env.DATA_FILE = path.join(directory, 'state.json');
 const store = await import('../src/store.js');
-const { CookieJar, classify, createLedger, createUnlocker, diagnose } = await import('../src/unlocker.js');
+const { CookieJar, classify, createLedger, createUnlocker, diagnose, textBody } = await import('../src/unlocker.js');
 const { createPaymentServer } = await import('../src/payments.js');
 
 test.after(() => rm(directory, { recursive: true, force: true }));
@@ -835,4 +835,30 @@ test('a custom fetchImpl replaces the Node fetcher for plain HTTP rungs', async 
   assert.equal(curlCalls, 1, 'custom fetchImpl was used for the HTTP rung');
   await upstream.close();
   await target.close();
+});
+
+test('pages in a legacy charset reach the caller as correct text, not replacement characters', async () => {
+  const czech = 'Nové a ojeté vozy: Škoda, příslušenství, žluťoučký kůň';
+  // "Nové a ojeté vozy" etc. in windows-1250, as cars.cz serves it.
+  const cp1250 = Buffer.from([...czech].map((char) => ({ é: 0xe9, Š: 0x8a, ř: 0xf8, í: 0xed, š: 0x9a, ž: 0x9e, ť: 0x9d, ů: 0xf9, ý: 0xfd, ň: 0xf2, č: 0xe8 })[char] ?? char.charCodeAt(0)));
+  const html = (prefix = '') => Buffer.concat([Buffer.from(`<html><head>${prefix}<title>`), cp1250, Buffer.from(`</title></head><body>${'x'.repeat(600)}</body></html>`)]);
+
+  assert.equal(textBody({ 'content-type': 'text/html; charset=windows-1250' }, html()).body.toString('utf8').includes(czech), true);
+  // Declared only in a <meta> tag.
+  assert.equal(textBody({ 'content-type': 'text/html' }, html('<meta http-equiv="Content-Type" content="text/html; charset=windows-1250">')).body.toString('utf8').includes(czech), true);
+  // UTF-8, latin1, binary and unknown charsets are left as they were.
+  const utf8 = Buffer.from(czech);
+  assert.deepEqual(textBody({ 'content-type': 'text/html; charset=UTF-8' }, utf8), { encoding: 'utf8', body: utf8 });
+  assert.equal(textBody({ 'content-type': 'text/html; charset=iso-8859-1' }, utf8).encoding, 'latin1');
+  assert.equal(textBody({ 'content-type': 'image/png' }, utf8).encoding, 'base64');
+  assert.deepEqual(textBody({ 'content-type': 'text/html; charset=klingon' }, utf8), { encoding: 'utf8', body: utf8 });
+
+  await harness((req, res) => { res.setHeader('content-type', 'text/html; charset=windows-1250'); res.end(html()); }, {}, async ({ call }) => {
+    const user = await customer();
+    const response = await call({ url: 'https://shop.example/' }, { key: user.key });
+    assert.equal(response.status, 200);
+    assert.equal(response.json.encoding, 'utf8');
+    assert.ok(response.json.body.includes(czech), response.json.body.slice(0, 120));
+    assert.equal(response.json.body.includes('\ufffd'), false);
+  });
 });
