@@ -336,7 +336,7 @@ export function createUnlocker({
   const flareSolverrOk = Boolean(flareSolverrFetchImpl);
   const flareSolverrPools = flareSolverrOk ? ["flaresolverr-residential", ...(mobileOk ? ["flaresolverr-mobile"] : [])] : [];
   const solverOk = Boolean(solverImpl);
-  const solverPools = solverOk ? ["solver-residential"] : [];
+  const solverPools = solverOk ? ["solver-residential", ...(mobileOk ? ["solver-mobile"] : [])] : [];
   const pools = [...httpPools, ...browserPools, ...camoufoxPools, ...mobilePools, ...flareSolverrPools, ...solverPools];
   const isBrowserRung = (rung) => rung.includes("browser-") || rung.startsWith("camoufox-") || rung.startsWith("flaresolverr-");
   const isBrowserNotFs = (rung) => isBrowserRung(rung) && !isFlareSolverrRung(rung);
@@ -514,21 +514,63 @@ export function createUnlocker({
   }
 
   const SOLVER_IP_TRIES = 4;
-  async function solverFetchOnExit(exit, username, country, startUrl, deadline) {
+
+  function solverProxyString(currentExit, username, country) {
+    const endpoint = upstreamEndpoint(gateway, currentExit.pool);
+    const auth = upstreamAuthorization(gateway, { username, country, session: currentExit.sid, pool: currentExit.pool });
+    const decoded = Buffer.from(auth.replace(/^Basic /, ""), "base64").toString();
+    const colonIdx = decoded.indexOf(":");
+    const proxyUser = decoded.slice(0, colonIdx);
+    const proxyPass = decoded.slice(colonIdx + 1);
+    if (config.solverRelayHost && config.solverRelayPort) {
+      return `${config.solverRelayHost}:${config.solverRelayPort}:${proxyUser}:${proxyPass}`;
+    }
+    return `${endpoint.host}:${endpoint.port}:${proxyUser}:${proxyPass}`;
+  }
+
+  async function solverFetchOnExit(exit, username, country, startUrl, originalDeadline) {
+    // The solver rung needs at least 200s total: ~40s FlareSolverr + ~120s Solverify
+    // + headroom for retries. Extend the deadline if earlier rungs ate the budget.
+    const deadline = Math.max(originalDeadline, Date.now() + 200_000);
     const ua = chromeHeaders().find(([k]) => k === "User-Agent")?.[1] ?? "";
     let totalWireBytes = 0;
     let currentExit = exit;
 
     for (let ipTry = 0; ipTry < SOLVER_IP_TRIES && Date.now() < deadline - 2000; ipTry++) {
       if (ipTry > 0) currentExit = newExit(currentExit.pool);
+
+      // When FlareSolverr is available, use it for the initial fetch: it passes
+      // Cloudflare managed challenges and captures DataDome interstitials in one
+      // shot.  CF cookies land in the exit jar so the curl_cffi replay carries them.
       let result;
-      try {
-        result = await fetchOnExit(currentExit, username, country, startUrl, deadline);
-      } catch (error) {
-        totalWireBytes += error.wireBytes ?? 0;
-        throw Object.assign(error, { wireBytes: totalWireBytes });
+      let usedFlareSolverr = false;
+      // FlareSolverr only works with residential proxies (mobile proxies fail
+      // with ERR_TUNNEL_CONNECTION_FAILED in Chrome's proxy extension).
+      if (flareSolverrFetchImpl && currentExit.pool === "residential") {
+        log.info?.(`Solver: trying FlareSolverr pre-fetch for ${startUrl.hostname} (exit ${currentExit.sid}, pool ${currentExit.pool})`);
+        try {
+          // Cap FlareSolverr at 40s — if CF can't be passed in that time, the IP
+          // is bad and we should move on to try another one rather than waiting 90s.
+          const fsDeadline = Math.min(deadline, Date.now() + 40_000);
+          result = await flareSolverrFetchOnExit(currentExit, country, startUrl, fsDeadline);
+          usedFlareSolverr = true;
+          totalWireBytes += result.wireBytes ?? 0;
+          currentExit.jar.store(startUrl.hostname, result.headers["set-cookie"]);
+          log.info?.(`Solver: FlareSolverr pre-fetch for ${startUrl.hostname}: status=${result.status} bodyLen=${result.body?.length ?? 0}`);
+        } catch (err) {
+          log.info?.(`Solver: FlareSolverr pre-fetch failed for ${startUrl.hostname}: ${err.message}, falling back to HTTP`);
+          usedFlareSolverr = false;
+        }
       }
-      totalWireBytes += result.wireBytes ?? 0;
+      if (!usedFlareSolverr) {
+        try {
+          result = await fetchOnExit(currentExit, username, country, startUrl, deadline);
+        } catch (error) {
+          totalWireBytes += error.wireBytes ?? 0;
+          throw Object.assign(error, { wireBytes: totalWireBytes });
+        }
+        totalWireBytes += result.wireBytes ?? 0;
+      }
 
       const outcome = classify(result, config.minBodyBytes);
       if (outcome !== "blocked" || !result.body?.length) {
@@ -536,19 +578,16 @@ export function createUnlocker({
       }
 
       const detection = solverImpl.detectDatadome(result.body, { websiteURL: startUrl.href });
-      // Not DataDome — try Cloudflare Turnstile before giving up on the solver rung.
       if (!detection) {
         const turnstile = solverImpl.detectTurnstile?.(result.body, { websiteURL: startUrl.href });
         if (turnstile) {
-          log.info?.(`CapSolver: detected Cloudflare Turnstile for ${startUrl.hostname}`);
+          log.info?.(`Solver: detected Cloudflare Turnstile for ${startUrl.hostname}`);
           const solution = await solverImpl.solveTurnstile?.({
             siteKey: turnstile.siteKey,
             websiteURL: startUrl.href,
-            deadlineMs: Math.min(deadline, Date.now() + 60_000),
+            deadlineMs: Math.max(deadline, Date.now() + 150_000),
           });
           if (solution?.token) {
-            // Turnstile token alone can't clear cf_clearance — retry with Camoufox which
-            // can now pass the challenge script that produced the Turnstile.
             if (camoufoxFetchImpl) {
               try {
                 const browserResult = await browserFetchOnExit(currentExit, username, country, startUrl, deadline, { useCamoufox: true });
@@ -568,60 +607,84 @@ export function createUnlocker({
       }
 
       if (!detection.solvable) {
-        log.info?.(`CapSolver: IP banned (t=bv) for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+        log.info?.(`Solver: IP banned (t=bv) for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
         continue;
       }
 
-      // t=fe: solvable challenge — submit to CapSolver
-      const endpoint = upstreamEndpoint(gateway, currentExit.pool);
-      const auth = upstreamAuthorization(gateway, { username, country, session: currentExit.sid, pool: currentExit.pool });
-      const decoded = Buffer.from(auth.replace(/^Basic /, ""), "base64").toString();
-      // CapSolver proxy format: host:port:user:pass
-      const colonIdx = decoded.indexOf(":");
-      const proxyUser = decoded.slice(0, colonIdx);
-      const proxyPass = decoded.slice(colonIdx + 1);
-      const proxyString = `${endpoint.host}:${endpoint.port}:${proxyUser}:${proxyPass}`;
+      const proxyString = solverProxyString(currentExit, username, country);
 
-      const solution = await solverImpl.solveDatadome({
-        captchaUrl: detection.captchaUrl,
-        html: detection.html,
-        websiteURL: startUrl.href,
-        proxyString,
-        userAgent: ua,
-        deadlineMs: Math.min(deadline, Date.now() + 60_000),
-      });
-      if (solution) {
-        for (const c of solution.cookies) currentExit.jar.store(startUrl.hostname, [`${c.name}=${c.value}`]);
-        const retry = await fetchOnExit(currentExit, username, country, startUrl, deadline);
-        totalWireBytes += retry.wireBytes ?? 0;
-        Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
-        return { ...retry, wireBytes: totalWireBytes, solverUsed: true };
+      // Per-attempt cap: 60s is enough for a good IP (typical solve: 12-45s).
+      // Slow IPs hit target_navigation_timeout and get retried on fresh exit.
+      const solverDeadline = Date.now() + 60_000;
+      let solution;
+      try {
+        solution = await solverImpl.solveDatadome({
+          captchaUrl: detection.captchaUrl,
+          html: detection.html,
+          websiteURL: startUrl.href,
+          proxyString,
+          userAgent: ua,
+          deadlineMs: solverDeadline,
+        });
+      } catch (err) {
+        if (err.retryable) {
+          log.info?.(`Solver: retryable error for ${startUrl.hostname} (${err.message}), trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+          continue;
+        }
+        throw err;
       }
-
-      // CapSolver failed (proxy banned on captcha page etc.) — fall back to
-      // Camoufox on the same proxy session. A real browser solves DataDome's JS
-      // challenge natively; the resulting datadome cookie works for plain HTTP.
-      if (camoufoxFetchImpl) {
-        log.info?.(`CapSolver failed for ${startUrl.hostname}, falling back to Camoufox on same proxy session`);
+      if (solution) {
+        log.info?.(`Solver got cookies for ${startUrl.hostname}, storing ${solution.cookies.length} cookie(s) and retrying`);
+        for (const c of solution.cookies) {
+          const cookieStr = c.domain ? `${c.name}=${c.value}; Domain=.${c.domain}` : `${c.name}=${c.value}`;
+          currentExit.jar.store(startUrl.hostname, [cookieStr]);
+        }
+        if (solution.userAgent) {
+          log.info?.(`Solver provided user-agent override for ${startUrl.hostname}`);
+        }
+        // curl_cffi replay carries both CF cookies (from FlareSolverr) and DD
+        // cookies (from solver) in the jar — that combination bypasses CF+DD sites.
         try {
-          const browserResult = await browserFetchOnExit(currentExit, username, country, startUrl, deadline, { useCamoufox: true });
-          totalWireBytes += browserResult.wireBytes ?? 0;
-          const browserOutcome = classify(browserResult, config.minBodyBytes);
-          if (browserOutcome === "ok" || browserOutcome === "final") {
+          const retry = await fetchOnExit(currentExit, username, country, startUrl, deadline);
+          log.info?.(`Solver cookie + HTTP retry for ${startUrl.hostname}: status=${retry.status} bodyLen=${retry.body?.length ?? 0}`);
+          totalWireBytes += retry.wireBytes ?? 0;
+          const retryOutcome = classify(retry, config.minBodyBytes);
+          if (retryOutcome === "ok" || retryOutcome === "final") {
             Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
-            return { ...browserResult, wireBytes: totalWireBytes, solverUsed: true };
+            return { ...retry, wireBytes: totalWireBytes, solverUsed: true };
           }
-          log.info?.(`Camoufox fallback got ${browserOutcome} for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+          log.info?.(`Solver cookie + HTTP got ${retryOutcome} for ${startUrl.hostname}, trying Camoufox`);
         } catch (err) {
           totalWireBytes += err.wireBytes ?? 0;
-          log.warn?.(`Camoufox fallback error for ${startUrl.hostname}: ${err.message}`);
+          log.warn?.(`Solver cookie + HTTP error for ${startUrl.hostname}: ${err.message}`);
         }
-      } else {
-        log.info?.(`CapSolver: solve failed for ${startUrl.hostname}, no Camoufox available, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
+        if (camoufoxFetchImpl) {
+          try {
+            const browserResult = await browserFetchOnExit(currentExit, username, country, startUrl, deadline, { useCamoufox: true });
+            log.info?.(`Solver cookie + Camoufox for ${startUrl.hostname}: status=${browserResult.status} bodyLen=${browserResult.body?.length ?? 0}`);
+            totalWireBytes += browserResult.wireBytes ?? 0;
+            const browserOutcome = classify(browserResult, config.minBodyBytes);
+            if (browserOutcome === "ok" || browserOutcome === "final") {
+              Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
+              return { ...browserResult, wireBytes: totalWireBytes, solverUsed: true };
+            }
+            log.info?.(`Solver cookie + Camoufox got ${browserOutcome} for ${startUrl.hostname}`);
+          } catch (err) {
+            totalWireBytes += err.wireBytes ?? 0;
+            log.warn?.(`Solver cookie + Camoufox error for ${startUrl.hostname}: ${err.message}`);
+          }
+        }
+        Object.assign(exit, { pool: currentExit.pool, sid: currentExit.sid, jar: currentExit.jar });
+        const lastRetry = await fetchOnExit(currentExit, username, country, startUrl, deadline);
+        totalWireBytes += lastRetry.wireBytes ?? 0;
+        return { ...lastRetry, wireBytes: totalWireBytes, solverUsed: true };
       }
+
+      // No Camoufox fallback when solver returned no cookies — it won't help
+      // and wastes 30-75s per attempt. Go straight to next IP.
+      log.info?.(`Solver: no solution for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
     }
 
-    // All IP tries exhausted (banned or solve failed)
     const error = new Error("Solver exhausted all IP tries");
     error.code = "PROXY";
     error.wireBytes = totalWireBytes;
@@ -779,8 +842,12 @@ export function createUnlocker({
         attempts.push({ pool: exit.pool, outcome: "error", error: code, ms: Date.now() - attemptStarted });
         lastError = code;
         if (!RETRYABLE_ERRORS.has(code)) break;
-        // The solver already tried SOLVER_IP_TRIES fresh IPs — retrying won't help.
-        if (isSolverRung(rung) && code === "PROXY") break;
+        // The solver already tried SOLVER_IP_TRIES fresh IPs on this pool — but
+        // the next solver rung may use a different pool (mobile vs residential).
+        if (isSolverRung(rung) && code === "PROXY") {
+          const nextRung = poolForStep(step + 1);
+          if (!isSolverRung(nextRung) || poolOf(nextRung) === poolOf(rung)) break;
+        }
       }
     }
 
@@ -832,7 +899,7 @@ export function createUnlocker({
     }
     const started = Date.now();
     const exit = newExit(actualPool);
-    const timeout = solver ? 90_000 : browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
+    const timeout = solver ? 210_000 : browser ? (config.browserTimeoutMs ?? 45_000) : config.attemptTimeoutMs;
     try {
       const result = solver
         ? await solverFetchOnExit(exit, username, country, url, started + timeout)

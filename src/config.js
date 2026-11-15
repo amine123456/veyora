@@ -203,7 +203,7 @@ export function unlockerConfig() {
     maxAttempts: integer('UNLOCKER_MAX_ATTEMPTS', 8, { max: 16 }),
     httpAttempts: integer('UNLOCKER_HTTP_ATTEMPTS', 3, { max: 8 }),
     attemptTimeoutMs: integer('UNLOCKER_ATTEMPT_TIMEOUT_MS', 30_000, { min: 1_000, max: 120_000 }),
-    totalTimeoutMs: integer('UNLOCKER_TOTAL_TIMEOUT_MS', 120_000, { min: 1_000, max: 300_000 }),
+    totalTimeoutMs: integer('UNLOCKER_TOTAL_TIMEOUT_MS', 480_000, { min: 1_000, max: 600_000 }),
     maxResponseBytes,
     minBodyBytes: integer('UNLOCKER_MIN_BODY_BYTES', 512, { min: 0, max: 64 * 1024 }),
     requestsPerMinutePerKey: integer('UNLOCKER_REQUESTS_PER_MINUTE', 300, { max: 100_000 }),
@@ -215,6 +215,15 @@ export function unlockerConfig() {
     ledgerMaxBytes: integer('UNLOCKER_LEDGER_MAX_BYTES', 50 * 1024 * 1024, { min: 64 * 1024, max: 1024 * 1024 * 1024 }),
     ledgerKeep: integer('UNLOCKER_LEDGER_KEEP', 30, { max: 3650 }),
     ledgerFile: path.resolve(process.env.UNLOCKER_LEDGER_FILE?.trim() || path.join(path.dirname(dataFile()), 'unlocker-ledger.jsonl')),
+    capsolverApiKey: process.env.CAPSOLVER_API_KEY?.trim() || '',
+    solverifyApiKey: process.env.SOLVERIFY_API_KEY?.trim() || '',
+    solverRelayHost: process.env.SOLVER_RELAY_HOST?.trim() || '',
+    solverRelayPort: process.env.SOLVER_RELAY_PORT ? integer('SOLVER_RELAY_PORT', 0, { max: 65535 }) : 0,
+    solverSurchargeMicros: process.env.UNLOCKER_SOLVER_SURCHARGE_MICROS ? integer('UNLOCKER_SOLVER_SURCHARGE_MICROS', 5000, { min: 0, max: 1_000_000 }) : 5000,
+    humanSolverEnabled: boolean('HUMAN_SOLVER_ENABLED', false),
+    solverTaskTtlMs: integer('SOLVER_TASK_TTL_MS', 300_000, { min: 10_000, max: 3_600_000 }),
+    solverMaxPending: integer('SOLVER_MAX_PENDING', 50, { max: 10_000 }),
+    solverCookieTtlMs: integer('SOLVER_COOKIE_TTL_MS', 1_800_000, { min: 60_000, max: 86_400_000 }),
   };
 }
 
