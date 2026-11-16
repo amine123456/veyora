@@ -783,13 +783,16 @@ export function createUnlocker({
     throw error;
   }
 
-  async function unlock({ username, url, country, session, aborted = () => false }) {
+  async function unlock({ username, url, country, callerCountry = null, session, aborted = () => false }) {
     const started = Date.now();
     const deadline = started + config.totalTimeoutMs;
     // AbortController lets browser subprocesses (Camoufox, Chromium) be killed immediately
     // when the caller disconnects, instead of running until their own timeout.
     const ac = new AbortController();
     const checkAbort = setInterval(() => { if (aborted()) ac.abort(); }, 1_000);
+    // Mobile pool works better without geo-targeting (general pool has higher success rate).
+    // Only pin a mobile exit to a country when the caller explicitly asked for it.
+    const countryForPool = (pool) => pool === "mobile" && !callerCountry ? null : country;
     try {
     const site = siteOf(url.hostname);
     const remembered = siteMemory.get(site);
@@ -885,14 +888,15 @@ export function createUnlocker({
       const attemptStarted = Date.now();
       try {
         let result;
+        const exitCountry = countryForPool(exit.pool);
         if (isSolverRung(rung)) {
-          result = await solverFetchOnExit(exit, username, country, url, deadline);
+          result = await solverFetchOnExit(exit, username, exitCountry, url, deadline);
         } else if (isFlareSolverrRung(rung)) {
-          result = await flareSolverrFetchOnExit(exit, country, url, deadline);
+          result = await flareSolverrFetchOnExit(exit, exitCountry, url, deadline);
         } else if (isBrowserRung(rung)) {
-          result = await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung), signal: ac.signal });
+          result = await browserFetchOnExit(exit, username, exitCountry, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung), signal: ac.signal });
         } else {
-          result = await fetchOnExit(exit, username, country, url, deadline);
+          result = await fetchOnExit(exit, username, exitCountry, url, deadline);
         }
         wireByPool[exit.pool] += result.wireBytes;
         if (result.solverUsed) solverUsed = true;
@@ -1230,8 +1234,9 @@ export function createUnlocker({
       const refund = () => (testMode ? sandboxStore.giveBack(client.username) : releaseFunds(client.username, priceMicros));
       let outcome;
       try {
-        const country = input.country ?? siteCountry(url.hostname, config.siteCountries);
-        outcome = await unlock({ username: client.username, url, country, session: input.session, aborted: () => hungUp(response) });
+        const callerCountry = input.country ?? null;
+        const country = callerCountry ?? siteCountry(url.hostname, config.siteCountries);
+        outcome = await unlock({ username: client.username, url, country, callerCountry, session: input.session, aborted: () => hungUp(response) });
       } catch (error) {
         await refund();
         throw error;

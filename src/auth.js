@@ -95,7 +95,7 @@ export function upstreamAuthorization(config, { username = "", country = null, s
   const account = pool === "mobile" ? config.upstreamMobile : null;
   if (pool === "mobile" && !account) throw new Error("Mobile upstream is not configured");
   let login = account ? account.username : config.upstreamUsername;
-  if (country) login += `-cc-${country}`;
+  if (country) login += `-cc-${country.toUpperCase()}`;
   if (session) {
     const sid = crypto.createHash("sha256").update(`${username}:${session}`).digest("hex").slice(0, 16);
     login += `-sid-${sid}-ttl-${config.upstreamSessionTtlSeconds ?? 600}`;

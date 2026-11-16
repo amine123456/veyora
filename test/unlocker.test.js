@@ -87,7 +87,7 @@ async function harness(handler, { config = {}, mobile = true, log = { warn() {},
   }
 }
 
-const loginParts = (login) => /^(res-user|mob-user)(?:-cc-([a-z]{2}))?-sid-([0-9a-f]{16})-ttl-600$/.exec(login);
+const loginParts = (login) => /^(res-user|mob-user)(?:-cc-([A-Z]{2}))?-sid-([0-9a-f]{16})-ttl-600$/.exec(login);
 
 test('block detection reads statuses, challenge pages, and suspiciously small HTML', () => {
   const page = (status, body, headers = { 'content-type': 'text/html' }) => ({ status, headers, body: Buffer.from(body) });
@@ -175,7 +175,7 @@ test('blocked attempts escalate to new IPs and the site remembers', async () => 
     ]);
     const logins = upstream.logins.map((entry) => loginParts(entry.login));
     assert.deepEqual(logins.map((parts) => parts[1]), ['res-user', 'res-user', 'res-user']);
-    assert.ok(logins.every((parts) => parts[2] === 'de'));
+    assert.ok(logins.every((parts) => parts[2] === 'DE'));
     assert.equal(new Set(logins.map((parts) => parts[3])).size, 3); // a new IP each time
     assert.equal(await balance(username), 2_000_000 - 800); // charged once
   });
@@ -933,5 +933,5 @@ test('with no country given, the exit country follows the site', async () => {
     assert.equal((await call({ url: 'https://shop.example/a', country: 'de', session: 'x1' }, { key: user.key })).status, 200);
     logins.push(...upstream.logins.map((entry) => loginParts(entry.login)?.[2]));
   });
-  assert.deepEqual(logins, ['cz', 'de'], 'default from the site, but the caller\'s choice wins');
+  assert.deepEqual(logins, ['CZ', 'DE'], 'default from the site, but the caller\'s choice wins');
 });
