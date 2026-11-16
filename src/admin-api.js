@@ -47,6 +47,20 @@ export function createAdminServer({ token }, { unlocker = null } = {}) {
         if (!unlocker) return send(response, 404, { error: 'Unlocker disabled' });
         return send(response, 200, unlocker.stats());
       }
+      if (request.method === 'GET' && pathname === '/unlocker/knowledge') {
+        if (!unlocker) return send(response, 404, { error: 'Unlocker disabled' });
+        const params = new URL(request.url, 'http://admin').searchParams;
+        return send(response, 200, await unlocker.siteKnowledge.list({
+          limit: Math.min(Number(params.get('limit')) || 50, 500),
+          sort: params.get('sort') || 'recent',
+        }));
+      }
+      if (request.method === 'GET' && pathname.startsWith('/unlocker/knowledge/')) {
+        if (!unlocker) return send(response, 404, { error: 'Unlocker disabled' });
+        const site = decodeURIComponent(pathname.slice('/unlocker/knowledge/'.length));
+        const entry = await unlocker.siteKnowledge.get(site);
+        return entry ? send(response, 200, entry) : send(response, 404, { error: 'No knowledge for this site' });
+      }
       if (request.method !== 'POST') return send(response, 404, { error: 'Not found' });
       const body = await readJson(request);
 

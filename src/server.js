@@ -65,6 +65,7 @@ async function main() {
       })
     : null;
   await unlocker?.ledger.load();
+  await unlocker?.loadKnowledge();
   const paymentServer = createPaymentServer(payments, { unlocker, pricing, mobile: Boolean(gateway.upstreamMobile) });
   const admin = adminConfig();
   const adminServer = admin.token ? createAdminServer(admin, { unlocker, solverQueue }) : null;

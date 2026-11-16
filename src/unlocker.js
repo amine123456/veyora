@@ -7,6 +7,7 @@ import { createLedger } from "./ledger.js";
 import { resolveTarget } from "./gateway.js";
 import { authenticateApiKey, insertUsageEvent, releaseFunds, reserveFunds, returnSandboxLive, sandboxLiveUsed, takeSandboxLive } from "./store.js";
 import { scenarioList, simulate } from "./sandbox.js";
+import * as siteKnowledge from "./site-knowledge.js";
 
 // Web Unlocker: POST /v1/unlock fetches one public page for an API-key holder. Each
 // request is priced up front from the wallet and refunded unless the page came back.
@@ -534,6 +535,40 @@ export function createUnlocker({
   // WAF type detected from challenge markers — used to skip futile rungs.
   const siteWaf = expiringMap(MAX_TRACKED);
   const firstCamoufoxStep = pools.findIndex((rung) => isCamoufoxRung(rung));
+
+  async function loadKnowledge() {
+    try {
+      const known = await siteKnowledge.loadAll();
+      let seeded = 0;
+      for (const [site, k] of known) {
+        if (k.waf) siteWaf.set(site, k.waf, DOMAIN_MEMORY_MS);
+        if (k.bestRung != null && k.bestRung < pools.length) {
+          siteMemory.set(site, { step: k.bestRung, uses: 0 }, DOMAIN_MEMORY_MS);
+          seeded += 1;
+        }
+      }
+      if (seeded) log.info?.(`Site knowledge: loaded ${known.size} sites, seeded ${seeded} into ladder memory`);
+    } catch (err) {
+      log.warn?.(`Site knowledge load failed (non-fatal): ${err.message}`);
+    }
+  }
+
+  function recordKnowledge(outcome) {
+    const success = outcome.billable;
+    const lastAttempt = outcome.attempts?.at(-1);
+    const rung = success && lastAttempt ? outcome.attempts.findIndex((a) => a.outcome === "ok") : undefined;
+    const step = rung != null && rung >= 0 ? rung : outcome.attempts?.length ? outcome.attempts.length - 1 : 0;
+    siteKnowledge.record({
+      site: outcome.site,
+      waf: siteWaf.get(outcome.site) ?? null,
+      rung: step,
+      pool: lastAttempt?.pool ?? null,
+      country: null,
+      solverUsed: outcome.solverUsed ?? false,
+      success,
+      ms: outcome.ms ?? 0,
+    }).catch((err) => log.warn?.(`Site knowledge write failed: ${err.message}`));
+  }
 
   function wafFromReasons(reasons) {
     for (const r of reasons) {
@@ -1241,6 +1276,7 @@ export function createUnlocker({
         costMicros: totalBilledMicros,
         billed: totalBilledMicros > 0, durationMs: outcome.ms,
       }).catch(() => {});
+      recordKnowledge(outcome);
 
       const summary = {
         requestId,
@@ -1297,6 +1333,8 @@ export function createUnlocker({
     ledger,
     stop,
     probe,
+    loadKnowledge,
+    siteKnowledge: { get: siteKnowledge.get, list: siteKnowledge.list },
     rungs: [...new Set(pools)],
     stats: () => ledger.stats(),
     memory: () => ({ bookedBytes, budgetBytes: memoryBudget, active, inFlight }),

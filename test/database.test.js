@@ -15,7 +15,7 @@ const wipe = () => query('TRUNCATE clients CASCADE');
 
 test('migrations apply once and are safe to run again, even concurrently', async () => {
   const { rows } = await query('SELECT name FROM schema_migrations ORDER BY name');
-  assert.deepEqual(rows.map((row) => row.name), ['001_init.sql', '002_email_canonical.sql', '003_usage_events.sql', '004_sandbox.sql']);
+  assert.deepEqual(rows.map((row) => row.name), ['001_init.sql', '002_email_canonical.sql', '003_usage_events.sql', '004_sandbox.sql', '005_site_knowledge.sql']);
   const again = await Promise.all([db.migrate(), db.migrate(), db.migrate()]);
   assert.deepEqual(again, [[], [], []]);
 });
