@@ -9,8 +9,12 @@ Output: JSON on stdout with keys:
   status, headers {}, body (base64), wireBytes, finalUrl, error?
 """
 
-import sys, json, time, base64, random, warnings, os
+import sys, json, time, base64, random, warnings, os, signal
 warnings.filterwarnings("ignore")
+
+# SIGTERM from the Node parent means "clean up now". Raising SystemExit lets the
+# `with Camoufox` context manager close the browser and the finally block kill Xvfb.
+signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))
 
 def main():
     conf = json.loads(sys.stdin.read())

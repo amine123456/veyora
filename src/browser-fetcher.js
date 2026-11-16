@@ -204,7 +204,8 @@ async function simulateHuman(page) {
   }
 }
 
-export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false }) {
+export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false, signal }) {
+  if (signal?.aborted) throw new FetchError("ABORTED", "Request aborted");
   if (!browserModule) throw new FetchError("NETWORK", "No browser engine installed (patchright or playwright)");
   const { chromium } = browserModule;
   const auth = parseBasicAuth(proxy.authorization);
@@ -398,7 +399,7 @@ export async function fetchWithBrowser({ url, proxy, timeoutMs, maxBytes, cookie
 // Playwright server/connect protocol mismatch that hangs on newPage().
 const CAMOUFOX_FETCH_SCRIPT = join(__dirname, "camoufox-fetch.py");
 
-export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false }) {
+export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cookie = "", referer = "", country = "", useReferer = false, signal }) {
   if (!(await isCamoufoxAvailable())) {
     throw new FetchError("NETWORK", "Camoufox not installed on this server");
   }
@@ -420,15 +421,37 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
   return new Promise((resolve, reject) => {
     const child = spawn("python3", ["-u", CAMOUFOX_FETCH_SCRIPT], {
       stdio: ["pipe", "pipe", "pipe"],
-      timeout: totalTimeout,
+      detached: true,
     });
+
+    // Kill the entire process group (browser + Xvfb + driver) so nothing is orphaned.
+    let cleaned = false;
+    function killGroup(sig = "SIGTERM") {
+      if (cleaned && sig === "SIGTERM") return;
+      try { process.kill(-child.pid, sig); } catch {}
+    }
 
     let stdout = "";
     let stderr = "";
+    let settled = false;
+
+    const finish = (fn) => { if (!settled) { settled = true; fn(); } };
+
     const timer = setTimeout(() => {
-      child.kill("SIGKILL");
-      reject(new FetchError("TIMEOUT", "Camoufox fetch timed out"));
+      killGroup("SIGTERM");
+      setTimeout(() => killGroup("SIGKILL"), 3_000);
+      finish(() => reject(new FetchError("TIMEOUT", "Camoufox fetch timed out")));
     }, totalTimeout);
+
+    if (signal) {
+      const onAbort = () => {
+        killGroup("SIGTERM");
+        setTimeout(() => killGroup("SIGKILL"), 3_000);
+        finish(() => reject(new FetchError("ABORTED", "Request aborted")));
+      };
+      if (signal.aborted) { onAbort(); return; }
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
 
     child.stdout.on("data", (d) => { stdout += d; });
     child.stderr.on("data", (d) => { stderr += d; });
@@ -438,27 +461,31 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
 
     child.on("close", (code) => {
       clearTimeout(timer);
+      // Safety net: kill anything left in the group (browser, Xvfb, driver).
+      killGroup("SIGKILL");
+      cleaned = true;
+      if (settled) return;
       if (!stdout.trim()) {
-        reject(new FetchError("NETWORK", `Camoufox exited ${code}: ${stderr.slice(0, 300)}`));
+        finish(() => reject(new FetchError("NETWORK", `Camoufox exited ${code}: ${stderr.slice(0, 300)}`)));
         return;
       }
       try {
         const result = JSON.parse(stdout);
         if (result.error) {
-          reject(new FetchError(result.error, result.message || result.error));
+          finish(() => reject(new FetchError(result.error, result.message || result.error)));
           return;
         }
         const body = Buffer.from(result.body, "base64");
-        resolve({
+        finish(() => resolve({
           status: result.status,
           headers: result.headers,
           body,
           wireBytes: result.wireBytes || body.length,
           protocol: "camoufox",
           url: new URL(result.finalUrl),
-        });
+        }));
       } catch (e) {
-        reject(new FetchError("NETWORK", `Camoufox parse error: ${e.message}`));
+        finish(() => reject(new FetchError("NETWORK", `Camoufox parse error: ${e.message}`)));
       }
     });
   });

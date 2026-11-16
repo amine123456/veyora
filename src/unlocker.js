@@ -480,7 +480,7 @@ export function createUnlocker({
   }
 
   // Browser-based fetch: the browser handles redirects and cookies internally.
-  async function browserFetchOnExit(exit, username, country, startUrl, deadline, { useReferer = false, useCamoufox = false } = {}) {
+  async function browserFetchOnExit(exit, username, country, startUrl, deadline, { useReferer = false, useCamoufox = false, signal } = {}) {
     const impl = useCamoufox ? camoufoxFetchImpl : browserFetchImpl;
     if (!impl) {
       const error = new Error(useCamoufox ? "Camoufox not available" : "Browser fetcher not available");
@@ -518,6 +518,7 @@ export function createUnlocker({
         referer: "",
         country: country ?? "",
         useReferer,
+        signal,
       });
       exit.jar.store(startUrl.hostname, result.headers["set-cookie"]);
       const wireBytes = result.wireBytes ?? 0;
@@ -750,6 +751,11 @@ export function createUnlocker({
   async function unlock({ username, url, country, session, aborted = () => false }) {
     const started = Date.now();
     const deadline = started + config.totalTimeoutMs;
+    // AbortController lets browser subprocesses (Camoufox, Chromium) be killed immediately
+    // when the caller disconnects, instead of running until their own timeout.
+    const ac = new AbortController();
+    const checkAbort = setInterval(() => { if (aborted()) ac.abort(); }, 1_000);
+    try {
     const site = siteOf(url.hostname);
     const remembered = siteMemory.get(site);
     // Every request opens with one cheap plain try (a blocked answer costs ~2 KB and a
@@ -811,7 +817,7 @@ export function createUnlocker({
       browserExit.jar.store(url.hostname, cached.cookies);
       log.info?.(`Trying cached solver cookies for ${site} via browser (exit ${cached.exitInfo.sid})`);
       try {
-        const result = await browserFetchOnExit(browserExit, username, country, url, deadline, { useReferer: false, useCamoufox: true });
+        const result = await browserFetchOnExit(browserExit, username, country, url, deadline, { useReferer: false, useCamoufox: true, signal: ac.signal });
         wireByPool[browserExit.pool] += result.wireBytes;
         const outcome = classify(result, config.minBodyBytes);
         if (outcome === "ok" || outcome === "final") {
@@ -849,7 +855,7 @@ export function createUnlocker({
         } else if (isFlareSolverrRung(rung)) {
           result = await flareSolverrFetchOnExit(exit, country, url, deadline);
         } else if (isBrowserRung(rung)) {
-          result = await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung) });
+          result = await browserFetchOnExit(exit, username, country, url, deadline, { useReferer: isRefererRung(rung), useCamoufox: isCamoufoxRung(rung), signal: ac.signal });
         } else {
           result = await fetchOnExit(exit, username, country, url, deadline);
         }
@@ -951,6 +957,9 @@ export function createUnlocker({
       ms: Date.now() - started,
       site,
     };
+    } finally {
+      clearInterval(checkAbort);
+    }
   }
 
   // Diagnostics for `admin unlock-test`: one fetch on a fresh exit of the given pool,
