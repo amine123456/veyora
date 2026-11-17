@@ -115,17 +115,23 @@ def main():
             settle_end = time.time() + min(30, timeout_s - 5)
             akamai_reloaded = False
             turnstile_clicked = False
+            dd_block_seen = 0
             while time.time() < settle_end:
                 page.wait_for_timeout(2000)
 
                 # Check for DataDome challenge
                 dd = page.evaluate("""() => {
-                    const frames = document.querySelectorAll('iframe[src*="captcha-delivery"], iframe[src*="datadome"]');
-                    if (frames.length) return 'captcha';
                     const html = document.documentElement.outerHTML;
-                    if (html.length < 5000 && /captcha-delivery|datadome/i.test(html)) return 'block';
+                    const frames = document.querySelectorAll('iframe[src*="captcha-delivery"], iframe[src*="datadome"]');
+                    if (html.length > 10000) return 'none';
+                    if (frames.length || /captcha-delivery|datadome/i.test(html)) return 'block';
                     return 'none';
                 }""")
+                if dd == "block":
+                    dd_block_seen += 1
+                    if dd_block_seen >= 2:
+                        break
+                    continue
                 if dd == "none":
                     challenge_info = page.evaluate("""() => {
                         const html = document.documentElement.outerHTML;
