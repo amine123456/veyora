@@ -606,6 +606,7 @@ export function createUnlocker({
 
   const SOLVER_IP_TRIES = 4;
   const CAMOUFOX_IP_TRIES = 3;
+  const CAMOUFOX_DD_IP_TRIES = 8;
 
   function solverProxyString(currentExit, username, country) {
     const endpoint = upstreamEndpoint(gateway, currentExit.pool);
@@ -922,19 +923,32 @@ export function createUnlocker({
         if (outcome === "blocked" && currentWaf) {
           if (!isCamoufoxRung(rung) && !isSolverRung(rung) && firstCamoufoxStep >= 0 && step < firstCamoufoxStep) {
             step = firstCamoufoxStep - 1;
-          } else if (isCamoufoxRung(rung) && currentWaf !== "cloudflare" && currentWaf !== "datadome") {
-            // Akamai, Imperva, PerimeterX, AWS: no solver rung helps, the outcome depends
-            // on the exit IP. Try the stealth browser on fresh IPs, then on the next
-            // stealth-browser pool (mobile), and stop there.
-            if (camoufoxTries < CAMOUFOX_IP_TRIES) {
+          } else if (isCamoufoxRung(rung) && currentWaf !== "cloudflare") {
+            // DataDome, Akamai, Imperva, PerimeterX, AWS: Camoufox is effective when it
+            // hits a clean IP. DataDome bans most IPs (t=bv) but Camoufox solves the JS
+            // challenge natively on clean ones — the same approach the lacentrale scraper
+            // uses successfully. Give DataDome more retries than other WAFs.
+            const maxTries = currentWaf === "datadome" ? CAMOUFOX_DD_IP_TRIES : CAMOUFOX_IP_TRIES;
+            if (camoufoxTries < maxTries) {
               step -= 1;
             } else {
               const nextCamoufox = pools.findIndex((r, index) => index > step && isCamoufoxRung(r));
-              if (nextCamoufox < 0) break;
-              step = nextCamoufox - 1;
-              camoufoxTries = 0;
+              if (nextCamoufox >= 0) {
+                step = nextCamoufox - 1;
+                camoufoxTries = 0;
+              } else {
+                const fsStep = pools.findIndex((r) => isFlareSolverrRung(r));
+                const solverStep = pools.findIndex((r) => isSolverRung(r));
+                const nextStep = fsStep >= 0 && step < fsStep ? fsStep : solverStep;
+                if (nextStep >= 0 && step < nextStep) {
+                  step = nextStep - 1;
+                } else {
+                  break;
+                }
+              }
             }
           } else if (isCamoufoxRung(rung)) {
+            // Cloudflare: Camoufox can't solve managed challenges — jump to FlareSolverr/solver.
             const fsStep = pools.findIndex((r) => isFlareSolverrRung(r));
             const solverStep = pools.findIndex((r) => isSolverRung(r));
             const nextStep = fsStep >= 0 && step < fsStep ? fsStep : solverStep;
@@ -962,7 +976,8 @@ export function createUnlocker({
         if (!RETRYABLE_ERRORS.has(code)) break;
         // A stealth-browser attempt lost to a dead proxy exit says nothing about the site:
         // repeat the rung on a new IP.
-        if (isCamoufoxRung(rung) && camoufoxTries < CAMOUFOX_IP_TRIES) step -= 1;
+        const camoufoxMax = (siteWaf.get(site) === "datadome") ? CAMOUFOX_DD_IP_TRIES : CAMOUFOX_IP_TRIES;
+        if (isCamoufoxRung(rung) && camoufoxTries < camoufoxMax) step -= 1;
         // The solver already tried SOLVER_IP_TRIES fresh IPs on this pool — but
         // the next solver rung may use a different pool (mobile vs residential).
         if (isSolverRung(rung) && code === "PROXY") {

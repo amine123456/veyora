@@ -200,7 +200,7 @@ export function unlockerConfig() {
     browserEnabled: boolean('UNLOCKER_BROWSER_ENABLED', true),
     browserMaxConcurrent: integer('UNLOCKER_BROWSER_MAX_CONCURRENT', 2, { max: 10 }),
     browserTimeoutMs: integer('UNLOCKER_BROWSER_TIMEOUT_MS', 45_000, { min: 5_000, max: 120_000 }),
-    maxAttempts: integer('UNLOCKER_MAX_ATTEMPTS', 8, { max: 16 }),
+    maxAttempts: integer('UNLOCKER_MAX_ATTEMPTS', 14, { max: 20 }),
     httpAttempts: integer('UNLOCKER_HTTP_ATTEMPTS', 3, { max: 8 }),
     attemptTimeoutMs: integer('UNLOCKER_ATTEMPT_TIMEOUT_MS', 30_000, { min: 1_000, max: 120_000 }),
     totalTimeoutMs: integer('UNLOCKER_TOTAL_TIMEOUT_MS', 480_000, { min: 1_000, max: 600_000 }),
