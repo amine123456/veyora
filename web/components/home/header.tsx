@@ -15,6 +15,9 @@ export function HomeHeader() {
               <li>
                 <a href="#pricing">Pricing</a>
               </li>
+              <li>
+                <a href="/docs">Documentation</a>
+              </li>
             </ul>{' '}
             <a className="brand" href="#top" aria-label="Veyora, back to top">
               <svg className="brand__mark" aria-hidden="true">
@@ -27,7 +30,10 @@ export function HomeHeader() {
                 <a href="/data-feeds">Data Feeds</a>
               </li>
               <li>
-                <a href="/docs">Docs</a>
+                <a href="/about">About</a>
+              </li>
+              <li>
+                <a href="/support">Support</a>
               </li>
             </ul>
           </nav>
@@ -35,8 +41,8 @@ export function HomeHeader() {
             <a className="nav__login" href="/login">
               Log in
             </a>{' '}
-            <a className="btn btn--ink btn--sm" href="#pricing">
-              Get proxies
+            <a className="btn btn--ink btn--sm" href="/data-feeds">
+              Browse data feeds
             </a>{' '}
             <button
               className="nav__toggle"
@@ -66,17 +72,17 @@ export function HomeHeader() {
               <a href="#pricing">Pricing</a>
             </li>
             <li>
-              <a href="/data-feeds">Data Feeds</a>
+              <a href="/docs">Docs</a>
             </li>
             <li>
-              <a href="/docs">Docs</a>
+              <a href="/data-feeds">Data Feeds</a>
             </li>
           </ul>{' '}
           <a className="navpill__login" href="/login">
             Log in
           </a>{' '}
-          <a className="btn btn--ink btn--sm" href="#pricing">
-            Get proxies
+          <a className="btn btn--ink btn--sm" href="/data-feeds">
+            Browse data feeds
           </a>
         </nav>
         <div className="sheet" id="sheet" hidden>
@@ -88,17 +94,23 @@ export function HomeHeader() {
               <a href="#pricing">Pricing</a>
             </li>
             <li>
+              <a href="/docs">Documentation</a>
+            </li>
+            <li>
               <a href="/data-feeds">Data Feeds</a>
             </li>
             <li>
-              <a href="/docs">Docs</a>
+              <a href="/about">About</a>
+            </li>
+            <li>
+              <a href="/support">Support</a>
             </li>
             <li>
               <a href="/login">Log in</a>
             </li>
           </ul>{' '}
-          <a className="btn btn--yellow btn--lg" href="#pricing">
-            Get proxies
+          <a className="btn btn--yellow btn--lg" href="/data-feeds">
+            Browse data feeds
           </a>
         </div>
       </header>

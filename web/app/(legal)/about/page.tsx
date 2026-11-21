@@ -1,8 +1,16 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About Veyora',
-  description: 'Learn what Veyora provides and how to contact the team.',
+  title: 'About Veyora — Residential Proxy & Data Platform',
+  description: 'Learn what Veyora provides — residential proxies, Web Unlocker API, and managed data feeds — and how to contact the team.',
+  alternates: { canonical: 'https://veyora.pro/about' },
+  openGraph: {
+    title: 'About Veyora',
+    description: 'Residential proxies, Web Unlocker API, and managed data feeds.',
+    url: 'https://veyora.pro/about',
+    siteName: 'Veyora',
+    type: 'website',
+  },
 };
 
 export default function AboutPage() {

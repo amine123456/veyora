@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Acceptable Use Policy — Veyora',
   description: 'Veyora acceptable use policy: rules for lawful, authorized proxy usage.',
+  alternates: { canonical: 'https://veyora.pro/acceptable-use' },
 };
 
 export default function AcceptableUsePage() {

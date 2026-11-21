@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Privacy Policy — Veyora',
   description: 'Veyora privacy policy: what we collect, how we use it, and your choices.',
+  alternates: { canonical: 'https://veyora.pro/privacy' },
 };
 
 export default function PrivacyPage() {

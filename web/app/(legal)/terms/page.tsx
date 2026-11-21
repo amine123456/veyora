@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms of Service — Veyora',
   description: 'Terms governing access to and use of Veyora proxy services.',
+  alternates: { canonical: 'https://veyora.pro/terms' },
 };
 
 export default function TermsPage() {

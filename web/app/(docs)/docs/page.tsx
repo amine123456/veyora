@@ -2,9 +2,22 @@ import type { Metadata } from 'next';
 import { LegacyScripts } from '@/components/legacy-scripts';
 
 export const metadata: Metadata = {
-  title: 'Documentation — Veyora',
+  title: 'Documentation — Veyora | API & Proxy Setup Guide',
   description:
-    'Veyora API documentation: proxy gateway setup, Web Unlocker API, authentication, targeting, and code examples.',
+    'Veyora API documentation: proxy gateway setup, Web Unlocker API, authentication, country targeting, sticky sessions, and code examples for cURL, Python and Node.',
+  alternates: { canonical: 'https://veyora.pro/docs' },
+  openGraph: {
+    title: 'Documentation — Veyora',
+    description: 'Proxy gateway setup, Web Unlocker API, authentication, targeting, and code examples.',
+    url: 'https://veyora.pro/docs',
+    siteName: 'Veyora',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Documentation — Veyora',
+    description: 'Proxy gateway setup, Web Unlocker API, authentication, targeting, and code examples.',
+  },
 };
 
 export default function DocsPage() {
@@ -149,7 +162,7 @@ export default function DocsPage() {
               browser, or scraping framework at the gateway and authenticate with Basic auth.
             </p>
             <h3>Connection details</h3>
-            <table>
+            <div className="table-wrap"><table>
               <tbody>
                 <tr>
                   <th>Parameter</th>
@@ -162,21 +175,21 @@ export default function DocsPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td>Port</td>
+                  <td>Ports</td>
                   <td>
-                    <code>8443</code>
+                    <code>8443</code> HTTPS CONNECT &nbsp;·&nbsp; <code>8080</code> HTTP / SOCKS5
                   </td>
                 </tr>
                 <tr>
                   <td>Protocol</td>
-                  <td>HTTP / HTTPS (CONNECT) / SOCKS5</td>
+                  <td>HTTP, HTTPS (CONNECT), SOCKS5 — all on one gateway</td>
                 </tr>
                 <tr>
                   <td>Auth</td>
                   <td>Basic (username:password)</td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
             <h3>cURL</h3>
             <pre>{'curl -x gate.veyora.io:8443 \\\n     -U "USER:PASS" \\\n     https://example.com'}</pre>
             <h3>Python (requests)</h3>
@@ -215,7 +228,7 @@ export default function DocsPage() {
               Append flags to your username to control the exit IP. Options combine in this order: <code>-mobile</code>,
               then <code>-country-xx</code>, then <code>-session-name</code>.
             </p>
-            <table>
+            <div className="table-wrap"><table>
               <tbody>
                 <tr>
                   <th>Username</th>
@@ -264,7 +277,7 @@ export default function DocsPage() {
                   <td>Sticky mobile IP in the UK</td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
             <h3>Country codes</h3>
             <p>
               Use standard{' '}
@@ -288,7 +301,7 @@ export default function DocsPage() {
               </p>
             </div>
             <h3>Endpoint</h3>
-            <table>
+            <div className="table-wrap"><table>
               <tbody>
                 <tr>
                   <th>Method</th>
@@ -299,18 +312,18 @@ export default function DocsPage() {
                     <code>POST</code>
                   </td>
                   <td>
-                    <code>https://your-domain/v1/unlock</code>
+                    <code>https://gate.veyora.io/v1/unlock</code>
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
             <h3>Authentication</h3>
             <p>
               Include your API key in the <code>Authorization</code> header as a Bearer token.
             </p>
             <pre>{'Authorization: Bearer YOUR_API_KEY'}</pre>
             <h3>Request body (JSON)</h3>
-            <table>
+            <div className="table-wrap"><table>
               <tbody>
                 <tr>
                   <th>Field</th>
@@ -342,30 +355,38 @@ export default function DocsPage() {
                   <td>No</td>
                   <td>Session name to reuse the same IP and cookies (up to 10 min)</td>
                 </tr>
+                <tr>
+                  <td>
+                    <code>render</code>
+                  </td>
+                  <td>boolean</td>
+                  <td>No</td>
+                  <td>Set to <code>true</code> to execute JavaScript and return the fully rendered page</td>
+                </tr>
               </tbody>
-            </table>
+            </table></div>
             <h3>cURL example</h3>
             <pre>
               {
-                'curl -X POST https://your-domain/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com"}\''
+                'curl -X POST https://gate.veyora.io/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com"}\''
               }
             </pre>
             <h3>With country and session</h3>
             <pre>
               {
-                'curl -X POST https://your-domain/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com", "country": "de", "session": "job1"}\''
+                'curl -X POST https://gate.veyora.io/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com", "country": "de", "session": "job1"}\''
               }
             </pre>
             <h3>Python</h3>
             <pre>
               {
-                'import requests\n\nr = requests.post(\n    "https://your-domain/v1/unlock",\n    headers={"Authorization": "Bearer YOUR_API_KEY"},\n    json={"url": "https://example.com", "country": "fr"},\n)\nprint(r.json())'
+                'import requests\n\nr = requests.post(\n    "https://gate.veyora.io/v1/unlock",\n    headers={"Authorization": "Bearer YOUR_API_KEY"},\n    json={"url": "https://example.com", "country": "fr"},\n)\nprint(r.json())'
               }
             </pre>
             <h3>Node.js</h3>
             <pre>
               {
-                "const res = await fetch('https://your-domain/v1/unlock', {\n  method: 'POST',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({ url: 'https://example.com' }),\n});\nconst data = await res.json();\nconsole.log(data);"
+                "const res = await fetch('https://gate.veyora.io/v1/unlock', {\n  method: 'POST',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({ url: 'https://example.com' }),\n});\nconst data = await res.json();\nconsole.log(data);"
               }
             </pre>
             <h3>Response</h3>
@@ -396,7 +417,7 @@ export default function DocsPage() {
               unlimited (within the normal rate limit) and work with any key, so you can exercise every branch of your
               error handling:
             </p>
-            <table>
+            <div className="table-wrap"><table>
               <tbody>
                 <tr>
                   <th>URL path</th>
@@ -478,7 +499,7 @@ export default function DocsPage() {
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
             <pre>
               {
                 'curl -X POST https://veyora.pro/v1/unlock \\\n  -H "Authorization: Bearer vy_test_YOUR_SANDBOX_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"url": "https://sandbox.veyora.pro/hard"}\''
@@ -507,7 +528,7 @@ export default function DocsPage() {
               <li>All keys on an account share the same wallet balance.</li>
             </ul>{' '}
             <h2 id="errors">Error codes</h2>
-            <table>
+            <div className="table-wrap"><table>
               <tbody>
                 <tr>
                   <th>HTTP Status</th>
@@ -562,7 +583,7 @@ export default function DocsPage() {
                   <td>Service unavailable — all attempts blocked (Web Unlocker)</td>
                 </tr>
               </tbody>
-            </table>{' '}
+            </table></div>{' '}
             <h2 id="limits">Rate limits & billing</h2>
             <h3>Proxy gateway</h3>
             <ul>
@@ -597,7 +618,7 @@ export default function DocsPage() {
             </ul>
             <h3>Wallet</h3>
             <ul>
-              <li>All purchases are in USDT on BNB Smart Chain (BEP-20).</li>
+              <li>Top up with card (Visa, Mastercard, Amex via Stripe) or USDT on BNB Smart Chain (BEP-20).</li>
               <li>Balance is prepaid in USD micro-units; no withdrawals or transfers.</li>
               <li>Larger top-ups include a bonus (shown before checkout).</li>
               <li>

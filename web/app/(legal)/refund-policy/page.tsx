@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Refund Policy — Veyora',
   description: 'Veyora refund, cancellation, and dispute policy for card and cryptocurrency payments.',
+  alternates: { canonical: 'https://veyora.pro/refund-policy' },
 };
 
 export default function RefundPolicyPage() {

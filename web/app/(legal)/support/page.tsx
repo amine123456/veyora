@@ -4,6 +4,14 @@ import { LegacyScripts } from '@/components/legacy-scripts';
 export const metadata: Metadata = {
   title: 'Contact & Support — Veyora',
   description: 'Contact Veyora about product, account, billing, technical, or abuse concerns.',
+  alternates: { canonical: 'https://veyora.pro/support' },
+  openGraph: {
+    title: 'Contact & Support — Veyora',
+    description: 'Get help with your Veyora account, billing, or technical questions.',
+    url: 'https://veyora.pro/support',
+    siteName: 'Veyora',
+    type: 'website',
+  },
 };
 
 export default function SupportPage() {

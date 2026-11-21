@@ -47,159 +47,71 @@ export function HomeTop() {
         </span>{' '}
         <div className="hero__copy">
           <p className="chip">
-            <span className="dot" />5 million residential IPs · 195 countries
+            <span className="dot" />Data Feeds · Web Unlocker · Proxies
           </p>
           <h1 className="h1" id="hero-title" data-split="">
-            Proxies that look like <br className="br-d" />
+            The data platform that{' '}
+            <br className="br-d" />
             <span className="y">
-              <em className="serif">real people</em>, at any scale.
+              <em className="serif">powers decisions.</em>
             </span>
           </h1>
           <p className="sub">
-            5 million residential IPs across 195 countries, sticky or a fresh IP every request. HTTP, HTTPS and SOCKS5.
-            Prepaid with card or USDT.
+            Structured data feeds from hard-to-scrape sites, delivered daily to your pipeline.
+            A Web Unlocker API and 5 million residential IPs when you need to collect it yourself.
           </p>
           <div className="cta-row">
-            <a className="btn btn--yellow btn--lg" href="#pricing">
-              Get proxies
+            <a className="btn btn--yellow btn--lg" href="/data-feeds">
+              Browse data feeds
             </a>{' '}
             <a className="btn btn--ghost-dark btn--lg" href="#pricing">
               View pricing
             </a>
           </div>
           <p className="hero__pill">
-            Every account starts with $1.00 free credit — 5,000 Web Unlocker requests, no payment needed.
+            2.4 million records collected daily · 26 live sources · delivered to your pipeline every morning.
           </p>
         </div>
         <div
           className="dash-wrap"
           role="img"
-          aria-label="Example dashboard preview: a Gate sidebar with locations, a requests list, and a detail panel for GET /checkout returning 200 OK in 412ms over SOCKS5 with a sticky 10-minute session."
+          aria-label="Data pipeline: sources like mobile.de, LaCentrale, car.gr feed into Veyora and deliver structured data via SFTP, S3, Snowflake, and API."
         >
-          <div className="dash" aria-hidden="true">
-            <div className="dash__rail">
-              <svg className="dash__logo">
-                <use href="#i-logo" />
-              </svg>{' '}
-              <span className="dash__plus">
-                <svg>
-                  <use href="#i-spark" />
-                </svg>
-              </span>{' '}
-              <svg className="dash__ic">
-                <use href="#i-home" />
-              </svg>{' '}
-              <svg className="dash__ic">
-                <use href="#i-globe" />
-              </svg>{' '}
-              <svg className="dash__ic">
-                <use href="#i-user" />
-              </svg>
-            </div>
-            <div className="dash__col dash__gate">
-              <div className="dash__h">
-                <b>Gate</b>
-                <span>live</span>
-              </div>
-              <div className="dash__search">
-                <svg>
-                  <use href="#i-search" />
-                </svg>
-                All locations
-              </div>
-              <p className="dash__k">Countries</p>
-              <ul className="dash__list">
-                <li className="is-on">
-                  <svg className="flag">
-                    <use href="#f-fr" />
-                  </svg>
-                  France
-                  <span>12</span>
-                </li>
-                <li>
-                  <svg className="flag">
-                    <use href="#f-jp" />
-                  </svg>
-                  Japan
-                  <span>9</span>
-                </li>
-                <li>
-                  <svg className="flag">
-                    <use href="#f-de" />
-                  </svg>
-                  Germany
-                  <span>7</span>
-                </li>
+          <div className="dash dash--pipeline" aria-hidden="true">
+            <div className="pipe__col pipe__sources">
+              <div className="dash__h"><b>Sources</b><span>12+ live</span></div>
+              <ul className="pipe__logos">
+                <li className="is-on"><span className="pipe__dot pipe__dot--green" />mobile.de<span>1.2M</span></li>
+                <li><span className="pipe__dot pipe__dot--green" />LaCentrale<span>782K</span></li>
+                <li><span className="pipe__dot pipe__dot--green" />car.gr<span>245K</span></li>
+                <li><span className="pipe__dot pipe__dot--green" />Milanuncios<span>198K</span></li>
+                <li><span className="pipe__dot pipe__dot--blue" />QuintoAndar<span>44K</span></li>
+                <li><span className="pipe__dot pipe__dot--amber" />Capterra<span>8K</span></li>
               </ul>
             </div>
-            <div className="dash__col dash__reqs">
-              <div className="dash__h">
-                <b>Requests</b>
-                <span>4 live · example</span>
+            <div className="pipe__col pipe__center">
+              <div className="dash__h"><b>Veyora Pipeline</b><span>today</span></div>
+              <div className="pipe__stats">
+                <div><small>Records collected</small><b>2.4M</b></div>
+                <div><small>Sources crawled</small><b>26</b></div>
+                <div><small>Delivery success</small><b>99.8%</b></div>
               </div>
-              <div className="dash__tabs">
-                <span className="is-on">All</span>
-                <span>Sticky</span>
-                <span>Rotating</span>
+              <div className="pipe__flow">
+                <span className="pipe__step">Crawl</span>
+                <span className="pipe__arrow">→</span>
+                <span className="pipe__step">Clean</span>
+                <span className="pipe__arrow">→</span>
+                <span className="pipe__step">Deliver</span>
               </div>
-              <ul className="dash__rows">
-                <li className="is-on">
-                  <span className="get">GET</span>
-                  <b>/checkout</b>
-                  <time>5:41 PM</time>
-                  <small>
-                    <i />
-                    200 OK · Lyon, FR · 412ms
-                  </small>
-                </li>
-                <li>
-                  <span className="get">GET</span>
-                  <b>/search</b>
-                  <time>1:56 PM</time>
-                  <small>
-                    <i />
-                    200 OK · Lyon, FR · 257ms
-                  </small>
-                </li>
-                <li>
-                  <span className="get">GET</span>
-                  <b>/ads/verify</b>
-                  <time>1:52 PM</time>
-                  <small>
-                    <i />
-                    200 OK · Tokyo, JP · 301ms
-                  </small>
-                </li>
-              </ul>
             </div>
-            <div className="dash__col dash__detail">
-              <div className="dash__h">
-                <span className="get">GET</span>
-                <b className="dash__path">example-shopid · sticky</b>
-                <span>1 of 4 · example</span>
-              </div>
-              <h3>GET /checkout</h3>
-              <p>
-                Routed through a residential exit in <u>Lyon, FR</u> · 10-minute sticky session
-              </p>
-              <div className="dash__badges">
-                <span className="ok">
-                  <i />
-                  200 OK
-                </span>
-                <span>412ms</span>
-                <span className="ex">Example</span>
-              </div>
-              <div className="dash__facts">
-                <div>
-                  <small>Protocol</small>
-                  <b>SOCKS5</b>
-                </div>
-                <div>
-                  <small>Session</small>
-                  <b>Sticky · 10 min</b>
-                </div>
-              </div>
+            <div className="pipe__col pipe__output">
+              <div className="dash__h"><b>Delivery</b><span>daily</span></div>
+              <ul className="pipe__methods">
+                <li className="is-on"><span className="pipe__dot pipe__dot--green" />SFTP<small>pushed 06:00</small></li>
+                <li><span className="pipe__dot pipe__dot--green" />Amazon S3<small>pushed 06:02</small></li>
+                <li><span className="pipe__dot pipe__dot--blue" />Snowflake<small>loaded 06:05</small></li>
+                <li><span className="pipe__dot pipe__dot--amber" />API<small>ready</small></li>
+              </ul>
             </div>
           </div>
         </div>

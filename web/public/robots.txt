@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /login
+Disallow: /signup
+Disallow: /verify-email
+Disallow: /api/
+
+Sitemap: https://veyora.pro/sitemap.xml

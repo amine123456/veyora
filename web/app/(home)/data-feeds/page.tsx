@@ -4,14 +4,97 @@ import { HomeIcons } from '@/components/home/icons';
 import { HomeHeader } from '@/components/home/header';
 
 export const metadata: Metadata = {
-  title: 'Data Feeds | Veyora',
+  title: 'Managed Data Feeds — Veyora | Cars, Real Estate, Jobs',
   description:
     'Managed data feeds from hard-to-scrape sites. Cars, real estate, jobs, reviews — structured data delivered daily to your SFTP.',
+  alternates: { canonical: 'https://veyora.pro/data-feeds' },
+  openGraph: {
+    title: 'Managed Data Feeds — Veyora',
+    description: 'Structured data from hard-to-scrape sites. Cars, real estate, jobs, reviews — delivered daily via SFTP.',
+    url: 'https://veyora.pro/data-feeds',
+    siteName: 'Veyora',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Managed Data Feeds — Veyora',
+    description: 'Structured data from hard-to-scrape sites delivered daily via SFTP.',
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Product',
+      name: 'Veyora Managed Data Feeds',
+      description:
+        'Ready-to-use structured data from hard-to-scrape sites. Cars, real estate, jobs, software reviews — delivered daily via SFTP. Subscribe to the feeds you need and get fresh, clean datasets without building scrapers.',
+      url: 'https://veyora.pro/data-feeds',
+      brand: {
+        '@type': 'Organization',
+        name: 'Veyora',
+        url: 'https://veyora.pro',
+      },
+      category: 'Data Services',
+      offers: {
+        '@type': 'AggregateOffer',
+        priceCurrency: 'EUR',
+        lowPrice: '29',
+        highPrice: '499',
+        offerCount: '26',
+        url: 'https://veyora.pro/data-feeds',
+        description: 'Monthly subscriptions for managed data feeds — cars, real estate, jobs, reviews',
+        availability: 'https://schema.org/InStock',
+      },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'What are managed data feeds?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Managed data feeds are pre-built datasets from hard-to-scrape websites. Veyora crawls these sites daily with custom infrastructure and delivers clean, structured data (JSON/CSV) to your SFTP endpoint. No scraping setup needed.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'What data categories are available?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Veyora offers data feeds across cars (mobile.de, LaCentrale, car.gr, Milanuncios, and more), real estate (QuintoAndar), jobs (Keejob, EmploiTunisie, TanitJobs), and software reviews (Capterra). New feeds are added regularly.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How is the data delivered?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Data is delivered daily via SFTP as structured JSON or CSV files. Each delivery includes a full snapshot of the dataset. Webhook notifications are also available.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How much do data feeds cost?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Data feed subscriptions start from €29/month depending on the site, data volume, and delivery frequency. Each feed is priced individually. Payment is via Stripe (card) in EUR.',
+          },
+        },
+      ],
+    },
+  ],
 };
 
 export default function DataFeedsPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HomeIcons />
       <HomeHeader />
       <main id="main" className="feeds-page">
