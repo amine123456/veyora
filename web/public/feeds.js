@@ -7,6 +7,7 @@
     BE: '\u{1F1E7}\u{1F1EA}', TN: '\u{1F1F9}\u{1F1F3}', BR: '\u{1F1E7}\u{1F1F7}',
     HU: '\u{1F1ED}\u{1F1FA}', RO: '\u{1F1F7}\u{1F1F4}', PT: '\u{1F1F5}\u{1F1F9}',
     GR: '\u{1F1EC}\u{1F1F7}',
+    TR: '\u{1F1F9}\u{1F1F7}',
     MULTI: '\u{1F310}'
   };
 

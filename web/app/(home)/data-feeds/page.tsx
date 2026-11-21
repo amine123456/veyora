@@ -5,7 +5,9 @@ import { HomeHeader } from '@/components/home/header';
 import { LIVE_FEEDS } from '@/components/feeds/live-feeds';
 
 const COUNTRY_NAMES: Record<string, string> = {
-  DE: 'Germany', FR: 'France', IE: 'Ireland', FI: 'Finland', HU: 'Hungary', RO: 'Romania', MULTI: 'Global',
+  DE: 'Germany', FR: 'France', IE: 'Ireland', FI: 'Finland', HU: 'Hungary', RO: 'Romania',
+  ES: 'Spain', GB: 'United Kingdom', BE: 'Belgium', TN: 'Tunisia', BR: 'Brazil',
+  GR: 'Greece', PT: 'Portugal', TR: 'Turkey', MULTI: 'Global',
 };
 const VERTICAL_NAMES: Record<string, string> = {
   cars: 'Cars', real_estate: 'Real Estate', jobs: 'Jobs', reviews: 'Reviews', analytics: 'Analytics',
