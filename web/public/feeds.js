@@ -328,7 +328,8 @@
         });
       })
       .catch(function () {
-        grid.innerHTML = '<div class="feeds-loading">Could not load feeds. Please try again later.</div>';
+        grid.setAttribute('aria-busy', 'false');
+        if (!grid.querySelector('.feed-card')) grid.innerHTML = '<div class="feeds-loading">Could not load feeds. Please try again later.</div>';
       });
   }
 

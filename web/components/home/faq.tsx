@@ -44,6 +44,12 @@ export const HOME_FAQ = [
 export function HomeFaq() {
   return (
     <section className="faq container" id="faq" aria-labelledby="faq-title">
+      <p className="faq__eyebrow">
+        <span className="pill">
+          <span className="dot" />
+          Data feeds, Web Unlocker &amp; proxy FAQ
+        </span>
+      </p>
       <h2 className="h2" id="faq-title" data-split="">
         Questions, <em className="serif">answered.</em>
       </h2>

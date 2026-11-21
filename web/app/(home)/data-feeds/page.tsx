@@ -2,6 +2,34 @@ import type { Metadata } from 'next';
 import { LegacyScripts } from '@/components/legacy-scripts';
 import { HomeIcons } from '@/components/home/icons';
 import { HomeHeader } from '@/components/home/header';
+import { LIVE_FEEDS } from '@/components/feeds/live-feeds';
+
+const COUNTRY_NAMES: Record<string, string> = {
+  DE: 'Germany', FR: 'France', IE: 'Ireland', FI: 'Finland', HU: 'Hungary', RO: 'Romania', MULTI: 'Global',
+};
+const VERTICAL_NAMES: Record<string, string> = {
+  cars: 'Cars', real_estate: 'Real Estate', jobs: 'Jobs', reviews: 'Reviews', analytics: 'Analytics',
+};
+const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+
+const FEEDS_FAQ = [
+  {
+    q: 'What are managed data feeds?',
+    a: 'Managed data feeds are pre-built datasets from hard-to-scrape websites. Veyora crawls these sites daily with custom infrastructure and delivers clean, structured data (JSON/CSV) to your SFTP endpoint. No scraping setup needed.',
+  },
+  {
+    q: 'What data categories are available?',
+    a: 'Veyora offers data feeds across cars (mobile.de, LaCentrale, car.gr, Milanuncios, and more), real estate (QuintoAndar), jobs (Keejob, EmploiTunisie, TanitJobs), and software reviews (Capterra). New feeds are added regularly.',
+  },
+  {
+    q: 'How is the data delivered?',
+    a: 'Data is delivered daily via SFTP as structured JSON or CSV files. Each delivery includes a full snapshot of the dataset. Webhook notifications are also available.',
+  },
+  {
+    q: 'How much do data feeds cost?',
+    a: 'Data feed subscriptions start from €100/month depending on the site, data volume, and delivery frequency. Each feed is priced individually. Payment is via Stripe (card) in EUR.',
+  },
+];
 
 export const metadata: Metadata = {
   title: 'Managed Data Feeds — Veyora | Cars, Real Estate, Jobs',
@@ -14,9 +42,11 @@ export const metadata: Metadata = {
     url: 'https://veyora.pro/data-feeds',
     siteName: 'Veyora',
     type: 'website',
+    images: [{ url: 'https://veyora.pro/og-data-feeds.png', width: 1200, height: 630, alt: 'Veyora managed data feeds' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
+    images: ['https://veyora.pro/og-data-feeds.png'],
     title: 'Managed Data Feeds — Veyora',
     description: 'Structured data from hard-to-scrape sites delivered daily via SFTP.',
   },
@@ -31,6 +61,7 @@ const jsonLd = {
       description:
         'Ready-to-use structured data from hard-to-scrape sites. Cars, real estate, jobs, software reviews — delivered daily via SFTP. Subscribe to the feeds you need and get fresh, clean datasets without building scrapers.',
       url: 'https://veyora.pro/data-feeds',
+      image: 'https://veyora.pro/og-data-feeds.png',
       brand: {
         '@type': 'Organization',
         name: 'Veyora',
@@ -49,41 +80,29 @@ const jsonLd = {
       },
     },
     {
-      '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: 'What are managed data feeds?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Managed data feeds are pre-built datasets from hard-to-scrape websites. Veyora crawls these sites daily with custom infrastructure and delivers clean, structured data (JSON/CSV) to your SFTP endpoint. No scraping setup needed.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'What data categories are available?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Veyora offers data feeds across cars (mobile.de, LaCentrale, car.gr, Milanuncios, and more), real estate (QuintoAndar), jobs (Keejob, EmploiTunisie, TanitJobs), and software reviews (Capterra). New feeds are added regularly.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'How is the data delivered?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Data is delivered daily via SFTP as structured JSON or CSV files. Each delivery includes a full snapshot of the dataset. Webhook notifications are also available.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'How much do data feeds cost?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Data feed subscriptions start from €100/month depending on the site, data volume, and delivery frequency. Each feed is priced individually. Payment is via Stripe (card) in EUR.',
-          },
-        },
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://veyora.pro/' },
+        { '@type': 'ListItem', position: 2, name: 'Data Feeds', item: 'https://veyora.pro/data-feeds' },
       ],
+    },
+    {
+      '@type': 'ItemList',
+      name: 'Live data feeds',
+      itemListElement: LIVE_FEEDS.map((feed, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: `${feed.site_name} data feed`,
+        description: feed.description,
+      })),
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: FEEDS_FAQ.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
     },
   ],
 };
@@ -101,7 +120,7 @@ export default function DataFeedsPage() {
         <section className="feeds-hero">
           <div className="container">
             <p className="eyebrow">Managed Data Feeds</p>
-            <h1>Structured data from<br />hard-to-scrape sites</h1>
+            <h1>Structured data from <br />hard-to-scrape sites</h1>
             <p className="feeds-hero__sub">
               Some sites block every proxy and unlocker. We crawl them daily with custom
               infrastructure and deliver clean, structured data to your endpoint.
@@ -120,7 +139,27 @@ export default function DataFeedsPage() {
               <button type="button" role="tab" aria-selected="false" data-vertical="analytics">Analytics</button>
             </div>
             <div className="feeds-grid" data-feeds-grid="" aria-busy="true">
-              <div className="feeds-loading">Loading feeds...</div>
+              {LIVE_FEEDS.map((feed) => (
+                <article className="feed-card" data-feed-vertical={feed.vertical} key={feed.feed_id}>
+                  <div className="feed-card__top">
+                    <div className="feed-card__info">
+                      <h2 className="feed-card__name">{feed.site_name} data feed</h2>
+                      <div className="feed-card__domain">{feed.site_domain}</div>
+                    </div>
+                  </div>
+                  <div className="feed-card__meta">
+                    <span className="feed-chip feed-chip--active">Active</span>
+                    <span className="feed-chip">{feed.frequency}</span>
+                    <span className="feed-chip feed-chip--vol">{compact.format(feed.record_count)} records</span>
+                    <span className="feed-chip">{VERTICAL_NAMES[feed.vertical] ?? feed.vertical}</span>
+                    <span className="feed-chip">{COUNTRY_NAMES[feed.country] ?? feed.country}</span>
+                  </div>
+                  <p className="feed-card__desc">{feed.description}</p>
+                  {feed.sample_fields.length > 0 && (
+                    <p className="feed-card__fields">Fields: {feed.sample_fields.join(', ')}</p>
+                  )}
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -165,6 +204,20 @@ export default function DataFeedsPage() {
                 </div>
               </li>
             </ol>
+          </div>
+        </section>
+
+        <section className="faq container" id="faq" aria-labelledby="feeds-faq-title">
+          <h2 className="h2" id="feeds-faq-title">
+            Data feed <em className="serif">questions.</em>
+          </h2>
+          <div className="faq__list">
+            {FEEDS_FAQ.map((item) => (
+              <details className="faq__item" key={item.q}>
+                <summary>{item.q}</summary>
+                <p>{item.a}</p>
+              </details>
+            ))}
           </div>
         </section>
 

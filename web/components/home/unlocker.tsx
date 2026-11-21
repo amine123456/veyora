@@ -6,7 +6,7 @@ export function HomeUnlocker() {
           <div className="unlocker__copy">
             <p className="pill">
               <span className="dot" />
-              Web Unlocker
+              Web Unlocker API
             </p>
             <h2 className="h2" id="unlocker-title" data-split="">
               Send a URL. <em className="serif">Get the page back.</em>

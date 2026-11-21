@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { LegacyScripts } from '@/components/legacy-scripts';
 import { HomeIcons } from '@/components/home/icons';
+import { ORGANIZATION, UNLOCKER_PRODUCT, breadcrumbs, shareImage } from '@/components/seo/schema';
+
+const SHARE = shareImage('og-web-unlocker.png', 'Veyora Web Unlocker API');
+const jsonLd = { '@context': 'https://schema.org', '@graph': [ORGANIZATION, UNLOCKER_PRODUCT, breadcrumbs('Web Unlocker', '/web-unlocker')] };
 
 export const metadata: Metadata = {
   title: 'Web Unlocker API — Veyora | $0.20 per 1,000 Requests',
@@ -13,9 +17,10 @@ export const metadata: Metadata = {
     url: 'https://veyora.pro/web-unlocker',
     siteName: 'Veyora',
     type: 'website',
+    images: SHARE.openGraph.images,
   },
   twitter: {
-    card: 'summary',
+    ...SHARE.twitter,
     title: 'Web Unlocker API — Veyora',
     description: 'Send a URL, get the page back. Residential IP rotation, automatic retries. $0.20/1k requests.',
   },
@@ -24,6 +29,7 @@ export const metadata: Metadata = {
 export default function WebUnlockerPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <HomeIcons />
       <a className="skip" href="#main">
         Skip to content

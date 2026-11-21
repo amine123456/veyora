@@ -54,7 +54,7 @@ export default function DocsPage() {
             </a>{' '}
             <ul className="nav__links nav__links--r">
               <li>
-                <a href="/#compare">Network</a>
+                <a href="/residential-proxies">Network</a>
               </li>
               <li>
                 <a href="/docs">Docs</a>
@@ -91,7 +91,7 @@ export default function DocsPage() {
             <a href="/#pricing">Pricing</a>
           </li>
           <li>
-            <a href="/#compare">Network</a>
+            <a href="/residential-proxies">Network</a>
           </li>
           <li>
             <a href="/docs">Docs</a>
@@ -681,7 +681,7 @@ export default function DocsPage() {
                     <a href="/docs">Documentation</a>
                   </li>
                   <li>
-                    <a href="/#compare">How the network works</a>
+                    <a href="/residential-proxies">How the network works</a>
                   </li>
                   <li>
                     <a href="/support">Frequently asked questions</a>

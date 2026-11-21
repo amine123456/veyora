@@ -5,7 +5,7 @@ export function HomeDataFeeds() {
         <div className="dfeed__head">
           <p className="pill">
             <span className="dot" />
-            Data Marketplace
+            Managed data feeds
           </p>
           <h2 className="h2" id="dfeed-title" data-split="">
             Ready data,{' '}

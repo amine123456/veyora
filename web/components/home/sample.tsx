@@ -14,14 +14,14 @@ export function HomeSample() {
       <header className="head head--center">
         <p className="pill">
           <span className="dot" />
-          Real rows, not mock-ups
+          Free data samples
         </p>
         <h2 className="h2" id="sample-title" data-split="">
           See the data{' '}
           <em className="serif">before you pay.</em>
         </h2>
         <p className="sub sub--ink">
-          These rows come straight from our live feeds. Pick a source to preview its fields,
+          These car listing and web traffic records come straight from our live data feeds. Pick a source to preview its fields,
           then download the sample and load it into your own tools.
         </p>
       </header>

@@ -5,7 +5,7 @@ export function HomeHow() {
         <header className="head head--center">
           <p className="pill">
             <span className="dot" />
-            How it works
+            How Veyora works
           </p>
           <h2 className="h2" id="how-title" data-split="">
             From sign-up{' '}

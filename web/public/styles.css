@@ -937,6 +937,7 @@ svg { display: block; }
 .faq__item[open] summary::after { transform: translateY(3px) rotate(-135deg); }
 .faq__item summary:hover { color: #3D3D3A; }
 .faq__item p { padding: 0 40px 26px 0; color: var(--muted); font-size: 16px; line-height: 1.65; }
+.faq__eyebrow { display: flex; justify-content: center; margin-bottom: 20px; }
 .faq__more { margin-top: 28px; text-align: center; color: var(--muted); font-size: 15px; }
 .faq__more a { color: var(--ink); font-weight: 500; text-underline-offset: 3px; }
 

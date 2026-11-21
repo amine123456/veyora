@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { LegacyScripts } from '@/components/legacy-scripts';
 import { HomeIcons } from '@/components/home/icons';
+import { ORGANIZATION, PROXIES_PRODUCT, breadcrumbs, shareImage } from '@/components/seo/schema';
+
+const SHARE = shareImage('og-residential-proxies.png', 'Veyora residential proxies');
+const jsonLd = { '@context': 'https://schema.org', '@graph': [ORGANIZATION, PROXIES_PRODUCT, breadcrumbs('Residential Proxies', '/residential-proxies')] };
 
 export const metadata: Metadata = {
   title: 'Residential Proxies — Veyora | 5M IPs in 195 Countries',
@@ -13,9 +17,10 @@ export const metadata: Metadata = {
     url: 'https://veyora.pro/residential-proxies',
     siteName: 'Veyora',
     type: 'website',
+    images: SHARE.openGraph.images,
   },
   twitter: {
-    card: 'summary',
+    ...SHARE.twitter,
     title: 'Residential Proxies — Veyora',
     description: '5M residential IPs in 195 countries. HTTP, HTTPS & SOCKS5. Sticky or rotating. From $2/GB.',
   },
@@ -24,6 +29,7 @@ export const metadata: Metadata = {
 export default function ResidentialProxiesPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <HomeIcons />
       <a className="skip" href="#main">
         Skip to content

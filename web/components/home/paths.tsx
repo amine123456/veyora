@@ -52,7 +52,7 @@ export function HomePaths() {
       <header className="head head--center">
         <p className="pill">
           <span className="dot" />
-          Three ways in
+          Data feeds · Web Unlocker API · Proxies
         </p>
         <h2 className="h2" id="paths-title" data-split="">
           Choose how much of the work{' '}

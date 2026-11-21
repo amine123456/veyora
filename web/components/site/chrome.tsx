@@ -32,7 +32,7 @@ export function SiteHeader() {
             </a>{' '}
             <ul className="nav__links nav__links--r">
               <li>
-                <a href="/#compare">Network</a>
+                <a href="/residential-proxies">Network</a>
               </li>
               <li>
                 <a href="/support">Support</a>
@@ -69,7 +69,7 @@ export function SiteHeader() {
             <a href="/#pricing">Pricing</a>
           </li>
           <li>
-            <a href="/#compare">Network</a>
+            <a href="/residential-proxies">Network</a>
           </li>
           <li>
             <a href="/support">Support</a>
@@ -137,7 +137,7 @@ export function SiteFooter() {
                     <a href="/#how">Setup guide</a>
                   </li>
                   <li>
-                    <a href="/#compare">How the network works</a>
+                    <a href="/residential-proxies">How the network works</a>
                   </li>
                   <li>
                     <a href="/support">Frequently asked questions</a>
