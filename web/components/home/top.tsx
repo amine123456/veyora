@@ -2,7 +2,7 @@ export function HomeTop() {
   return (
     <>
       <section className="panel hero" id="top" aria-labelledby="hero-title">
-        <div id="products" className="anchor" /> <svg className="hero__lines" id="heroLines" aria-hidden="true" />{' '}
+        <svg className="hero__lines" id="heroLines" aria-hidden="true" />{' '}
         <span className="tile tile--orange t1" aria-hidden="true">
           <svg>
             <use href="#i-sun" />
@@ -47,25 +47,25 @@ export function HomeTop() {
         </span>{' '}
         <div className="hero__copy">
           <p className="chip">
-            <span className="dot" />Data Feeds · Web Unlocker · Proxies
+            <span className="dot" />Data Feeds · Web Unlocker · Residential Proxies
           </p>
           <h1 className="h1" id="hero-title" data-split="">
-            The data platform that{' '}
+            Get the web data.{' '}
             <br className="br-d" />
             <span className="y">
-              <em className="serif">powers decisions.</em>
+              <em className="serif">Skip the scraping.</em>
             </span>
           </h1>
           <p className="sub">
-            Structured data feeds from hard-to-scrape sites, delivered daily to your pipeline.
-            A Web Unlocker API and 5 million residential IPs when you need to collect it yourself.
+            Ready-made datasets from sites that block scrapers, delivered to your pipeline every
+            morning. Need something custom? Use our Web Unlocker API or 5 million residential IPs.
           </p>
           <div className="cta-row">
             <a className="btn btn--yellow btn--lg" href="/data-feeds">
               Browse data feeds
             </a>{' '}
-            <a className="btn btn--ghost-dark btn--lg" href="#pricing">
-              View pricing
+            <a className="btn btn--ghost-dark btn--lg" href="/signup">
+              Get 5,000 free requests
             </a>
           </div>
           <p className="hero__pill">
@@ -102,6 +102,9 @@ export function HomeTop() {
                 <span className="pipe__step">Clean</span>
                 <span className="pipe__arrow">→</span>
                 <span className="pipe__step">Deliver</span>
+                <span className="pipe__packets">
+                  <i /><i /><i />
+                </span>
               </div>
             </div>
             <div className="pipe__col pipe__output">

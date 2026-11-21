@@ -10,16 +10,16 @@ export function HomeHeader() {
           <nav className="nav__center" aria-label="Primary">
             <ul className="nav__links nav__links--l">
               <li>
-                <a href="#products">Products</a>
+                <a href="/data-feeds">Data Feeds</a>
               </li>
               <li>
-                <a href="#pricing">Pricing</a>
+                <a href="/web-unlocker">Web Unlocker</a>
               </li>
               <li>
-                <a href="/docs">Documentation</a>
+                <a href="/residential-proxies">Proxies</a>
               </li>
             </ul>{' '}
-            <a className="brand" href="#top" aria-label="Veyora, back to top">
+            <a className="brand" href="/" aria-label="Veyora home">
               <svg className="brand__mark" aria-hidden="true">
                 <use href="#i-logo" />
               </svg>
@@ -27,10 +27,10 @@ export function HomeHeader() {
             </a>{' '}
             <ul className="nav__links nav__links--r">
               <li>
-                <a href="/data-feeds">Data Feeds</a>
+                <a href="/#pricing">Pricing</a>
               </li>
               <li>
-                <a href="/about">About</a>
+                <a href="/docs">Docs</a>
               </li>
               <li>
                 <a href="/support">Support</a>
@@ -58,7 +58,7 @@ export function HomeHeader() {
           </div>
         </div>
         <nav className="navpill" id="navPill" aria-label="Primary" inert>
-          <a className="brand" href="#top" aria-label="Veyora, back to top">
+          <a className="brand" href="/" aria-label="Veyora home">
             <svg className="brand__mark" aria-hidden="true">
               <use href="#i-logo" />
             </svg>
@@ -66,16 +66,19 @@ export function HomeHeader() {
           </a>{' '}
           <ul className="navpill__links">
             <li>
-              <a href="#products">Products</a>
+              <a href="/data-feeds">Data Feeds</a>
             </li>
             <li>
-              <a href="#pricing">Pricing</a>
+              <a href="/web-unlocker">Unlocker</a>
+            </li>
+            <li>
+              <a href="/residential-proxies">Proxies</a>
+            </li>
+            <li>
+              <a href="/#pricing">Pricing</a>
             </li>
             <li>
               <a href="/docs">Docs</a>
-            </li>
-            <li>
-              <a href="/data-feeds">Data Feeds</a>
             </li>
           </ul>{' '}
           <a className="navpill__login" href="/login">
@@ -88,16 +91,19 @@ export function HomeHeader() {
         <div className="sheet" id="sheet" hidden>
           <ul>
             <li>
-              <a href="#products">Products</a>
+              <a href="/data-feeds">Data Feeds</a>
             </li>
             <li>
-              <a href="#pricing">Pricing</a>
+              <a href="/web-unlocker">Web Unlocker</a>
+            </li>
+            <li>
+              <a href="/residential-proxies">Residential Proxies</a>
+            </li>
+            <li>
+              <a href="/#pricing">Pricing</a>
             </li>
             <li>
               <a href="/docs">Documentation</a>
-            </li>
-            <li>
-              <a href="/data-feeds">Data Feeds</a>
             </li>
             <li>
               <a href="/about">About</a>

@@ -8,24 +8,28 @@ import { HomeUnlocker } from '@/components/home/unlocker';
 import { HomeDataFeeds } from '@/components/home/data-feeds';
 import { HomePricing } from '@/components/home/pricing';
 import { HomeCta } from '@/components/home/cta';
+import { HomePaths } from '@/components/home/paths';
+import { HomeSample } from '@/components/home/sample';
+import { HomeFaq, HOME_FAQ } from '@/components/home/faq';
+
 export const metadata: Metadata = {
-  title: 'Veyora — Data Feeds, Market Intelligence & Web Data Platform',
+  title: 'Data Feeds from Hard-to-Scrape Sites & Web Unlocker | Veyora',
   description:
-    'Subscribe to structured data feeds from hard-to-scrape sites. Cars, real estate, jobs, reviews — delivered daily via SFTP, S3, Snowflake, or API. Plus a Web Unlocker API and 5M residential proxies for DIY collection.',
+    'Daily datasets from mobile.de, La Centrale and other sites that block scrapers, delivered to SFTP, S3 or Snowflake. Plus a $0.20/1K Web Unlocker API and 5M residential IPs.',
   alternates: { canonical: 'https://veyora.pro/' },
   openGraph: {
-    title: 'Veyora — Data Feeds, Market Intelligence & Web Data Platform',
+    title: 'Veyora: get the web data, skip the scraping',
     description:
-      'Never think about getting your data again. Subscribe to a feed, set your delivery, and receive structured datasets daily from hard-to-scrape sites.',
+      'Subscribe to a data feed and receive structured datasets every morning, call one API to unlock any page, or run your own scrapers on 5 million residential IPs.',
     url: 'https://veyora.pro/',
     siteName: 'Veyora',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Veyora — Data Feeds & Market Intelligence Platform',
+    title: 'Veyora: get the web data, skip the scraping',
     description:
-      'Structured data feeds from hard-to-scrape sites. Cars, real estate, jobs — delivered daily. Subscribe to data, not to scrapers.',
+      'Structured data feeds from hard-to-scrape sites, a Web Unlocker API and residential proxies. Free samples before you pay.',
   },
 };
 
@@ -103,59 +107,16 @@ const jsonLd = {
     },
     {
       '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: 'How does billing work?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Plans are monthly subscriptions that load your account with a traffic allowance (8 GB or 40 GB). You can also buy one-off top-ups from $10 in the dashboard. Both methods credit the same prepaid balance.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Does my traffic expire?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'No. Unused traffic rolls over indefinitely. Your balance stays until you use it, whether it came from a plan or a top-up.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'What payment methods do you accept?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Visa, Mastercard, and American Express via Stripe, or USDT on BNB Smart Chain (BEP-20). All payments are prepaid.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Can I cancel or change plans anytime?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Yes. Upgrade, downgrade, or cancel from the dashboard. No contracts, no lock-in. Any remaining balance stays in your account.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'What happens after I create an account?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'You get $1.00 free credit immediately — enough for 5,000 Web Unlocker requests. No card needed. Your API credentials and proxy gateway details appear in the dashboard.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'How do I get support?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Email support is included on every plan. Pro and Enterprise customers get priority response. We typically respond within a few hours during business days.',
-          },
-        },
-      ],
+      mainEntity: HOME_FAQ.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a },
+      })),
     },
   ],
 };
+
+const HOME_SCRIPTS = ['/app.js', '/home.js'];
 
 export default function HomePage() {
   return (
@@ -168,13 +129,16 @@ export default function HomePage() {
       <HomeHeader />
       <main id="main">
         <HomeTop />
+        <HomePaths />
+        <HomeSample />
         <HomeDataFeeds />
         <HomeHow />
         <HomeUnlocker />
         <HomePricing />
+        <HomeFaq />
         <HomeCta />
       </main>
-      <LegacyScripts sources={['/app.js']} />
+      <LegacyScripts sources={HOME_SCRIPTS} />
     </>
   );
 }

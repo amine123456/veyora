@@ -8,7 +8,8 @@ export function HomePricing() {
               Pay for traffic, <em className="serif">not for promises.</em>
             </h2>
             <p className="sub">
-              Simple per-GB plans on residential traffic. Upgrade, downgrade or cancel whenever you want.
+              Per-GB plans for proxies, pay-per-request for the Web Unlocker, and a monthly price per data feed.
+              Upgrade, downgrade or cancel whenever you want.
             </p>
             <div className="seg" id="billing" role="group" aria-label="Billing period">
               <i className="seg__thumb" aria-hidden="true" />{' '}
@@ -276,17 +277,45 @@ export function HomePricing() {
             </ul>
           </article>
         </div>
-        <aside className="pnote container" aria-labelledby="pnote-title">
-          <h3 id="pnote-title">A note on how pricing is published</h3>
-          <p>
-            These three plans are copied from the public marketing page: Starter <b>$29/mo · 8 GB · about $3.63/GB</b>,
-            Pro <b>$99/mo · 40 GB · about $2.48/GB</b>, Enterprise custom. Annual billing is offered as <b>Save 20%</b>{' '}
-            (Starter $23/mo, Pro $79/mo). The live product dashboard also sells <b>prepaid top-ups</b> via card or
-            USDT: $10, $25, $50, $100 (+5% credit), $500 (+10% credit). Signup copy says residential proxies from{' '}
-            <b>$2 per GB</b>. See our <a href="/refund-policy">refund policy</a> for details. Which of those two models
-            is the source of truth is not resolved here — both are shown as they appear in source.
-          </p>
-        </aside>
+        <p className="plans__label container">Residential proxy plans above. Prepaid top-ups from $10 also available in the dashboard.</p>
+        <div className="pmore container">
+          <article className="pmore__card" data-reveal="">
+            <div className="pmore__head">
+              <p className="pill pill--sm">
+                <span className="dot" />
+                Web Unlocker
+              </p>
+              <p className="pmore__price">
+                <b>$0.20</b> per 1,000 requests
+              </p>
+            </div>
+            <p className="pmore__text">
+              Pay as you go from your prepaid wallet. Every account starts with <b>$1.00 free credit</b>, enough
+              for about 5,000 requests.
+            </p>
+            <a className="btn btn--ink" href="/signup">
+              Get a free API key
+            </a>
+          </article>
+          <article className="pmore__card pmore__card--dark" data-reveal="" style={{ ['--d' as string]: '80ms' }}>
+            <div className="pmore__head">
+              <p className="pill pill--sm">
+                <span className="dot" />
+                Data Feeds
+              </p>
+              <p className="pmore__price">
+                <b>From €29</b> per feed / month
+              </p>
+            </div>
+            <p className="pmore__text">
+              Each feed is its own monthly subscription, priced by site and data volume. Download a free sample
+              before you subscribe.
+            </p>
+            <a className="btn btn--yellow" href="/data-feeds">
+              See feed prices
+            </a>
+          </article>
+        </div>
       </section>
     </>
   );

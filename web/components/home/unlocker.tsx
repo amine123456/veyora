@@ -82,7 +82,7 @@ export function HomeUnlocker() {
             <pre className="ucode__pre" tabIndex={0} aria-label="Example Web Unlocker request">
               <code>
                 <span className="k">{'curl'}</span>
-                {' -X POST https://YOUR_HOST/v1/unlock \\\n  -H '}
+                {' -X POST https://veyora.pro/v1/unlock \\\n  -H '}
                 <span className="s">{'"Authorization: Bearer YOUR_API_KEY"'}</span>
                 {' \\\n  -H '}
                 <span className="s">{'"Content-Type: application/json"'}</span>
