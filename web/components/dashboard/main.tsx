@@ -322,7 +322,7 @@ export function DashboardMain() {
             <div>
               <h2 id="sandbox-title">Sandbox</h2>
               <p>
-                Try the Web Unlocker for free, right here. Fetch any public page with your daily test allowance, or
+                Try the Web Unlocker for free, right here. Fetch a public page with your daily test allowance, or
                 run a simulated scenario to see exactly what your code will receive. Nothing here touches your balance.
               </p>
             </div>

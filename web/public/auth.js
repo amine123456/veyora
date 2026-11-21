@@ -95,7 +95,7 @@ if (form) {
     wrap.innerHTML = `
       <header class="head">
         <h1 id="auth-title">Check your email</h1>
-        <p>We sent a verification link to <strong>${maskedEmail}</strong>. Click it to activate your account.</p>
+        <p>We sent a verification link to <strong>${esc(maskedEmail)}</strong>. Click it to activate your account.</p>
       </header>
       <p style="margin:16px 0 0;font-size:14px;color:#666">Didn't get it? Check your spam folder, or click below to resend.</p>
       <button class="btn" type="button" id="resend-btn" style="margin-top:16px">Resend verification email</button>
@@ -745,8 +745,9 @@ if (dash) {
                 : e.status >= 400 ? `<span class="badge badge--err">${e.status}</span>`
                 : `<span class="badge badge--warn">${e.status}</span>`)
               : '<span class="badge badge--muted">—</span>';
-            const domain = e.domain ? (e.domain.length > 28 ? e.domain.slice(0, 26) + '…' : e.domain) : '—';
-            tr.innerHTML = `<td class="mono">${timeStr}</td><td><span class="badge badge--muted">${e.kind}</span></td><td title="${e.domain || ''}">${domain}</td><td>${statusBadge}</td><td>${e.outcome || '—'}</td><td class="right mono">${traffic(e.bytes)}</td><td class="right mono">${e.billed ? usd(e.costMicros) : '—'}</td><td>${e.billed ? '<span class="badge badge--ok">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>`;
+            const domain = e.domain ? esc(e.domain.length > 28 ? e.domain.slice(0, 26) + '…' : e.domain) : '—';
+            const domainTitle = esc(e.domain || '');
+            tr.innerHTML = `<td class="mono">${timeStr}</td><td><span class="badge badge--muted">${esc(e.kind)}</span></td><td title="${domainTitle}">${domain}</td><td>${statusBadge}</td><td>${esc(e.outcome || '—')}</td><td class="right mono">${traffic(e.bytes)}</td><td class="right mono">${e.billed ? usd(e.costMicros) : '—'}</td><td>${e.billed ? '<span class="badge badge--ok">Yes</span>' : '<span class="badge badge--muted">No</span>'}</td>`;
             tbody.append(tr);
           });
           table.append(tbody);
@@ -782,7 +783,7 @@ if (dash) {
         payments.forEach(p => {
           const tr = document.createElement('tr');
           const date = new Date(p.processedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-          tr.innerHTML = `<td class="mono">${date}</td><td>${p.packageId || p.eventId || '—'}</td><td class="right mono">${usd(p.micros)}</td>`;
+          tr.innerHTML = `<td class="mono">${date}</td><td>${esc(p.packageId || p.eventId || '—')}</td><td class="right mono">${usd(p.micros)}</td>`;
           tbody.append(tr);
         });
         table.append(tbody);
@@ -876,7 +877,7 @@ function renderSubscriptions(subs) {
     return;
   }
   if (noFeeds) noFeeds.hidden = true;
-  var html = '<table class="usage-table" style="width:100%"><thead><tr>'
+  var html = '<div class="usage-table-wrap"><table class="usage-table" style="width:100%"><thead><tr>'
     + '<th>Feed</th><th>Status</th><th>Price</th><th>Frequency</th><th>Delivery</th><th>Paid until</th><th>Last delivery</th><th></th>'
     + '</tr></thead><tbody>';
   subs.forEach(function (s) {
@@ -918,7 +919,7 @@ function renderSubscriptions(subs) {
       + '<td>' + actions + '</td>'
       + '</tr>';
   });
-  html += '</tbody></table>';
+  html += '</tbody></table></div>';
   feedsSubs.innerHTML = html;
 
   feedsSubs.querySelectorAll('[data-configure-delivery]').forEach(function (btn) {

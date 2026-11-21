@@ -8,8 +8,7 @@ export function HomePricing() {
               Pay for traffic, <em className="serif">not for promises.</em>
             </h2>
             <p className="sub">
-              Per-GB plans for proxies, pay-per-request for the Web Unlocker, and a monthly price per data feed.
-              Upgrade, downgrade or cancel whenever you want.
+              Simple per-GB plans on residential traffic. Upgrade, downgrade or cancel whenever you want.
             </p>
             <div className="seg" id="billing" role="group" aria-label="Billing period">
               <i className="seg__thumb" aria-hidden="true" />{' '}
@@ -63,7 +62,8 @@ export function HomePricing() {
             </p>{' '}
             <a className="btn btn--ink btn--block" href="/signup">
               Get Starter
-            </a>{' '}
+            </a>
+            <p className="plan__note">No credit card required to start</p>
             <ul className="checks">
               <li>
                 <i>
@@ -104,6 +104,14 @@ export function HomePricing() {
                   </svg>
                 </i>
                 Country targeting
+              </li>
+              <li>
+                <i>
+                  <svg>
+                    <use href="#i-check" />
+                  </svg>
+                </i>
+                Traffic never expires
               </li>
               <li>
                 <i>
@@ -160,7 +168,8 @@ export function HomePricing() {
             </p>{' '}
             <a className="btn btn--ink btn--block" href="/signup">
               Get Pro
-            </a>{' '}
+            </a>
+            <p className="plan__note">No credit card required to start</p>
             <ul className="checks">
               <li>
                 <i>
@@ -192,7 +201,15 @@ export function HomePricing() {
                     <use href="#i-check" />
                   </svg>
                 </i>
-                Priority chat support, 24/7
+                Priority email support
+              </li>
+              <li>
+                <i>
+                  <svg>
+                    <use href="#i-check" />
+                  </svg>
+                </i>
+                Traffic never expires
               </li>
               <li>
                 <i>
@@ -277,45 +294,64 @@ export function HomePricing() {
             </ul>
           </article>
         </div>
-        <p className="plans__label container">Residential proxy plans above. Prepaid top-ups from $10 also available in the dashboard.</p>
-        <div className="pmore container">
-          <article className="pmore__card" data-reveal="">
-            <div className="pmore__head">
-              <p className="pill pill--sm">
-                <span className="dot" />
-                Web Unlocker
-              </p>
-              <p className="pmore__price">
-                <b>$0.20</b> per 1,000 requests
-              </p>
-            </div>
-            <p className="pmore__text">
-              Pay as you go from your prepaid wallet. Every account starts with <b>$1.00 free credit</b>, enough
-              for about 5,000 requests.
-            </p>
-            <a className="btn btn--ink" href="/signup">
-              Get a free API key
-            </a>
-          </article>
-          <article className="pmore__card pmore__card--dark" data-reveal="" style={{ ['--d' as string]: '80ms' }}>
-            <div className="pmore__head">
-              <p className="pill pill--sm">
-                <span className="dot" />
-                Data Feeds
-              </p>
-              <p className="pmore__price">
-                <b>From €100</b> per feed / month
-              </p>
-            </div>
-            <p className="pmore__text">
-              Each feed is its own monthly subscription, priced by site and data volume. Download a free sample
-              before you subscribe.
-            </p>
-            <a className="btn btn--yellow" href="/data-feeds">
-              See feed prices
-            </a>
-          </article>
-        </div>
+        <aside className="pnote container" aria-labelledby="pnote-title">
+          <h3 id="pnote-title">How billing works</h3>
+          <p>
+            Pick a plan and your balance is loaded with traffic. Use it for residential proxies (billed per GB) or
+            Web Unlocker requests ($0.20 per 1,000). Traffic never expires — it rolls over until used.
+            Need more? Top up anytime from the dashboard with card or USDT, starting at $10.
+            See our <a href="/refund-policy">refund policy</a> for details.
+          </p>
+        </aside>
+      </section>
+      <section className="faq container" id="faq" aria-labelledby="faq-title">
+        <h2 className="h2" id="faq-title">Frequently asked questions</h2>
+        <dl className="faq__list">
+          <div className="faq__item" data-reveal="">
+            <dt>How does billing work?</dt>
+            <dd>
+              Plans are monthly subscriptions that load your account with a traffic allowance (8 GB or 40 GB).
+              You can also buy one-off top-ups from $10 in the dashboard. Both methods credit the same prepaid balance.
+              You only pay for traffic you use — residential proxies per GB, Web Unlocker per request.
+            </dd>
+          </div>
+          <div className="faq__item" data-reveal="">
+            <dt>Does my traffic expire?</dt>
+            <dd>
+              No. Unused traffic rolls over indefinitely. Your balance stays until you use it, whether
+              it came from a plan or a top-up.
+            </dd>
+          </div>
+          <div className="faq__item" data-reveal="">
+            <dt>What happens after I create an account?</dt>
+            <dd>
+              You get $1.00 free credit immediately — enough for 5,000 Web Unlocker requests. No card needed.
+              Your API credentials and proxy gateway details appear in the dashboard. Add a payment method when you are ready
+              to buy more traffic.
+            </dd>
+          </div>
+          <div className="faq__item" data-reveal="">
+            <dt>Can I cancel or change plans anytime?</dt>
+            <dd>
+              Yes. Upgrade, downgrade, or cancel from the dashboard. No contracts, no lock-in. Any remaining balance stays in
+              your account.
+            </dd>
+          </div>
+          <div className="faq__item" data-reveal="">
+            <dt>What payment methods do you accept?</dt>
+            <dd>
+              Visa, Mastercard, and American Express via Stripe, or USDT on BNB Smart Chain (BEP-20).
+              All payments are prepaid.
+            </dd>
+          </div>
+          <div className="faq__item" data-reveal="">
+            <dt>How do I get support?</dt>
+            <dd>
+              Email support is included on every plan. Pro and Enterprise customers get priority response.
+              Send a request from the <a href="/support">support page</a> or email directly — we typically respond within a few hours during business days.
+            </dd>
+          </div>
+        </dl>
       </section>
     </>
   );

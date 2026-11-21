@@ -352,6 +352,9 @@ code, pre { font-family: var(--font-mono); }
   .keyform .btn, .keyform .field { width: 100%; }
   .packs { grid-template-columns: repeat(2, 1fr); }
   .hero-card__top .status { display: none; }
+  .usage-table td:last-child { white-space: normal; }
+  .usage-table .btn--sm { font-size: 12px; padding: 0 10px; min-height: 32px; }
+  .delivery-form { max-width: 100%; }
 }
 @media (pointer: coarse) { .copy, .btn--sm { min-height: 44px; } }
 /* sandbox playground */

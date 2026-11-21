@@ -4,58 +4,45 @@ export function HomeCompare() {
       <section className="compare container" id="compare" aria-labelledby="compare-title">
         <p className="pill">
           <span className="dot" />
-          Compare
+          What you get
         </p>
         <h2 className="h2" id="compare-title" data-split="">
-          Built different from <span className="grey">the usual proxy pitch.</span>
+          Everything included, <span className="grey">no hidden extras.</span>
         </h2>
         <p className="sub sub--ink sub--left">
-          A side-by-side against the patterns teams usually hit with generic residential providers. Columns marked{' '}
-          <em className="tagv tagv--sm">example</em> are illustrative positioning, not a named competitor audit.
+          Every plan includes the full feature set. No paid add-ons for country targeting, no extra fees for SOCKS5,
+          no minimum commitments.
         </p>
-        <div className="tablewrap" tabIndex={0} role="region" aria-label="Comparison table">
+        <div className="tablewrap" tabIndex={0} role="region" aria-label="Feature list">
           <table className="cmp">
             <thead>
               <tr>
-                <th scope="col">Capability</th>
-                <th scope="col">Typical residential</th>
-                <th scope="col">Datacenter</th>
+                <th scope="col">Feature</th>
+                <th scope="col">Starter</th>
+                <th scope="col">Pro</th>
                 <th scope="col" className="is-us">
-                  Veyora
+                  Enterprise
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <th scope="row">Looks like a household ASN</th>
+                <th scope="row">Residential IPs</th>
                 <td className="yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Usually
+                  5M+ pool
                 </td>
-                <td>Rarely</td>
-                <td className="is-us yes">
-                  <i>
-                    <svg>
-                      <use href="#i-check" />
-                    </svg>
-                  </i>
-                  Yes
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">HTTP + SOCKS5 on one gate</th>
-                <td>Often split</td>
                 <td className="yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Common
+                  5M+ pool
                 </td>
                 <td className="is-us yes">
                   <i>
@@ -63,76 +50,140 @@ export function HomeCompare() {
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Both
+                  Private pools
                 </td>
               </tr>
               <tr>
-                <th scope="row">Published per-GB marketing tiers</th>
-                <td>Opaque pools</td>
+                <th scope="row">Countries</th>
                 <td className="yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Sometimes
+                  195
                 </td>
-                <td className="is-us yes">
-                  <i>
-                    <svg>
-                      <use href="#i-check" />
-                    </svg>
-                  </i>
-                  $29 / $99
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">Sticky + rotating sessions</th>
                 <td className="yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Varies
+                  195
                 </td>
-                <td>Sticky only</td>
                 <td className="is-us yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Both
+                  195
                 </td>
               </tr>
               <tr>
-                <th scope="row">Country targeting</th>
+                <th scope="row">Protocols</th>
                 <td className="yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Paid add-on
+                  HTTP + SOCKS5
                 </td>
-                <td>Limited</td>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  HTTP + SOCKS5
+                </td>
                 <td className="is-us yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  Every plan
+                  HTTP + SOCKS5
                 </td>
               </tr>
               <tr>
-                <th scope="row">
-                  Payment methods <em className="tagv tagv--sm">example framing</em>
-                </th>
-                <td>Card only</td>
-                <td>Card only</td>
+                <th scope="row">Sticky sessions</th>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  10 min
+                </td>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  10 min
+                </td>
                 <td className="is-us yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Custom
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Web Unlocker API</th>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Included
+                </td>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Included
+                </td>
+                <td className="is-us yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Included
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Concurrent sessions</th>
+                <td>Unlimited</td>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Unlimited
+                </td>
+                <td className="is-us yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Unlimited
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Payment methods</th>
+                <td className="yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
@@ -140,14 +191,46 @@ export function HomeCompare() {
                   </i>
                   Card &amp; USDT
                 </td>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Card &amp; USDT
+                </td>
+                <td className="is-us yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Invoicing
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Support</th>
+                <td>Email</td>
+                <td className="yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Priority
+                </td>
+                <td className="is-us yes">
+                  <i>
+                    <svg>
+                      <use href="#i-check" />
+                    </svg>
+                  </i>
+                  Dedicated
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p className="foot">
-          Pricing columns use the public marketing tiers. Competitor behaviours are generalised{' '}
-          <em className="tagv tagv--sm">example</em> patterns — not claims about a specific vendor.
-        </p>
       </section>
     </>
   );

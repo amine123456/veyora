@@ -91,6 +91,7 @@ export async function createSubscriptionCheckout(config, { customerId, priceId, 
     'client_reference_id': subscriptionId,
     'subscription_data[metadata][subscription_id]': subscriptionId,
     'metadata[subscription_id]': subscriptionId,
+    'metadata[price_id]': priceId,
   });
   const session = await stripeRequest(config, 'POST', '/v1/checkout/sessions', params, fetchImpl);
   if (!validStripeIdentifier(session?.id, 'cs_') || typeof session?.url !== 'string'
