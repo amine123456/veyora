@@ -99,7 +99,7 @@ const jsonLd = {
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
-        price: '49',
+        price: '100',
         url: 'https://veyora.pro/data-feeds',
         description: 'Monthly subscription for managed data delivery — structured datasets via SFTP',
         availability: 'https://schema.org/InStock',

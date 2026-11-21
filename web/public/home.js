@@ -85,18 +85,25 @@ if (root) {
     fieldList.textContent = `All fields: ${d.fields.map(label).join(' · ')}`;
   }
 
+  // The server exposes samples through the feeds API; the static copy covers local dev.
+  async function load(id) {
+    for (const url of [`/api/feeds/${id}/sample`, `/samples/${id}.json`]) {
+      try {
+        const res = await fetch(url);
+        if (res.ok && (res.headers.get('content-type') || '').includes('json')) return { url, data: await res.json() };
+      } catch {}
+    }
+    throw new Error('sample unavailable');
+  }
+
   async function show(id) {
     current = id;
-    download.href = `/samples/${id}.json`;
     download.setAttribute('download', `veyora-${id}-sample.json`);
     root.setAttribute('aria-busy', 'true');
     try {
-      if (!cache.has(id)) {
-        const res = await fetch(`/samples/${id}.json`);
-        if (!res.ok) throw new Error(String(res.status));
-        cache.set(id, await res.json());
-      }
-      if (current === id) render(cache.get(id));
+      if (!cache.has(id)) cache.set(id, await load(id));
+      download.href = cache.get(id).url;
+      if (current === id) render(cache.get(id).data);
     } catch {
       if (current === id) table.replaceChildren(Object.assign(document.createElement('p'), { className: 'sample__empty', textContent: 'This sample could not be loaded. Download it with the button below.' }));
     } finally {

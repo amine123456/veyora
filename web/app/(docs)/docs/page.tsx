@@ -148,7 +148,7 @@ export default function DocsPage() {
               <h3>Your first request in 30 seconds</h3>
               <pre>
                 {
-                  'curl -x gate.veyora.io:8443 \\\n     -U "your-username:your-password" \\\n     https://httpbin.org/ip'
+                  'curl -x gate.veyora.pro:8443 \\\n     -U "your-username:your-password" \\\n     https://httpbin.org/ip'
                 }
               </pre>
               <p>
@@ -171,7 +171,7 @@ export default function DocsPage() {
                 <tr>
                   <td>Host</td>
                   <td>
-                    <code>gate.veyora.io</code>
+                    <code>gate.veyora.pro</code>
                   </td>
                 </tr>
                 <tr>
@@ -191,36 +191,36 @@ export default function DocsPage() {
               </tbody>
             </table></div>
             <h3>cURL</h3>
-            <pre>{'curl -x gate.veyora.io:8443 \\\n     -U "USER:PASS" \\\n     https://example.com'}</pre>
+            <pre>{'curl -x gate.veyora.pro:8443 \\\n     -U "USER:PASS" \\\n     https://example.com'}</pre>
             <h3>Python (requests)</h3>
             <pre>
               {
-                'import requests\n\nproxies = {\n    "http":  "http://USER:PASS@gate.veyora.io:8443",\n    "https": "http://USER:PASS@gate.veyora.io:8443",\n}\n\nr = requests.get("https://example.com", proxies=proxies)\nprint(r.text)'
+                'import requests\n\nproxies = {\n    "http":  "http://USER:PASS@gate.veyora.pro:8443",\n    "https": "http://USER:PASS@gate.veyora.pro:8443",\n}\n\nr = requests.get("https://example.com", proxies=proxies)\nprint(r.text)'
               }
             </pre>
             <h3>Node.js (undici)</h3>
             <pre>
               {
-                "import { ProxyAgent, fetch } from 'undici';\n\nconst agent = new ProxyAgent('http://USER:PASS@gate.veyora.io:8443');\nconst res = await fetch('https://example.com', { dispatcher: agent });\nconsole.log(await res.text());"
+                "import { ProxyAgent, fetch } from 'undici';\n\nconst agent = new ProxyAgent('http://USER:PASS@gate.veyora.pro:8443');\nconst res = await fetch('https://example.com', { dispatcher: agent });\nconsole.log(await res.text());"
               }
             </pre>
             <h3>Playwright</h3>
             <pre>
               {
-                "const browser = await chromium.launch({\n  proxy: {\n    server: 'http://gate.veyora.io:8443',\n    username: 'USER',\n    password: 'PASS',\n  },\n});"
+                "const browser = await chromium.launch({\n  proxy: {\n    server: 'http://gate.veyora.pro:8443',\n    username: 'USER',\n    password: 'PASS',\n  },\n});"
               }
             </pre>
             <h3>Puppeteer</h3>
             <pre>
               {
-                "const browser = await puppeteer.launch({\n  args: ['--proxy-server=http://gate.veyora.io:8443'],\n});\nconst page = await browser.newPage();\nawait page.authenticate({ username: 'USER', password: 'PASS' });\nawait page.goto('https://example.com');"
+                "const browser = await puppeteer.launch({\n  args: ['--proxy-server=http://gate.veyora.pro:8443'],\n});\nconst page = await browser.newPage();\nawait page.authenticate({ username: 'USER', password: 'PASS' });\nawait page.goto('https://example.com');"
               }
             </pre>
             <h3>Scrapy</h3>
             <pre>
               <span className="cmt">{'# settings.py'}</span>
               {
-                '\nDOWNLOADER_MIDDLEWARES = {\n    "scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware": 1,\n}\nHTTP_PROXY = "http://USER:PASS@gate.veyora.io:8443"'
+                '\nDOWNLOADER_MIDDLEWARES = {\n    "scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware": 1,\n}\nHTTP_PROXY = "http://USER:PASS@gate.veyora.pro:8443"'
               }
             </pre>{' '}
             <h2 id="targeting">Targeting options</h2>
@@ -312,7 +312,7 @@ export default function DocsPage() {
                     <code>POST</code>
                   </td>
                   <td>
-                    <code>https://gate.veyora.io/v1/unlock</code>
+                    <code>https://veyora.pro/v1/unlock</code>
                   </td>
                 </tr>
               </tbody>
@@ -368,25 +368,25 @@ export default function DocsPage() {
             <h3>cURL example</h3>
             <pre>
               {
-                'curl -X POST https://gate.veyora.io/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com"}\''
+                'curl -X POST https://veyora.pro/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com"}\''
               }
             </pre>
             <h3>With country and session</h3>
             <pre>
               {
-                'curl -X POST https://gate.veyora.io/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com", "country": "de", "session": "job1"}\''
+                'curl -X POST https://veyora.pro/v1/unlock \\\n     -H "Authorization: Bearer YOUR_API_KEY" \\\n     -H "Content-Type: application/json" \\\n     -d \'{"url": "https://example.com", "country": "de", "session": "job1"}\''
               }
             </pre>
             <h3>Python</h3>
             <pre>
               {
-                'import requests\n\nr = requests.post(\n    "https://gate.veyora.io/v1/unlock",\n    headers={"Authorization": "Bearer YOUR_API_KEY"},\n    json={"url": "https://example.com", "country": "fr"},\n)\nprint(r.json())'
+                'import requests\n\nr = requests.post(\n    "https://veyora.pro/v1/unlock",\n    headers={"Authorization": "Bearer YOUR_API_KEY"},\n    json={"url": "https://example.com", "country": "fr"},\n)\nprint(r.json())'
               }
             </pre>
             <h3>Node.js</h3>
             <pre>
               {
-                "const res = await fetch('https://gate.veyora.io/v1/unlock', {\n  method: 'POST',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({ url: 'https://example.com' }),\n});\nconst data = await res.json();\nconsole.log(data);"
+                "const res = await fetch('https://veyora.pro/v1/unlock', {\n  method: 'POST',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json',\n  },\n  body: JSON.stringify({ url: 'https://example.com' }),\n});\nconst data = await res.json();\nconsole.log(data);"
               }
             </pre>
             <h3>Response</h3>

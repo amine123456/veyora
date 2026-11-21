@@ -40,7 +40,7 @@ const jsonLd = {
       offers: {
         '@type': 'AggregateOffer',
         priceCurrency: 'EUR',
-        lowPrice: '29',
+        lowPrice: '100',
         highPrice: '499',
         offerCount: '26',
         url: 'https://veyora.pro/data-feeds',
@@ -80,7 +80,7 @@ const jsonLd = {
           name: 'How much do data feeds cost?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Data feed subscriptions start from €29/month depending on the site, data volume, and delivery frequency. Each feed is priced individually. Payment is via Stripe (card) in EUR.',
+            text: 'Data feed subscriptions start from €100/month depending on the site, data volume, and delivery frequency. Each feed is priced individually. Payment is via Stripe (card) in EUR.',
           },
         },
       ],

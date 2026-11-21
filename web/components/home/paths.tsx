@@ -8,7 +8,7 @@ const PATHS = [
     effort: 'We do all of it',
     title: 'Ready datasets, delivered daily.',
     text: 'Pick a site, choose where the files go, and get a fresh, structured snapshot every morning. No scrapers, no proxies, no maintenance.',
-    price: 'From €29',
+    price: 'From €100',
     unit: '/month per feed',
     checks: ['Cars, real estate, jobs and reviews', 'JSON, CSV, Parquet or JSONL', 'SFTP, S3, Snowflake, webhook or API'],
     cta: { label: 'Browse the catalog', href: '/data-feeds' },

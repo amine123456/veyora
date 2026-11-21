@@ -33,7 +33,7 @@ export function HomeAlso() {
                   <dl className="mock__rows">
                     <div>
                       <dt>Host</dt>
-                      <dd className="mono">gate.veyora.io:8080</dd>
+                      <dd className="mono">gate.veyora.pro:8080</dd>
                     </div>
                     <div>
                       <dt>Username</dt>

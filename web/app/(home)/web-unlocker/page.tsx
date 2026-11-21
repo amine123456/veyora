@@ -120,7 +120,7 @@ export default function WebUnlockerPage() {
               <pre className="ucode__pre" tabIndex={0} aria-label="Web Unlocker request example">
                 <code>
                   <span className="k">{'curl'}</span>
-                  {' -X POST https://gate.veyora.io/v1/unlock \\\n  -H '}
+                  {' -X POST https://veyora.pro/v1/unlock \\\n  -H '}
                   <span className="s">{'"Authorization: Bearer YOUR_API_KEY"'}</span>
                   {' \\\n  -H '}
                   <span className="s">{'"Content-Type: application/json"'}</span>

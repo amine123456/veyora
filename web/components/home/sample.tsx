@@ -63,7 +63,7 @@ export function HomeSample() {
           </div>
           <div className="sample__foot">
             <p className="sample__fieldlist" data-sample-fieldlist="" />
-            <a className="btn btn--ink" href="/samples/mobilede.json" download="" data-sample-download="">
+            <a className="btn btn--ink" href="/api/feeds/mobilede/sample" download="" data-sample-download="">
               Download this sample (JSON)
             </a>
           </div>

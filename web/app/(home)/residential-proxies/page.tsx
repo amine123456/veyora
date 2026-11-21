@@ -112,8 +112,8 @@ export default function ResidentialProxiesPage() {
               <div className="faq__item">
                 <dt>Gateway connection</dt>
                 <dd>
-                  Point any HTTP client at <code style={{ background: '#F4F2EC', padding: '2px 7px', borderRadius: '6px', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>gate.veyora.io:8080</code> (HTTP/SOCKS5)
-                  or <code style={{ background: '#F4F2EC', padding: '2px 7px', borderRadius: '6px', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>gate.veyora.io:8443</code> (HTTPS CONNECT).
+                  Point any HTTP client at <code style={{ background: '#F4F2EC', padding: '2px 7px', borderRadius: '6px', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>gate.veyora.pro:8080</code> (HTTP/SOCKS5)
+                  or <code style={{ background: '#F4F2EC', padding: '2px 7px', borderRadius: '6px', fontFamily: 'var(--font-mono)', fontSize: '14px' }}>gate.veyora.pro:8443</code> (HTTPS CONNECT).
                   Authenticate with the username and password from your dashboard.
                 </dd>
               </div>

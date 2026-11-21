@@ -304,7 +304,7 @@ export function HomePricing() {
                 Data Feeds
               </p>
               <p className="pmore__price">
-                <b>From €29</b> per feed / month
+                <b>From €100</b> per feed / month
               </p>
             </div>
             <p className="pmore__text">
