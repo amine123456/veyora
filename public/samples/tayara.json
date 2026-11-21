@@ -1,0 +1,141 @@
+{
+  "feed_id": "tayara",
+  "total_records": 6914,
+  "file_size_mb": 8.2,
+  "sample_count": 5,
+  "fields": [
+    "id",
+    "title",
+    "description",
+    "price_tnd",
+    "images",
+    "governorate",
+    "delegation",
+    "publisher_name",
+    "publisher_is_shop",
+    "published_on",
+    "sub_category",
+    "url",
+    "crawled_at"
+  ],
+  "field_count": 13,
+  "deep_field_count": 13,
+  "records": [
+    {
+      "id": "6a0de377453ae0812f082152",
+      "title": "Toyota CHR ",
+      "description": "Toyota CHR année 2020 très bien entretenue avec carnet d'entretien. km 68000 km.\nPas d'échange svp\nTel 94164576",
+      "price_tnd": 70000,
+      "images": [
+        "https://cdn.tayara.tn/a7/a7a16138-4fd7-41c2-9049-318f7a84e013",
+        "https://cdn.tayara.tn/48/485ff235-5d52-40e1-a217-67336e97688b",
+        "https://cdn.tayara.tn/3f/3fc12911-d15b-4507-98a4-7736349c9201",
+        "https://cdn.tayara.tn/7e/7effe954-c483-4ffd-92ac-3f88c9e896df",
+        "https://cdn.tayara.tn/84/8403c84f-91da-4bc8-bc60-6eaf6c8687bd",
+        "https://cdn.tayara.tn/7c/7c10a69c-d80f-4691-9487-e54426b527fa",
+        "https://cdn.tayara.tn/ab/ab7906a0-02e4-4c45-80c3-cc8bb4f312ae",
+        "https://cdn.tayara.tn/c5/c5493ebe-164b-47f7-9b23-7f33ad18e57c",
+        "https://cdn.tayara.tn/ec/ec3dfdcc-891a-484c-9e69-d1d190c657e4",
+        "https://cdn.tayara.tn/4b/4bb08372-058d-40d0-9a78-6cae8f40d7b5"
+      ],
+      "governorate": "Ariana",
+      "delegation": "Ariana",
+      "publisher_name": "khalfa brahim",
+      "publisher_is_shop": false,
+      "published_on": "2026-05-31T13:20:19.000Z",
+      "sub_category": "60be84be50ab95b45b08a0a4",
+      "url": "https://www.tayara.tn/item/voitures/ariana/ariana/toyota-chr/6a0de377453ae0812f082152/",
+      "crawled_at": "2026-05-31T18:32:17.320570+00:00"
+    },
+    {
+      "id": "6a1c1d01ddff5c7827e00cc2",
+      "title": "golf7",
+      "description": "A vendre une très belle golf 7",
+      "price_tnd": 46000,
+      "images": [
+        "https://cdn.tayara.tn/c5/c57978fb-09ae-4ab4-bd97-6ea99b7a2d92",
+        "https://cdn.tayara.tn/49/49e5fe25-d454-4f4b-bef6-9c751b050134",
+        "https://cdn.tayara.tn/ac/acc972c9-d094-4a97-b29a-e2a42b1593b1",
+        "https://cdn.tayara.tn/34/3438ab90-dd30-415b-a7dc-edbaea4bba26",
+        "https://cdn.tayara.tn/39/399df9ab-a667-4595-9712-c0287d10f8ee",
+        "https://cdn.tayara.tn/d2/d24088e0-df84-49da-bfba-c9529c9a82e3",
+        "https://cdn.tayara.tn/b6/b6434992-756e-4d04-b37a-f0cabe56c28f"
+      ],
+      "governorate": "Ariana",
+      "delegation": "Chotrana 3",
+      "publisher_name": "foued nouira",
+      "publisher_is_shop": false,
+      "published_on": "2026-05-31T11:35:29.000Z",
+      "sub_category": "60be84be50ab95b45b08a0a4",
+      "url": "https://www.tayara.tn/item/voitures/ariana/chotrana-3/golf7/6a1c1d01ddff5c7827e00cc2/",
+      "crawled_at": "2026-05-31T18:32:18.693007+00:00"
+    },
+    {
+      "id": "6a19a7b960514491eae9e1eb",
+      "title": "kia rio 2010",
+      "description": "kia rio 2010 \n",
+      "price_tnd": 19,
+      "images": [
+        "https://cdn.tayara.tn/2e/2eb751f7-194e-4741-81bd-10ebbc2ab2d0",
+        "https://cdn.tayara.tn/b1/b1b57e1a-7b1c-4ea9-8702-054732d0a691",
+        "https://cdn.tayara.tn/bd/bd34b253-7c59-453b-a2d7-98c6175934b6",
+        "https://cdn.tayara.tn/e5/e559a107-9090-4a15-80cc-2221b6f3c10a"
+      ],
+      "governorate": "Kasserine",
+      "delegation": "Sbeïtla",
+      "publisher_name": "bader ha",
+      "publisher_is_shop": false,
+      "published_on": "2026-05-29T14:50:33.000Z",
+      "sub_category": "60be84be50ab95b45b08a0a4",
+      "url": "https://www.tayara.tn/item/voitures/kasserine/sbetla/kia-rio-2010/6a19a7b960514491eae9e1eb/",
+      "crawled_at": "2026-05-31T18:32:36.006064+00:00"
+    },
+    {
+      "id": "6a19934bddff5c7827deb153",
+      "title": "Polo 7",
+      "description": "Poste tactile androïd  \nCamera de recul  \nVitre avant electrique  \nClimatiseur en marche  \nPeinture d’origine  \nFermeture centralisée",
+      "price_tnd": 30500,
+      "images": [
+        "https://cdn.tayara.tn/25/258de411-7ce9-4914-ad78-09e101db34fe",
+        "https://cdn.tayara.tn/95/955d75cd-06e3-4fec-9a85-9867913e99c6",
+        "https://cdn.tayara.tn/40/4027c689-edf9-4b4e-9277-c63f9e45eb42",
+        "https://cdn.tayara.tn/ce/ce19a1bf-05fa-49ca-ae1e-50ceaf1e43ac",
+        "https://cdn.tayara.tn/07/072462b5-672e-4785-8c7b-39f77adea9ec",
+        "https://cdn.tayara.tn/e8/e898afd4-9f4b-4b0d-a4a2-672d045f3e65",
+        "https://cdn.tayara.tn/1f/1f2b8ff9-4326-4233-92a3-518918ecf2af",
+        "https://cdn.tayara.tn/20/20170b1e-4305-411d-b40b-2fda07ad8ef8",
+        "https://cdn.tayara.tn/1b/1b167bda-0055-4e96-9963-a525a44f8c3d"
+      ],
+      "governorate": "Sfax",
+      "delegation": "Route Tunis",
+      "publisher_name": "Mariem",
+      "publisher_is_shop": false,
+      "published_on": "2026-05-29T13:23:23.000Z",
+      "sub_category": "60be84be50ab95b45b08a0a4",
+      "url": "https://www.tayara.tn/item/voitures/sfax/route-tunis/polo-7/6a19934bddff5c7827deb153/",
+      "crawled_at": "2026-05-31T18:32:36.007420+00:00"
+    },
+    {
+      "id": "6a1c3e2dddff5c7827e024eb",
+      "title": "PEUGEOT 206+\nتسجيل اول 21033949",
+      "description": "PEUGEOT 206+\nتسجيل اول\nANNÉE 2012\nBoite à vitesse manuelle \nClimatisée \n21033949\n",
+      "price_tnd": 0,
+      "images": [
+        "https://cdn.tayara.tn/2b/2b1bfa07-492b-4ec4-830e-08e9dfaa481b",
+        "https://cdn.tayara.tn/fc/fccd3909-c52c-4f44-a4bf-558c0419b265",
+        "https://cdn.tayara.tn/19/19dde040-b0a5-4932-aa9a-ce7772038a43",
+        "https://cdn.tayara.tn/5c/5c9d1032-e8fb-4a0b-88e8-5aea61a83654",
+        "https://cdn.tayara.tn/fa/fa8c60b0-8493-425b-a8e1-94c74b3a37c4",
+        "https://cdn.tayara.tn/f0/f00ae206-82cf-4062-b64b-0f329ef1e5f6"
+      ],
+      "governorate": "Tunis",
+      "delegation": "El Ouardia",
+      "publisher_name": "20201896",
+      "publisher_is_shop": false,
+      "published_on": "2026-05-31T13:57:01.000Z",
+      "sub_category": "60be84be50ab95b45b08a0a4",
+      "url": "https://www.tayara.tn/item/voitures/tunis/el-ouardia/peugeot-206-21033949/6a1c3e2dddff5c7827e024eb/",
+      "crawled_at": "2026-05-31T18:32:17.320280+00:00"
+    }
+  ]
+}

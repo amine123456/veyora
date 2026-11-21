@@ -1,0 +1,64 @@
+{
+  "feed_id": "sahibinden",
+  "total_records": 61,
+  "file_size_mb": 0.0,
+  "sample_count": 5,
+  "fields": [
+    "id",
+    "title",
+    "url",
+    "price",
+    "location",
+    "date",
+    "image_url"
+  ],
+  "field_count": 7,
+  "deep_field_count": 7,
+  "records": [
+    {
+      "id": "1352373972",
+      "title": "CİTROEN C4 MAX CAM TAVAN DEĞİŞENSİZ ŞASE/AİRBAG ORJ 2025 6100km",
+      "url": "https://www.sahibinden.com/ilan/vasita-otomobil-citroen-citroen-c4-max-cam-tavan-degisensiz-sase-airbag-orj-2025-6100km-1352373972/detay",
+      "price": "1.380.000 TL",
+      "location": "İstanbul Beylikdüzü",
+      "date": "20 Kasım 2026",
+      "image_url": "https://i0.shbdn.com/photos/37/39/72/lthmb_13523739727po.jpg"
+    },
+    {
+      "id": "1330794204",
+      "title": "FORT FOKUS 1.5TCDİ TİTANİUM DEĞİŞENSİZ",
+      "url": "https://www.sahibinden.com/ilan/vasita-otomobil-ford-fort-fokus-1.5tcdi-titanium-degisensiz-1330794204/detay",
+      "price": "1.465.000 TL",
+      "location": "Adana Yüreğir",
+      "date": "20 Kasım 2026",
+      "image_url": "https://i0.shbdn.com/photos/79/42/04/lthmb_13307942044p6.jpg"
+    },
+    {
+      "id": "1351410002",
+      "title": "Sahibinden, Değişensiz, 126.000 km Otomatik Polo",
+      "url": "https://www.sahibinden.com/ilan/vasita-otomobil-volkswagen-sahibinden-degisensiz-126.000-km-otomatik-polo-1351410002/detay",
+      "price": "995.000 TL",
+      "location": "Elazığ Merkez",
+      "date": "20 Kasım 2026",
+      "image_url": "https://i0.shbdn.com/photos/41/00/02/lthmb_1351410002p5l.jpg"
+    },
+    {
+      "id": "1351363987",
+      "title": "2018 R dönüşüm Golf 7.5",
+      "url": "https://www.sahibinden.com/ilan/vasita-otomobil-volkswagen-2018-r-donusum-golf-7.5-1351363987/detay",
+      "price": "1.495.000 TL",
+      "location": "Bursa Nilüfer",
+      "date": "20 Kasım 2026",
+      "image_url": "https://i0.shbdn.com/photos/36/39/87/lthmb_135136398771c.jpg"
+    },
+    {
+      "id": "1330562667",
+      "title": "Temiz muhayyer sıfır motor",
+      "url": "https://www.sahibinden.com/ilan/vasita-otomobil-mercedes-benz-temiz-muhayyer-sifir-motor-1330562667/detay",
+      "price": "1.850.000 TL",
+      "location": "Ankara Yenimahalle",
+      "date": "20 Kasım 2026",
+      "image_url": "https://i0.shbdn.com/photos/56/26/67/lthmb_13305626672dc.jpg"
+    }
+  ]
+}

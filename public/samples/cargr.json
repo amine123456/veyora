@@ -1,0 +1,1073 @@
+{
+  "feed_id": "cargr",
+  "total_records": 7758,
+  "file_size_mb": 41.1,
+  "sample_count": 5,
+  "fields": [
+    "geolocation",
+    "marketplace",
+    "own",
+    "leasing",
+    "price_per_unit",
+    "pending_acceptance_audits_count",
+    "consent",
+    "is_new",
+    "foreign_number_plate",
+    "states",
+    "label",
+    "has_online_finance",
+    "model_stub",
+    "thumbs",
+    "registration",
+    "seo",
+    "paid_features",
+    "category_ids",
+    "dealer_cls",
+    "id",
+    "category",
+    "price_debatable",
+    "user_id",
+    "thumb",
+    "certificate",
+    "title",
+    "views",
+    "without_vat",
+    "descriptive_title",
+    "seller",
+    "has_youtube",
+    "created",
+    "external_link",
+    "seo_json_ld",
+    "compare",
+    "clicks",
+    "duplicate_classifieds_id",
+    "url_slug",
+    "seo_url",
+    "mileage",
+    "has_finance",
+    "marketplace_cart",
+    "key_features",
+    "is_parked",
+    "price",
+    "title_parts",
+    "short_description",
+    "crashed",
+    "address_long",
+    "thumbs_patterns",
+    "raw_price",
+    "address",
+    "price_parked",
+    "deleted_date",
+    "offertype",
+    "has_shorts",
+    "has_certificate",
+    "engine_size",
+    "is_deleted",
+    "has_leasing",
+    "thumb_pattern",
+    "discount",
+    "finance_options",
+    "dealers_only",
+    "modified",
+    "all_final_category_ids",
+    "length",
+    "has_360photos",
+    "vtype_xyma_or_part",
+    "promotion",
+    "duplicate_classifieds",
+    "fueltype",
+    "has_photos",
+    "suggested_category",
+    "parked"
+  ],
+  "field_count": 75,
+  "deep_field_count": 122,
+  "records": [
+    {
+      "geolocation": {
+        "geolocation": {
+          "lat": 41.01029832276064,
+          "lon": 24.64344542770502
+        },
+        "exact_location": false
+      },
+      "marketplace": null,
+      "own": false,
+      "leasing": {
+        "only_leasing": false,
+        "options_count": 0,
+        "default_leasing_option": null
+      },
+      "price_per_unit": null,
+      "pending_acceptance_audits_count": 0,
+      "consent": null,
+      "is_new": false,
+      "foreign_number_plate": false,
+      "states": {
+        "is_non_public": false,
+        "is_deleted": false,
+        "unlisted_cause_of_vpn": null,
+        "dealers_only": false,
+        "is_ghosted": false,
+        "is_removed": false,
+        "is_unlisted": null,
+        "is_dealers_only_cause_foreign": false,
+        "is_hidden": false
+      },
+      "label": null,
+      "has_online_finance": false,
+      "model_stub": "Volkswagen Amarok 2024 PANAMERICANA",
+      "thumbs": {
+        "count": 14,
+        "urls": [
+          "https://static.car.gr/57462076_f_m.jpg",
+          "https://static.car.gr/57462076_b_m.jpg",
+          "https://static.car.gr/57462076_8_m.jpg",
+          "https://static.car.gr/57462076_d_m.jpg",
+          "https://static.car.gr/57462076_a_m.jpg",
+          "https://static.car.gr/57462076_1_m.jpg",
+          "https://static.car.gr/57462076_2_m.jpg",
+          "https://static.car.gr/57462076_4_m.jpg",
+          "https://static.car.gr/57462076_0_m.jpg",
+          "https://static.car.gr/57462076_3_m.jpg",
+          "https://static.car.gr/57462076_6_m.jpg",
+          "https://static.car.gr/57462076_7_m.jpg",
+          "https://static.car.gr/57462076_9_m.jpg",
+          "https://static.car.gr/57462076_g_m.jpg"
+        ]
+      },
+      "registration": "4 / 2024",
+      "seo": {
+        "item_type": null,
+        "item_prop": null,
+        "name": null
+      },
+      "paid_features": {
+        "is_promotion_enabled": false,
+        "is_paid_classified": false,
+        "is_paid_one_click_auto_touch_enabled": false
+      },
+      "category_ids": [
+        20001,
+        15000,
+        15001,
+        15214
+      ],
+      "dealer_cls": false,
+      "id": 57462076,
+      "category": "Αυτοκίνητο » Αγροτικό / Pickup",
+      "price_debatable": true,
+      "user_id": 1000338118,
+      "thumb": "https://static.car.gr/57462076_f_n.jpg",
+      "certificate": null,
+      "title": "Volkswagen Amarok 2024 PANAMERICANA",
+      "views": "-",
+      "without_vat": true,
+      "descriptive_title": "Volkswagen Amarok 2024 PANAMERICANA - 4 / 2024 - 16.000 χλμ - Πετρέλαιο - 3.000 cc - 239 hp - 4 - Αυτόματο - Αγροτικό / Pickup",
+      "seller": {
+        "classifieds_count": 1,
+        "name": "",
+        "verification": {
+          "telephone_verified": true,
+          "credit_card_verified": false
+        },
+        "address": "ΧΡΥΣΟΥΠΟΛΗ Ν. Καβάλας 64200 ΑΓΙΑΣΜΑ",
+        "type": "Guest",
+        "id": 1000338118,
+        "avatar": null
+      },
+      "has_youtube": false,
+      "created": "2026-10-09 21:22:55",
+      "external_link": null,
+      "seo_json_ld": {
+        "url": "/classifieds/cars/view/57462076-volkswagen-amarok",
+        "@type": "Car"
+      },
+      "compare": {
+        "is_in_comparison": false,
+        "is_comparable": true
+      },
+      "clicks": "-",
+      "duplicate_classifieds_id": null,
+      "url_slug": "volkswagen-amarok",
+      "seo_url": "/classifieds/cars/view/57462076-volkswagen-amarok",
+      "mileage": "16.000 χλμ",
+      "has_finance": false,
+      "marketplace_cart": null,
+      "key_features": [
+        {
+          "key": "mileage",
+          "value": "16.000 Km",
+          "label": "Χιλιόμετρα"
+        },
+        {
+          "label": "Κυβικά",
+          "key": "engine_size",
+          "value": "3.000 cc",
+          "extra": null
+        },
+        {
+          "key": "engine_power",
+          "value": "239 hp",
+          "label": "Ιπποδύναμη"
+        },
+        {
+          "label": "Σασμάν",
+          "key": "gearbox_type",
+          "value": "Αυτόματο",
+          "extra": null
+        },
+        {
+          "label": "Καύσιμο",
+          "key": "fuel_type",
+          "value": "Πετρέλαιο",
+          "extra": {
+            "is_electric": false
+          }
+        }
+      ],
+      "is_parked": false,
+      "price": "40.000 €",
+      "title_parts": {
+        "category": null,
+        "make": "Volkswagen",
+        "variant": "PANAMERICANA",
+        "model": "Amarok",
+        "year": 2024
+      },
+      "short_description": null,
+      "crashed": false,
+      "address_long": "ΧΡΥΣΟΥΠΟΛΗ Ν. Καβάλας 64200 ΑΓΙΑΣΜΑ",
+      "thumbs_patterns": {
+        "stretch": {
+          "list": false,
+          "gallery": false
+        },
+        "count": 14,
+        "urls": [
+          "https://static.car.gr/57462076_f_{size}.jpg",
+          "https://static.car.gr/57462076_b_{size}.jpg",
+          "https://static.car.gr/57462076_8_{size}.jpg",
+          "https://static.car.gr/57462076_d_{size}.jpg",
+          "https://static.car.gr/57462076_a_{size}.jpg",
+          "https://static.car.gr/57462076_1_{size}.jpg",
+          "https://static.car.gr/57462076_2_{size}.jpg",
+          "https://static.car.gr/57462076_4_{size}.jpg",
+          "https://static.car.gr/57462076_0_{size}.jpg",
+          "https://static.car.gr/57462076_3_{size}.jpg",
+          "https://static.car.gr/57462076_6_{size}.jpg",
+          "https://static.car.gr/57462076_7_{size}.jpg",
+          "https://static.car.gr/57462076_9_{size}.jpg",
+          "https://static.car.gr/57462076_g_{size}.jpg"
+        ]
+      },
+      "raw_price": 40000,
+      "address": "ΧΡΥΣΟΥΠΟΛΗ 64200",
+      "price_parked": "",
+      "deleted_date": null,
+      "offertype": "sale",
+      "has_shorts": false,
+      "has_certificate": false,
+      "engine_size": "3.000 cc",
+      "is_deleted": false,
+      "has_leasing": false,
+      "thumb_pattern": "https://static.car.gr/57462076_f_{size}.jpg",
+      "discount": null,
+      "finance_options": null,
+      "dealers_only": false,
+      "modified": "2026-10-19 14:44:20",
+      "all_final_category_ids": [
+        15214
+      ],
+      "length": null,
+      "has_360photos": false,
+      "vtype_xyma_or_part": "car",
+      "promotion": null,
+      "duplicate_classifieds": null,
+      "fueltype": "Πετρέλαιο",
+      "has_photos": true,
+      "suggested_category": null,
+      "parked": "-"
+    },
+    {
+      "geolocation": {
+        "geolocation": {
+          "lat": 38.85294253635517,
+          "lon": 22.473819547736785
+        },
+        "exact_location": false
+      },
+      "marketplace": null,
+      "own": false,
+      "leasing": {
+        "only_leasing": false,
+        "options_count": 0,
+        "default_leasing_option": null
+      },
+      "price_per_unit": null,
+      "pending_acceptance_audits_count": 0,
+      "consent": null,
+      "is_new": false,
+      "foreign_number_plate": false,
+      "states": {
+        "is_non_public": false,
+        "is_deleted": false,
+        "unlisted_cause_of_vpn": null,
+        "dealers_only": false,
+        "is_ghosted": false,
+        "is_removed": false,
+        "is_unlisted": null,
+        "is_dealers_only_cause_foreign": false,
+        "is_hidden": false
+      },
+      "label": null,
+      "has_online_finance": false,
+      "model_stub": "Bmw 316 2000",
+      "thumbs": {
+        "count": 12,
+        "urls": [
+          "https://static.car.gr/56969304_0_m.jpg",
+          "https://static.car.gr/56969304_1_m.jpg",
+          "https://static.car.gr/56969304_2_m.jpg",
+          "https://static.car.gr/56969304_3_m.jpg",
+          "https://static.car.gr/56969304_4_m.jpg",
+          "https://static.car.gr/56969304_5_m.jpg",
+          "https://static.car.gr/56969304_6_m.jpg",
+          "https://static.car.gr/56969304_7_m.jpg",
+          "https://static.car.gr/56969304_8_m.jpg",
+          "https://static.car.gr/56969304_9_m.jpg",
+          "https://static.car.gr/56969304_a_m.jpg",
+          "https://static.car.gr/56969304_b_m.jpg"
+        ]
+      },
+      "registration": "1 / 2000",
+      "seo": {
+        "item_type": null,
+        "item_prop": null,
+        "name": null
+      },
+      "paid_features": {
+        "is_promotion_enabled": false,
+        "is_paid_classified": false,
+        "is_paid_one_click_auto_touch_enabled": false
+      },
+      "category_ids": [
+        20001,
+        15000,
+        15001,
+        15213
+      ],
+      "dealer_cls": false,
+      "id": 56969304,
+      "category": "Αυτοκίνητο » Λιμουζίνα / Sedan",
+      "price_debatable": true,
+      "user_id": 1002795410,
+      "thumb": "https://static.car.gr/56969304_0_n.jpg",
+      "certificate": null,
+      "title": "Bmw 316 2000",
+      "views": "-",
+      "without_vat": false,
+      "descriptive_title": "Bmw 316 2000 - 1 / 2000 - 236.000 χλμ - Βενζίνη - 1.600 cc - 101 hp - 5 - Χειροκίνητο - Λιμουζίνα / Sedan",
+      "seller": {
+        "classifieds_count": 1,
+        "name": "",
+        "verification": {
+          "telephone_verified": true,
+          "credit_card_verified": false
+        },
+        "address": "ΛΑΜΙΑ Ν. Φθιώτιδας 35100",
+        "type": "Guest",
+        "id": 1002795410,
+        "avatar": null
+      },
+      "has_youtube": true,
+      "created": "2026-09-17 21:30:07",
+      "external_link": null,
+      "seo_json_ld": {
+        "url": "/classifieds/cars/view/56969304-bmw-316",
+        "@type": "Car"
+      },
+      "compare": {
+        "is_in_comparison": false,
+        "is_comparable": true
+      },
+      "clicks": "-",
+      "duplicate_classifieds_id": null,
+      "url_slug": "bmw-316",
+      "seo_url": "/classifieds/cars/view/56969304-bmw-316",
+      "mileage": "236.000 χλμ",
+      "has_finance": false,
+      "marketplace_cart": null,
+      "key_features": [
+        {
+          "key": "mileage",
+          "value": "236.000 Km",
+          "label": "Χιλιόμετρα"
+        },
+        {
+          "label": "Κυβικά",
+          "key": "engine_size",
+          "value": "1.600 cc",
+          "extra": null
+        },
+        {
+          "key": "engine_power",
+          "value": "101 hp",
+          "label": "Ιπποδύναμη"
+        },
+        {
+          "label": "Καύσιμο",
+          "key": "fuel_type",
+          "value": "Βενζίνη",
+          "extra": {
+            "is_electric": false
+          }
+        }
+      ],
+      "is_parked": false,
+      "price": "1.650 €",
+      "title_parts": {
+        "category": null,
+        "make": "Bmw",
+        "variant": null,
+        "model": "316",
+        "year": 2000
+      },
+      "short_description": null,
+      "crashed": false,
+      "address_long": "ΛΑΜΙΑ Ν. Φθιώτιδας 35100",
+      "thumbs_patterns": {
+        "stretch": {
+          "list": false,
+          "gallery": false
+        },
+        "count": 12,
+        "urls": [
+          "https://static.car.gr/56969304_0_{size}.jpg",
+          "https://static.car.gr/56969304_1_{size}.jpg",
+          "https://static.car.gr/56969304_2_{size}.jpg",
+          "https://static.car.gr/56969304_3_{size}.jpg",
+          "https://static.car.gr/56969304_4_{size}.jpg",
+          "https://static.car.gr/56969304_5_{size}.jpg",
+          "https://static.car.gr/56969304_6_{size}.jpg",
+          "https://static.car.gr/56969304_7_{size}.jpg",
+          "https://static.car.gr/56969304_8_{size}.jpg",
+          "https://static.car.gr/56969304_9_{size}.jpg",
+          "https://static.car.gr/56969304_a_{size}.jpg",
+          "https://static.car.gr/56969304_b_{size}.jpg"
+        ]
+      },
+      "raw_price": 1650,
+      "address": "ΛΑΜΙΑ 35100",
+      "price_parked": "",
+      "deleted_date": null,
+      "offertype": "sale",
+      "has_shorts": false,
+      "has_certificate": false,
+      "engine_size": "1.600 cc",
+      "is_deleted": false,
+      "has_leasing": false,
+      "thumb_pattern": "https://static.car.gr/56969304_0_{size}.jpg",
+      "discount": null,
+      "finance_options": null,
+      "dealers_only": false,
+      "modified": "2026-10-09 17:56:43",
+      "all_final_category_ids": [
+        15213
+      ],
+      "length": null,
+      "has_360photos": false,
+      "vtype_xyma_or_part": "car",
+      "promotion": null,
+      "duplicate_classifieds": null,
+      "fueltype": "Βενζίνη",
+      "has_photos": true,
+      "suggested_category": null,
+      "parked": "-"
+    },
+    {
+      "geolocation": {
+        "geolocation": {
+          "lat": 40.66938269553895,
+          "lon": 22.891748939903657
+        },
+        "exact_location": false
+      },
+      "marketplace": null,
+      "own": false,
+      "leasing": {
+        "only_leasing": false,
+        "options_count": 0,
+        "default_leasing_option": null
+      },
+      "price_per_unit": null,
+      "pending_acceptance_audits_count": 0,
+      "consent": null,
+      "is_new": false,
+      "foreign_number_plate": false,
+      "states": {
+        "is_non_public": false,
+        "is_deleted": false,
+        "unlisted_cause_of_vpn": null,
+        "dealers_only": false,
+        "is_ghosted": false,
+        "is_removed": false,
+        "is_unlisted": null,
+        "is_dealers_only_cause_foreign": false,
+        "is_hidden": false
+      },
+      "label": null,
+      "has_online_finance": false,
+      "model_stub": "Seat Cordoba 2001 1.4",
+      "thumbs": {
+        "count": 7,
+        "urls": [
+          "https://static.car.gr/57654010_0_m.jpg",
+          "https://static.car.gr/57654010_1_m.jpg",
+          "https://static.car.gr/57654010_2_m.jpg",
+          "https://static.car.gr/57654010_3_m.jpg",
+          "https://static.car.gr/57654010_4_m.jpg",
+          "https://static.car.gr/57654010_5_m.jpg",
+          "https://static.car.gr/57654010_6_m.jpg"
+        ]
+      },
+      "registration": "5 / 2001",
+      "seo": {
+        "item_type": null,
+        "item_prop": null,
+        "name": null
+      },
+      "paid_features": {
+        "is_promotion_enabled": false,
+        "is_paid_classified": false,
+        "is_paid_one_click_auto_touch_enabled": false
+      },
+      "category_ids": [
+        20001,
+        15000,
+        15001,
+        15211
+      ],
+      "dealer_cls": false,
+      "id": 57654010,
+      "category": "Αυτοκίνητο » Κόμπακτ / Hatchback",
+      "price_debatable": true,
+      "user_id": 1002854452,
+      "thumb": "https://static.car.gr/57654010_0_n.jpg",
+      "certificate": null,
+      "title": "Seat Cordoba 2001 1.4",
+      "views": "-",
+      "without_vat": false,
+      "descriptive_title": "Seat Cordoba 2001 1.4 - 5 / 2001 - 214.000 χλμ - Βενζίνη - 1.400 cc - 75 hp - 5 - Χειροκίνητο - Κόμπακτ / Hatchback",
+      "seller": {
+        "name": "",
+        "avatar": null,
+        "address": "ΕΛΕΥΘΕΡΙΟ Ν. Θεσσαλονίκης 56334 ΕΛΕΥΘΕΡΙΟ-ΚΟΡΔΕΛΙΟ",
+        "type": "SingleClassifiedUser",
+        "id": 1002854452,
+        "verification": {
+          "telephone_verified": false,
+          "credit_card_verified": false
+        }
+      },
+      "has_youtube": false,
+      "created": "2026-10-20 08:39:20",
+      "external_link": null,
+      "seo_json_ld": {
+        "url": "/classifieds/cars/view/57654010-seat-cordoba",
+        "@type": "Car"
+      },
+      "compare": {
+        "is_in_comparison": false,
+        "is_comparable": true
+      },
+      "clicks": "-",
+      "duplicate_classifieds_id": null,
+      "url_slug": "seat-cordoba",
+      "seo_url": "/classifieds/cars/view/57654010-seat-cordoba",
+      "mileage": "214.000 χλμ",
+      "has_finance": false,
+      "marketplace_cart": null,
+      "key_features": [
+        {
+          "key": "mileage",
+          "value": "214.000 Km",
+          "label": "Χιλιόμετρα"
+        },
+        {
+          "label": "Κυβικά",
+          "key": "engine_size",
+          "value": "1.400 cc",
+          "extra": null
+        },
+        {
+          "key": "engine_power",
+          "value": "75 hp",
+          "label": "Ιπποδύναμη"
+        },
+        {
+          "label": "Καύσιμο",
+          "key": "fuel_type",
+          "value": "Βενζίνη",
+          "extra": {
+            "is_electric": false
+          }
+        }
+      ],
+      "is_parked": false,
+      "price": "1.800 €",
+      "title_parts": {
+        "category": null,
+        "make": "Seat",
+        "variant": "1.4",
+        "model": "Cordoba",
+        "year": 2001
+      },
+      "short_description": null,
+      "crashed": false,
+      "address_long": "ΕΛΕΥΘΕΡΙΟ Ν. Θεσσαλονίκης 56334 ΕΛΕΥΘΕΡΙΟ-ΚΟΡΔΕΛΙΟ",
+      "thumbs_patterns": {
+        "stretch": {
+          "list": false,
+          "gallery": false
+        },
+        "count": 7,
+        "urls": [
+          "https://static.car.gr/57654010_0_{size}.jpg",
+          "https://static.car.gr/57654010_1_{size}.jpg",
+          "https://static.car.gr/57654010_2_{size}.jpg",
+          "https://static.car.gr/57654010_3_{size}.jpg",
+          "https://static.car.gr/57654010_4_{size}.jpg",
+          "https://static.car.gr/57654010_5_{size}.jpg",
+          "https://static.car.gr/57654010_6_{size}.jpg"
+        ]
+      },
+      "raw_price": 1800,
+      "address": "ΕΛΕΥΘΕΡΙΟ 56334",
+      "price_parked": "",
+      "deleted_date": null,
+      "offertype": "sale",
+      "has_shorts": false,
+      "has_certificate": false,
+      "engine_size": "1.400 cc",
+      "is_deleted": false,
+      "has_leasing": false,
+      "thumb_pattern": "https://static.car.gr/57654010_0_{size}.jpg",
+      "discount": null,
+      "finance_options": null,
+      "dealers_only": false,
+      "modified": "2026-10-20 08:39:21",
+      "all_final_category_ids": [
+        15211
+      ],
+      "length": null,
+      "has_360photos": false,
+      "vtype_xyma_or_part": "car",
+      "promotion": null,
+      "duplicate_classifieds": null,
+      "fueltype": "Βενζίνη",
+      "has_photos": true,
+      "suggested_category": null,
+      "parked": "-"
+    },
+    {
+      "geolocation": {
+        "geolocation": {
+          "lat": 40.5414419,
+          "lon": 22.2010733
+        },
+        "exact_location": false
+      },
+      "marketplace": null,
+      "own": false,
+      "leasing": {
+        "only_leasing": false,
+        "options_count": 0,
+        "default_leasing_option": null
+      },
+      "price_per_unit": null,
+      "pending_acceptance_audits_count": 0,
+      "consent": null,
+      "is_new": false,
+      "foreign_number_plate": false,
+      "states": {
+        "is_non_public": false,
+        "is_deleted": false,
+        "unlisted_cause_of_vpn": null,
+        "dealers_only": false,
+        "is_ghosted": false,
+        "is_removed": false,
+        "is_unlisted": null,
+        "is_dealers_only_cause_foreign": false,
+        "is_hidden": false
+      },
+      "label": null,
+      "has_online_finance": false,
+      "model_stub": "Mercedes-Benz C 200 2001 KOMPRESSOR",
+      "thumbs": {
+        "count": 15,
+        "urls": [
+          "https://static.car.gr/54452370_0_m.jpg",
+          "https://static.car.gr/54452370_1_m.jpg",
+          "https://static.car.gr/54452370_2_m.jpg",
+          "https://static.car.gr/54452370_3_m.jpg",
+          "https://static.car.gr/54452370_4_m.jpg",
+          "https://static.car.gr/54452370_5_m.jpg",
+          "https://static.car.gr/54452370_6_m.jpg",
+          "https://static.car.gr/54452370_7_m.jpg",
+          "https://static.car.gr/54452370_8_m.jpg",
+          "https://static.car.gr/54452370_9_m.jpg",
+          "https://static.car.gr/54452370_a_m.jpg",
+          "https://static.car.gr/54452370_b_m.jpg",
+          "https://static.car.gr/54452370_c_m.jpg",
+          "https://static.car.gr/54452370_d_m.jpg",
+          "https://static.car.gr/54452370_e_m.jpg"
+        ]
+      },
+      "registration": "1 / 2001",
+      "seo": {
+        "item_type": null,
+        "item_prop": null,
+        "name": null
+      },
+      "paid_features": {
+        "is_promotion_enabled": false,
+        "is_paid_classified": false,
+        "is_paid_one_click_auto_touch_enabled": false
+      },
+      "category_ids": [
+        20001,
+        15000,
+        15001,
+        15216
+      ],
+      "dealer_cls": false,
+      "id": 54452370,
+      "category": "Αυτοκίνητο » Άλλο",
+      "price_debatable": true,
+      "user_id": 1002620076,
+      "thumb": "https://static.car.gr/54452370_0_n.jpg",
+      "certificate": null,
+      "title": "Mercedes-Benz C 200 2001 KOMPRESSOR",
+      "views": "-",
+      "without_vat": false,
+      "descriptive_title": "Mercedes-Benz C 200 2001 KOMPRESSOR - 1 / 2001 - 285.000 χλμ - Αέριο(lpg) - βενζίνη - 2.000 cc - 163 hp - 4 - Χειροκίνητο - Άλλο",
+      "seller": {
+        "name": "Theodorou cars",
+        "manager_id": 124440,
+        "verification": {
+          "telephone_verified": false,
+          "credit_card_verified": false
+        },
+        "address": "Σταδίου 96",
+        "user_since": "2018-09-11 10:23:59",
+        "type": "Dealer",
+        "id": 1002620076,
+        "avatar": "https://static-cz.car.gr/users/124440/aylo2kjzmg.jpeg"
+      },
+      "has_youtube": false,
+      "created": "2026-05-31 23:25:45",
+      "external_link": null,
+      "seo_json_ld": {
+        "url": "/classifieds/cars/view/54452370-mercedes-benz-c-200",
+        "@type": "Car"
+      },
+      "compare": {
+        "is_in_comparison": false,
+        "is_comparable": true
+      },
+      "clicks": "-",
+      "duplicate_classifieds_id": null,
+      "url_slug": "mercedes-benz-c-200",
+      "seo_url": "/classifieds/cars/view/54452370-mercedes-benz-c-200",
+      "mileage": "285.000 χλμ",
+      "has_finance": true,
+      "marketplace_cart": null,
+      "key_features": [
+        {
+          "key": "mileage",
+          "value": "285.000 Km",
+          "label": "Χιλιόμετρα"
+        },
+        {
+          "label": "Κυβικά",
+          "key": "engine_size",
+          "value": "2.000 cc",
+          "extra": null
+        },
+        {
+          "key": "engine_power",
+          "value": "163 hp",
+          "label": "Ιπποδύναμη"
+        },
+        {
+          "label": "Καύσιμο",
+          "key": "fuel_type",
+          "value": "Αέριο(lpg) - βενζίνη",
+          "extra": {
+            "is_electric": false
+          }
+        }
+      ],
+      "is_parked": false,
+      "price": "4.800 €",
+      "title_parts": {
+        "category": null,
+        "make": "Mercedes-Benz",
+        "variant": "KOMPRESSOR",
+        "model": "C 200",
+        "year": 2001
+      },
+      "short_description": null,
+      "crashed": false,
+      "address_long": "ΒΕΡΟΙΑ 59132",
+      "thumbs_patterns": {
+        "stretch": {
+          "list": false,
+          "gallery": false
+        },
+        "count": 15,
+        "urls": [
+          "https://static.car.gr/54452370_0_{size}.jpg",
+          "https://static.car.gr/54452370_1_{size}.jpg",
+          "https://static.car.gr/54452370_2_{size}.jpg",
+          "https://static.car.gr/54452370_3_{size}.jpg",
+          "https://static.car.gr/54452370_4_{size}.jpg",
+          "https://static.car.gr/54452370_5_{size}.jpg",
+          "https://static.car.gr/54452370_6_{size}.jpg",
+          "https://static.car.gr/54452370_7_{size}.jpg",
+          "https://static.car.gr/54452370_8_{size}.jpg",
+          "https://static.car.gr/54452370_9_{size}.jpg",
+          "https://static.car.gr/54452370_a_{size}.jpg",
+          "https://static.car.gr/54452370_b_{size}.jpg",
+          "https://static.car.gr/54452370_c_{size}.jpg",
+          "https://static.car.gr/54452370_d_{size}.jpg",
+          "https://static.car.gr/54452370_e_{size}.jpg"
+        ]
+      },
+      "raw_price": 4800,
+      "address": "ΒΕΡΟΙΑ 59132",
+      "price_parked": "",
+      "deleted_date": null,
+      "offertype": "sale",
+      "has_shorts": false,
+      "has_certificate": false,
+      "engine_size": "2.000 cc",
+      "is_deleted": false,
+      "has_leasing": false,
+      "thumb_pattern": "https://static.car.gr/54452370_0_{size}.jpg",
+      "discount": null,
+      "finance_options": {
+        "maxinstallments": 84,
+        "default_installment": 71.71711499614729,
+        "interest": 10,
+        "mindownpayment": 10
+      },
+      "dealers_only": false,
+      "modified": "2026-10-19 09:29:03",
+      "all_final_category_ids": [
+        15216
+      ],
+      "length": null,
+      "has_360photos": false,
+      "vtype_xyma_or_part": "car",
+      "promotion": null,
+      "duplicate_classifieds": null,
+      "fueltype": "Αέριο(lpg) - βενζίνη",
+      "has_photos": true,
+      "suggested_category": null,
+      "parked": "-"
+    },
+    {
+      "geolocation": {
+        "geolocation": {
+          "lat": 37.978347238,
+          "lon": 23.6618696051
+        },
+        "exact_location": false
+      },
+      "marketplace": null,
+      "own": false,
+      "leasing": {
+        "only_leasing": false,
+        "options_count": 0,
+        "default_leasing_option": null
+      },
+      "price_per_unit": null,
+      "pending_acceptance_audits_count": 0,
+      "consent": null,
+      "is_new": false,
+      "foreign_number_plate": false,
+      "states": {
+        "is_non_public": false,
+        "is_deleted": false,
+        "unlisted_cause_of_vpn": null,
+        "dealers_only": false,
+        "is_ghosted": false,
+        "is_removed": false,
+        "is_unlisted": null,
+        "is_dealers_only_cause_foreign": false,
+        "is_hidden": false
+      },
+      "label": null,
+      "has_online_finance": false,
+      "model_stub": "Ford Fiesta 2001",
+      "thumbs": {
+        "count": 9,
+        "urls": [
+          "https://static.car.gr/53942493_1_m.jpg",
+          "https://static.car.gr/53942493_2_m.jpg",
+          "https://static.car.gr/53942493_3_m.jpg",
+          "https://static.car.gr/53942493_4_m.jpg",
+          "https://static.car.gr/53942493_5_m.jpg",
+          "https://static.car.gr/53942493_6_m.jpg",
+          "https://static.car.gr/53942493_7_m.jpg",
+          "https://static.car.gr/53942493_8_m.jpg",
+          "https://static.car.gr/53942493_9_m.jpg"
+        ]
+      },
+      "registration": "7 / 2001",
+      "seo": {
+        "item_type": null,
+        "item_prop": null,
+        "name": null
+      },
+      "paid_features": {
+        "is_promotion_enabled": false,
+        "is_paid_classified": false,
+        "is_paid_one_click_auto_touch_enabled": false
+      },
+      "category_ids": [
+        20001,
+        15000,
+        15001,
+        15211
+      ],
+      "dealer_cls": false,
+      "id": 53942493,
+      "category": "Αυτοκίνητο » Κόμπακτ / Hatchback",
+      "price_debatable": false,
+      "user_id": 1005385,
+      "thumb": "https://static.car.gr/53942493_1_n.jpg",
+      "certificate": null,
+      "title": "Ford Fiesta 2001",
+      "views": "-",
+      "without_vat": false,
+      "descriptive_title": "Ford Fiesta 2001 - 7 / 2001 - 235.000 χλμ - Βενζίνη - 1.250 cc - 75 hp - 3 - Χειροκίνητο - Κόμπακτ / Hatchback",
+      "seller": {
+        "name": "Cars4all",
+        "manager_id": 3641,
+        "verification": {
+          "telephone_verified": false,
+          "credit_card_verified": false
+        },
+        "address": "ΓΡΗΓΟΡΙΟΥ ΛΑΜΠΡΑΚΗ 68",
+        "user_since": "2009-02-06 22:14:34",
+        "type": "Dealer",
+        "id": 1005385,
+        "avatar": "https://static-cz.car.gr/users/3641/99e4zk2q2u.jpeg"
+      },
+      "has_youtube": false,
+      "created": "2026-04-30 11:24:21",
+      "external_link": null,
+      "seo_json_ld": {
+        "url": "/classifieds/cars/view/53942493-ford-fiesta",
+        "@type": "Car"
+      },
+      "compare": {
+        "is_in_comparison": false,
+        "is_comparable": true
+      },
+      "clicks": "-",
+      "duplicate_classifieds_id": null,
+      "url_slug": "ford-fiesta",
+      "seo_url": "/classifieds/cars/view/53942493-ford-fiesta",
+      "mileage": "235.000 χλμ",
+      "has_finance": false,
+      "marketplace_cart": null,
+      "key_features": [
+        {
+          "key": "mileage",
+          "value": "235.000 Km",
+          "label": "Χιλιόμετρα"
+        },
+        {
+          "label": "Κυβικά",
+          "key": "engine_size",
+          "value": "1.250 cc",
+          "extra": null
+        },
+        {
+          "key": "engine_power",
+          "value": "75 hp",
+          "label": "Ιπποδύναμη"
+        },
+        {
+          "label": "Καύσιμο",
+          "key": "fuel_type",
+          "value": "Βενζίνη",
+          "extra": {
+            "is_electric": false
+          }
+        }
+      ],
+      "is_parked": false,
+      "price": "1.800 €",
+      "title_parts": {
+        "category": null,
+        "make": "Ford",
+        "variant": null,
+        "model": "Fiesta",
+        "year": 2001
+      },
+      "short_description": null,
+      "crashed": false,
+      "address_long": "ΝΙΚΑΙΑ Ν. ΑΤΤΙΚΗΣ 18454",
+      "thumbs_patterns": {
+        "stretch": {
+          "list": false,
+          "gallery": false
+        },
+        "count": 9,
+        "urls": [
+          "https://static.car.gr/53942493_1_{size}.jpg",
+          "https://static.car.gr/53942493_2_{size}.jpg",
+          "https://static.car.gr/53942493_3_{size}.jpg",
+          "https://static.car.gr/53942493_4_{size}.jpg",
+          "https://static.car.gr/53942493_5_{size}.jpg",
+          "https://static.car.gr/53942493_6_{size}.jpg",
+          "https://static.car.gr/53942493_7_{size}.jpg",
+          "https://static.car.gr/53942493_8_{size}.jpg",
+          "https://static.car.gr/53942493_9_{size}.jpg"
+        ]
+      },
+      "raw_price": 1800,
+      "address": "ΝΙΚΑΙΑ 18454",
+      "price_parked": "",
+      "deleted_date": null,
+      "offertype": "sale",
+      "has_shorts": false,
+      "has_certificate": false,
+      "engine_size": "1.250 cc",
+      "is_deleted": false,
+      "has_leasing": false,
+      "thumb_pattern": "https://static.car.gr/53942493_1_{size}.jpg",
+      "discount": null,
+      "finance_options": null,
+      "dealers_only": false,
+      "modified": "2026-10-21 16:50:29",
+      "all_final_category_ids": [
+        15211
+      ],
+      "length": null,
+      "has_360photos": false,
+      "vtype_xyma_or_part": "car",
+      "promotion": null,
+      "duplicate_classifieds": null,
+      "fueltype": "Βενζίνη",
+      "has_photos": true,
+      "suggested_category": null,
+      "parked": "-"
+    }
+  ]
+}

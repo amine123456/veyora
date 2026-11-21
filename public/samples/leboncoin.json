@@ -1,0 +1,2804 @@
+{
+  "feed_id": "leboncoin",
+  "total_records": 801000,
+  "file_size_mb": 10730.7,
+  "sample_count": 5,
+  "fields": [
+    "list_id",
+    "first_publication_date",
+    "index_date",
+    "status",
+    "category_id",
+    "category_name",
+    "subject",
+    "body",
+    "brand",
+    "ad_type",
+    "url",
+    "price",
+    "price_cents",
+    "images",
+    "attributes",
+    "location",
+    "owner",
+    "options",
+    "has_phone",
+    "attributes_adview_positive",
+    "attributes_characteristics",
+    "similar",
+    "entitlements",
+    "counters"
+  ],
+  "field_count": 24,
+  "deep_field_count": 66,
+  "records": [
+    {
+      "list_id": 3271761941,
+      "first_publication_date": "2026-09-18 09:22:24",
+      "index_date": "2026-10-13 12:41:16",
+      "status": "active",
+      "category_id": "2",
+      "category_name": "Voitures",
+      "subject": "AIXAM CITY PACK VOITURE SANS PERMIS Véhicule en location – Assurance incluse – 20 /jour",
+      "body": "🚗 Véhicule sans permis – Location de Voitures Sans Permis à Igoville\nVSP LOCATION BY IGOVILLE AUTO\nLouez une voiture sans permis – Assurance Tous Risques Incluse\n\nVotre permis est suspendu, vous ne l’avez pas encore obtenu, ou vous n’avez jamais passé votre permis ? Pas de souci !\n\nVSP Location by Igoville Auto vous propose une solution simple et pratique pour continuer à vous déplacer.\n\nNous disposons de véhicules sans permis récents et soigneusement entretenus, disponibles à la location à Igoville et aux alentours : Rouen, Évreux, Elbeuf, Louviers, etc.\n\n🚗 Louez une voiture sans permis à partir de 20 € par jour !\n\n● 20 € par jour\n● Minimum de location : 1 mois, soit 600 € par mois TTC\n● Chèque de caution : 2 500 €\n● Assurance tous risques incluse\n● Entretien régulier en concession agréée inclus\n\nPourquoi choisir VSP Location by Igoville Auto ?\n\n✔️ 1er réseau national spécialisé dans la location de voitures sans permis\n✔️ Véhicules soigneusement entretenus pour une sécurité optimale\n✔️ Assurance tous risques incluse pour plus de sérénité\n✔️ Entretien en concession agréée inclus\n✔️ Tarifs transparents et économiques, sans surprise\n\nSitués à Igoville, nous vous accueillons dans notre agence pour découvrir nos véhicules et choisir la solution de location adaptée à vos besoins.\n\n📞 Contactez-nous dès maintenant pour réserver votre voiture sans permis !\n\nAvec VSP Location by Igoville Auto, retrouvez votre liberté de mouvement à Igoville et dans les villes alentour : Elbeuf, Rouen, Évreux, Louviers…\n\nAgence MOTRIO IGOVILLE AUTO\n📍 4 rue de Paris\n27460 Igoville\n📞 [Coordonnées masquées]\n\nOPTIONS ET ÉQUIPEMENTS :\nAudio - Télécommunications :\n  - Auto-radio commandé au volant\n  - Bluetooth\n\nExtérieur :\n  - Radar arrière de détection d’obstacles\n\nIntérieur :\n  - Direction assistée\n  - Fermeture centralisée\n  - Vitres électriques\n  - Volant cuir\n\nPack :\n  - Intérieur tissu",
+      "brand": "leboncoin",
+      "ad_type": "offer",
+      "url": "https://www.leboncoin.fr/ad/voitures/3271761941",
+      "price": [
+        20
+      ],
+      "price_cents": 2000,
+      "images": {
+        "thumb_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/ef/31/79/ef3179f5152ca6394c6df9431aa65e6920a9992f.jpg?rule=ad-thumb",
+        "small_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/ef/31/79/ef3179f5152ca6394c6df9431aa65e6920a9992f.jpg?rule=ad-small",
+        "nb_images": 12,
+        "urls": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ef/31/79/ef3179f5152ca6394c6df9431aa65e6920a9992f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/7c/7a/43/7c7a43ca4b4487bd65b242a529fdb507c294825d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b3/f2/af/b3f2afc39564dc360f8c3d8a03a9c1053137cd34.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f8/3c/32/f83c3297d88453eba9cda6483c1a137c20b46f97.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a7/93/11/a793114e373341e72250fb7ec3fde5933fe2bb9c.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/77/39/5a/77395a6ed571a671a05a858a42944e13a3d1de5d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/40/85/65/40856580ed4d90ad1e2009b66f5a563d7314e698.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/3c/97/40/3c97409743b27763d955db811cc8f0276f7e9271.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2e/4c/d5/2e4cd5b9ca1a1e9b2b5f69ee0a87de5e866e3cd7.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/34/26/54/342654613c18c0517d6233999c26df92c528d3ec.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/df/fc/e6/dffce6fbcfef5a452e57ecdb5ffb83615e2f1bea.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e2/32/41/e23241b88e5d71078834e34b20a8480959b8a6b4.jpg?rule=ad-image"
+        ],
+        "urls_thumb": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ef/31/79/ef3179f5152ca6394c6df9431aa65e6920a9992f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/7c/7a/43/7c7a43ca4b4487bd65b242a529fdb507c294825d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b3/f2/af/b3f2afc39564dc360f8c3d8a03a9c1053137cd34.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f8/3c/32/f83c3297d88453eba9cda6483c1a137c20b46f97.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a7/93/11/a793114e373341e72250fb7ec3fde5933fe2bb9c.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/77/39/5a/77395a6ed571a671a05a858a42944e13a3d1de5d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/40/85/65/40856580ed4d90ad1e2009b66f5a563d7314e698.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/3c/97/40/3c97409743b27763d955db811cc8f0276f7e9271.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2e/4c/d5/2e4cd5b9ca1a1e9b2b5f69ee0a87de5e866e3cd7.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/34/26/54/342654613c18c0517d6233999c26df92c528d3ec.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/df/fc/e6/dffce6fbcfef5a452e57ecdb5ffb83615e2f1bea.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e2/32/41/e23241b88e5d71078834e34b20a8480959b8a6b4.jpg?rule=ad-thumb"
+        ],
+        "urls_large": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ef/31/79/ef3179f5152ca6394c6df9431aa65e6920a9992f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/7c/7a/43/7c7a43ca4b4487bd65b242a529fdb507c294825d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b3/f2/af/b3f2afc39564dc360f8c3d8a03a9c1053137cd34.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f8/3c/32/f83c3297d88453eba9cda6483c1a137c20b46f97.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a7/93/11/a793114e373341e72250fb7ec3fde5933fe2bb9c.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/77/39/5a/77395a6ed571a671a05a858a42944e13a3d1de5d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/40/85/65/40856580ed4d90ad1e2009b66f5a563d7314e698.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/3c/97/40/3c97409743b27763d955db811cc8f0276f7e9271.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2e/4c/d5/2e4cd5b9ca1a1e9b2b5f69ee0a87de5e866e3cd7.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/34/26/54/342654613c18c0517d6233999c26df92c528d3ec.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/df/fc/e6/dffce6fbcfef5a452e57ecdb5ffb83615e2f1bea.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e2/32/41/e23241b88e5d71078834e34b20a8480959b8a6b4.jpg?rule=ad-large"
+        ]
+      },
+      "attributes": [
+        {
+          "key": "activity_sector",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "value_label": "1",
+          "generic": false
+        },
+        {
+          "key": "brand",
+          "value": "Aixam",
+          "values": [
+            "Aixam"
+          ],
+          "key_label": "Marque",
+          "value_label": "Aixam",
+          "generic": false
+        },
+        {
+          "key": "model",
+          "value": "City",
+          "values": [
+            "City",
+            "model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "City",
+          "generic": false
+        },
+        {
+          "key": "u_car_brand",
+          "value": "AIXAM",
+          "values": [
+            "AIXAM"
+          ],
+          "key_label": "Marque",
+          "value_label": "AIXAM",
+          "generic": true
+        },
+        {
+          "key": "u_car_model",
+          "value": "AIXAM_City",
+          "values": [
+            "AIXAM_City",
+            "AIXAM_model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "City",
+          "generic": true
+        },
+        {
+          "key": "regdate",
+          "value": "2026",
+          "values": [
+            "2026"
+          ],
+          "key_label": "Année modèle",
+          "value_label": "2026",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "mileage",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "key_label": "Kilométrage",
+          "value_label": "1 km",
+          "value_label_reader": "1 Kilomètres",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "fuel",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Énergie",
+          "value_label": "Diesel",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "gearbox",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Boîte de vitesse",
+          "value_label": "Automatique",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "doors",
+          "value": "3",
+          "values": [
+            "3"
+          ],
+          "key_label": "Nombre de portes",
+          "value_label": "3",
+          "generic": true
+        },
+        {
+          "key": "seats",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Nombre de place(s)",
+          "value_label": "2",
+          "generic": true
+        },
+        {
+          "key": "u_car_finition",
+          "value": "AIXAM_City_Sport",
+          "values": [
+            "AIXAM_City_Sport",
+            "AIXAM_model_all_finition_all",
+            "AIXAM_City_finition_all"
+          ],
+          "key_label": "Finition Constructeur",
+          "value_label": "Sport",
+          "generic": true
+        },
+        {
+          "key": "u_car_version",
+          "value": "City Sport",
+          "values": [
+            "City Sport"
+          ],
+          "key_label": "Version Constructeur",
+          "value_label": "City Sport",
+          "generic": true
+        },
+        {
+          "key": "issuance_date",
+          "value": "01/2026",
+          "values": [
+            "01/2026"
+          ],
+          "key_label": "Date de première mise en circulation",
+          "value_label": "01/2026",
+          "generic": true
+        },
+        {
+          "key": "vehicle_type",
+          "value": "citadine",
+          "values": [
+            "citadine"
+          ],
+          "key_label": "Type de véhicule",
+          "value_label": "Citadine",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "",
+          "values": [
+            "bluetooth",
+            "electric_rear_windows"
+          ],
+          "key_label": "Équipements",
+          "value_label": "Bluetooth, Vitres électriques arrières",
+          "value_label_reader": ", ",
+          "values_label": [
+            "Bluetooth",
+            "Vitres électriques arrières"
+          ],
+          "values_label_reader": [
+            "",
+            ""
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicule_color",
+          "value": "bleu",
+          "values": [
+            "bleu"
+          ],
+          "key_label": "Couleur",
+          "value_label": "Bleu",
+          "generic": true
+        },
+        {
+          "key": "vehicle_vsp",
+          "value": "sanspermis",
+          "values": [
+            "sanspermis"
+          ],
+          "key_label": "Permis",
+          "value_label": "Sans permis",
+          "generic": true
+        },
+        {
+          "key": "recent_used_vehicle",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "has_visibility_option",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "store_logo",
+          "value": "https://img.leboncoin.fr/api/v1/lbcpb1/images/34/9b/de/349bdef7-7c37-4faa-a3b2-efc641f914fe?rule=bo-thumb",
+          "values": [
+            "https://img.leboncoin.fr/api/v1/lbcpb1/images/34/9b/de/349bdef7-7c37-4faa-a3b2-efc641f914fe?rule=bo-thumb"
+          ],
+          "value_label": "https://img.leboncoin.fr/api/v1/lbcpb1/images/34/9b/de/349bdef7-7c37-4faa-a3b2-efc641f914fe?rule=bo-thumb",
+          "generic": false
+        },
+        {
+          "key": "store_name",
+          "value": "IGOVILLE AUTO",
+          "values": [
+            "IGOVILLE AUTO"
+          ],
+          "value_label": "IGOVILLE AUTO",
+          "generic": false
+        },
+        {
+          "key": "online_store_id",
+          "value": "46330",
+          "values": [
+            "46330"
+          ],
+          "value_label": "46330",
+          "generic": false
+        },
+        {
+          "key": "custom_ref",
+          "value": "420644",
+          "values": [
+            "420644"
+          ],
+          "key_label": "Référence",
+          "value_label": "420644",
+          "generic": true
+        },
+        {
+          "key": "is_import",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "argus_object_id",
+          "value": "2174666",
+          "values": [
+            "2174666"
+          ],
+          "value_label": "2174666",
+          "generic": false
+        },
+        {
+          "key": "spare_parts_availability",
+          "value": "non_renseignee",
+          "values": [
+            "non_renseignee"
+          ],
+          "key_label": "Durée de disponibilité des pièces détachées",
+          "value_label": "Non renseignée",
+          "generic": true
+        }
+      ],
+      "location": {
+        "country_id": "FR",
+        "region_id": "11",
+        "region_name": "Haute-Normandie",
+        "department_id": "27",
+        "department_name": "Eure",
+        "city_label": "Igoville 27460",
+        "city": "Igoville",
+        "zipcode": "27460",
+        "lat": 49.3191,
+        "lng": 1.15087,
+        "source": "city",
+        "provider": "here",
+        "type": "",
+        "origin_type": "",
+        "is_shape": true,
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              1.15087,
+              49.3191
+            ]
+          },
+          "properties": null
+        }
+      },
+      "owner": {
+        "store_id": "27377839",
+        "user_id": "2404ee89-927f-4684-a182-2eee890b1273",
+        "type": "pro",
+        "name": "IGOVILLE AUTO",
+        "siren": "827586017",
+        "no_salesmen": true,
+        "activity_sector": "1"
+      },
+      "options": {
+        "has_option": false,
+        "booster": false,
+        "photosup": false,
+        "urgent": false,
+        "gallery": false,
+        "sub_toplist": false,
+        "continuous_top_ads": false,
+        "highlight": false
+      },
+      "has_phone": true,
+      "attributes_adview_positive": [
+        {
+          "key": "mileage",
+          "value": "1",
+          "key_label": "Kilométrage",
+          "value_label": "Faible kilométrage",
+          "value_label_reader": "Faible kilométrage",
+          "generic": false
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "bluetooth",
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "value_label_reader": "Bluetooth",
+          "generic": false
+        }
+      ],
+      "attributes_characteristics": [
+        {
+          "key": "vehicle_interior_specs",
+          "value": "bluetooth",
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "electric_rear_windows",
+          "key_label": "Équipements",
+          "value_label": "Vitres électriques arrières",
+          "generic": true
+        }
+      ],
+      "similar": null,
+      "entitlements": [
+        "LBC_PRO_AUTO_NOSAMEADS_OPT",
+        "NO_SIMILAR_ADS"
+      ],
+      "counters": {}
+    },
+    {
+      "list_id": 3284212759,
+      "first_publication_date": "2026-10-07 21:25:03",
+      "index_date": "2026-10-12 21:33:41",
+      "status": "active",
+      "category_id": "2",
+      "category_name": "Voitures",
+      "subject": "RENAULT CLIO 1.6 E-Tech Hybride 145 BVA Esprit Alpine a partir de 298 euros / mois en LLD",
+      "body": "Renault Portet Automobiles vous propose la CLIO VI 1.2 E-TECH HYBRIDE 145 ALPINE\n\n🚗 CLIO VI 1.6 E-TECH HYBRIDE 145 ESPRIT ALPINE 🚗 Avec 2000 euros d'apport à partir de 298 euros / mois sur 36 mois en Location Longue Durée / 30 000 kms\nSans apport à partir de 345 euros / mois sur 37 mois en Location Longue Durée / 30 000 kms\n2 LOYERS OFFERTS Offre valable du 8 au 12 octobre uniquement\nOffre hors entretien et assurances emprunteur à rajouter\n\nDOCUMENTS A FOURNIR :\n- 2 derniers bulletins salaire ( OU justificatif de revenus?)\n- RIB\n- Justificatif domicile - 3 mois (Facture EDF, internet, Mobile,...)\n- Carte d'identité\n- Permis de conduire\n- Dernier Avis d 'imposition\n\nDans le cadre d'un financement, assurances emprunteur à rajouter aux mensualités. Notre agence est ouverte du lundi au vendredi de 7h30 à 12h30 et de 13h30 à 18h30 Le samedi de 9h à 18h. 113 bis Route d'Espagne 31120 Portet sur Garonne\n\nOPTIONS ET ÉQUIPEMENTS :\nConduite :\n  - Allumage automatique des projecteurs\n  - Régulateur de vitesse adaptatif avec fonction Stop & Go\n\nExtérieur :\n  - Caméra de recul\n\nIntérieur :\n  - Climatisation automatique\n  - Sièges avant sport\n  - Volant multifonction\n\nAutres équipements et informations :\n  - Easy link 9,3” avec navigation : radio et navigation avec écran tactile 9,3” haute résolution, finition brillante antireflet (compatible avec Android Auto et Apple CarPlay)\n  - Jantes alliage 17” «la flèche» (cabochon gris schiste/bleu selon couleur carrosserie)\n  - Peinture Bleu Iron",
+      "brand": "leboncoin",
+      "ad_type": "offer",
+      "url": "https://www.leboncoin.fr/ad/voitures/3284212759",
+      "price": [
+        298
+      ],
+      "price_cents": 29800,
+      "images": {
+        "thumb_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/9c/f0/489cf0479b85a56486d1452d0f28d6e53207631f.jpg?rule=ad-thumb",
+        "small_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/9c/f0/489cf0479b85a56486d1452d0f28d6e53207631f.jpg?rule=ad-small",
+        "nb_images": 50,
+        "urls": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/9c/f0/489cf0479b85a56486d1452d0f28d6e53207631f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/a5/fe/a1a5fe59912c0beba1a5bb749f445e029e0d57ee.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d1/61/a0/d161a0d94c516ca1a6d698894e6da84d04828210.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/45/6c/7e/456c7e4b66bd25ae6c41fdea078d7f71a9996935.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a2/47/34/a2473441bdf9f45659180831091af2b01b013169.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ae/30/8e/ae308e12f75b30e4280ef0d3e2758736cf4a9bbd.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/de/37/71/de37711ad9e1ca9fc14bdfd9e717c1c65a4e8ef4.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/66/cb/14/66cb14c69c5aa9cb8ec6f27d0301ccd8f39a6a99.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/db/3f/91/db3f91434d8fc936afe77972d64b9b6949fdfa10.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2a/1a/ae/2a1aae54e1fd2391875bb4fea46ee4eda890d306.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/49/91/d8/4991d883ec09fd04afa1a7e0b11c7dbd31a9ff40.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/21/6b/63/216b63225d01d187c95ca97ad864daf648ab10b7.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/51/11/d4/5111d49705eaa163bcb5098703cd7d171ac40eca.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a3/09/dc/a309dc2583756da0cb48f369893bb7541cfbd078.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/14/2b/47/142b47d8496796047799862574893b75583aa30f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f1/8c/c3/f18cc30bc0e2cc43ed28c73f29e689a4e64d9ddc.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/30/ff/47/30ff47abe0b08361f0336a714c7058aa5ea7ebe7.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2d/84/49/2d8449592884ae362e1915a76395c7e702f8130d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/bd/d1/29/bdd12914fc5de25a8a01d529f3b50074593e41d0.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d3/41/f5/d341f5050e18eed52562574ff98703b33feb3d45.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/b6/ea/a1b6eafee2cac8cf69d27b3594165751c460e5fe.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cb/57/a8/cb57a8ae8b9db9c928f22a9e27c583dd6ad2dfa1.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/24/68/10/2468102148e50c697e0649cfa21fdbed886791f2.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ee/f5/23/eef5236550e660267422643a0f0ba7b3fc9ecb42.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/0f/26/ef/0f26ef8036bc5f08ae5e7aad2c78a24ce22f4dff.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cb/e3/ef/cbe3ef279d73a1db15102a1b3415d8cac4992bae.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e1/4d/ce/e14dce5863bace0a687609c044cd9a7daf596972.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/39/6f/b5/396fb5b724a9a0da91afe8e81ca3e9886d08ffbd.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/91/28/d3/9128d39c18ac4c28948e8383e37ef36eca2066bd.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/58/97/00/589700a3d61e0db98be2acab06d7587455adce9d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5c/3a/b2/5c3ab2ae19d72194ab37247adb6de730aebbde66.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cd/63/54/cd6354f5f05c1e49e903b85eacf51f2e39ff8b82.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/4f/6c/4b/4f6c4bbeb4b88ff1bc2ac9ab942e98b09245550d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/52/27/be/5227be27d2329a5730fdfb8a48034c8b43a80690.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b9/fa/a9/b9faa969db5bfd4920185fa4715954e9eb4306b0.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b3/2c/80/b32c8006c185e2a607a4f460d0ca29c47caf1fca.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d9/99/54/d99954a11df7b078f7e9f58bc59b2bb91e04becb.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5c/c2/a8/5cc2a8924c9e3fca8940490d6b7ba6f3f3bd95a3.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cd/ad/00/cdad000b323c29961a2e6e377be7d6dd7bb38571.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/c1/a6/be/c1a6be82a211b0aa4ff581050f54cf71ad6cadd6.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f3/f4/44/f3f444d4be64b8400487e2104a67b3619efca0bb.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/50/d2/b5/50d2b50e90ac99155239ee595c5c3133ebdad61e.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/75/25/c0/7525c05f3e655c5e992f3da4d67ad92fe842392e.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/c0/88/ef/c088ef4521f0a0e7e9719679ae7df4f43d253d24.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a7/71/dd/a771dd056f44af8c59073e0e7d49aad5655db871.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/21/d1/c9/21d1c9486c3eff6d5ef3e5c752d8e446b1ef9054.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b0/5b/8b/b05b8ba6d35c3787e2f002e0ab973a810f8124d7.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/32/e3/ec/32e3eca93b90f10ab842d5be9b328eff28873cf5.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/97/89/ca/9789ca075723c44a36b46884c053bc1cfcc37767.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/20/87/9d/20879de03a779e67e8578232bdc6f05b1a5fe7dd.jpg?rule=ad-image"
+        ],
+        "urls_thumb": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/9c/f0/489cf0479b85a56486d1452d0f28d6e53207631f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/a5/fe/a1a5fe59912c0beba1a5bb749f445e029e0d57ee.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d1/61/a0/d161a0d94c516ca1a6d698894e6da84d04828210.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/45/6c/7e/456c7e4b66bd25ae6c41fdea078d7f71a9996935.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a2/47/34/a2473441bdf9f45659180831091af2b01b013169.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ae/30/8e/ae308e12f75b30e4280ef0d3e2758736cf4a9bbd.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/de/37/71/de37711ad9e1ca9fc14bdfd9e717c1c65a4e8ef4.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/66/cb/14/66cb14c69c5aa9cb8ec6f27d0301ccd8f39a6a99.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/db/3f/91/db3f91434d8fc936afe77972d64b9b6949fdfa10.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2a/1a/ae/2a1aae54e1fd2391875bb4fea46ee4eda890d306.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/49/91/d8/4991d883ec09fd04afa1a7e0b11c7dbd31a9ff40.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/21/6b/63/216b63225d01d187c95ca97ad864daf648ab10b7.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/51/11/d4/5111d49705eaa163bcb5098703cd7d171ac40eca.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a3/09/dc/a309dc2583756da0cb48f369893bb7541cfbd078.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/14/2b/47/142b47d8496796047799862574893b75583aa30f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f1/8c/c3/f18cc30bc0e2cc43ed28c73f29e689a4e64d9ddc.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/30/ff/47/30ff47abe0b08361f0336a714c7058aa5ea7ebe7.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2d/84/49/2d8449592884ae362e1915a76395c7e702f8130d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/bd/d1/29/bdd12914fc5de25a8a01d529f3b50074593e41d0.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d3/41/f5/d341f5050e18eed52562574ff98703b33feb3d45.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/b6/ea/a1b6eafee2cac8cf69d27b3594165751c460e5fe.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cb/57/a8/cb57a8ae8b9db9c928f22a9e27c583dd6ad2dfa1.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/24/68/10/2468102148e50c697e0649cfa21fdbed886791f2.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ee/f5/23/eef5236550e660267422643a0f0ba7b3fc9ecb42.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/0f/26/ef/0f26ef8036bc5f08ae5e7aad2c78a24ce22f4dff.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cb/e3/ef/cbe3ef279d73a1db15102a1b3415d8cac4992bae.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e1/4d/ce/e14dce5863bace0a687609c044cd9a7daf596972.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/39/6f/b5/396fb5b724a9a0da91afe8e81ca3e9886d08ffbd.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/91/28/d3/9128d39c18ac4c28948e8383e37ef36eca2066bd.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/58/97/00/589700a3d61e0db98be2acab06d7587455adce9d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5c/3a/b2/5c3ab2ae19d72194ab37247adb6de730aebbde66.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cd/63/54/cd6354f5f05c1e49e903b85eacf51f2e39ff8b82.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/4f/6c/4b/4f6c4bbeb4b88ff1bc2ac9ab942e98b09245550d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/52/27/be/5227be27d2329a5730fdfb8a48034c8b43a80690.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b9/fa/a9/b9faa969db5bfd4920185fa4715954e9eb4306b0.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b3/2c/80/b32c8006c185e2a607a4f460d0ca29c47caf1fca.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d9/99/54/d99954a11df7b078f7e9f58bc59b2bb91e04becb.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5c/c2/a8/5cc2a8924c9e3fca8940490d6b7ba6f3f3bd95a3.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cd/ad/00/cdad000b323c29961a2e6e377be7d6dd7bb38571.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/c1/a6/be/c1a6be82a211b0aa4ff581050f54cf71ad6cadd6.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f3/f4/44/f3f444d4be64b8400487e2104a67b3619efca0bb.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/50/d2/b5/50d2b50e90ac99155239ee595c5c3133ebdad61e.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/75/25/c0/7525c05f3e655c5e992f3da4d67ad92fe842392e.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/c0/88/ef/c088ef4521f0a0e7e9719679ae7df4f43d253d24.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a7/71/dd/a771dd056f44af8c59073e0e7d49aad5655db871.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/21/d1/c9/21d1c9486c3eff6d5ef3e5c752d8e446b1ef9054.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b0/5b/8b/b05b8ba6d35c3787e2f002e0ab973a810f8124d7.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/32/e3/ec/32e3eca93b90f10ab842d5be9b328eff28873cf5.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/97/89/ca/9789ca075723c44a36b46884c053bc1cfcc37767.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/20/87/9d/20879de03a779e67e8578232bdc6f05b1a5fe7dd.jpg?rule=ad-thumb"
+        ],
+        "urls_large": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/9c/f0/489cf0479b85a56486d1452d0f28d6e53207631f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/a5/fe/a1a5fe59912c0beba1a5bb749f445e029e0d57ee.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d1/61/a0/d161a0d94c516ca1a6d698894e6da84d04828210.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/45/6c/7e/456c7e4b66bd25ae6c41fdea078d7f71a9996935.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a2/47/34/a2473441bdf9f45659180831091af2b01b013169.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ae/30/8e/ae308e12f75b30e4280ef0d3e2758736cf4a9bbd.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/de/37/71/de37711ad9e1ca9fc14bdfd9e717c1c65a4e8ef4.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/66/cb/14/66cb14c69c5aa9cb8ec6f27d0301ccd8f39a6a99.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/db/3f/91/db3f91434d8fc936afe77972d64b9b6949fdfa10.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2a/1a/ae/2a1aae54e1fd2391875bb4fea46ee4eda890d306.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/49/91/d8/4991d883ec09fd04afa1a7e0b11c7dbd31a9ff40.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/21/6b/63/216b63225d01d187c95ca97ad864daf648ab10b7.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/51/11/d4/5111d49705eaa163bcb5098703cd7d171ac40eca.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a3/09/dc/a309dc2583756da0cb48f369893bb7541cfbd078.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/14/2b/47/142b47d8496796047799862574893b75583aa30f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f1/8c/c3/f18cc30bc0e2cc43ed28c73f29e689a4e64d9ddc.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/30/ff/47/30ff47abe0b08361f0336a714c7058aa5ea7ebe7.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/2d/84/49/2d8449592884ae362e1915a76395c7e702f8130d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/bd/d1/29/bdd12914fc5de25a8a01d529f3b50074593e41d0.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d3/41/f5/d341f5050e18eed52562574ff98703b33feb3d45.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/b6/ea/a1b6eafee2cac8cf69d27b3594165751c460e5fe.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cb/57/a8/cb57a8ae8b9db9c928f22a9e27c583dd6ad2dfa1.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/24/68/10/2468102148e50c697e0649cfa21fdbed886791f2.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/ee/f5/23/eef5236550e660267422643a0f0ba7b3fc9ecb42.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/0f/26/ef/0f26ef8036bc5f08ae5e7aad2c78a24ce22f4dff.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cb/e3/ef/cbe3ef279d73a1db15102a1b3415d8cac4992bae.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e1/4d/ce/e14dce5863bace0a687609c044cd9a7daf596972.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/39/6f/b5/396fb5b724a9a0da91afe8e81ca3e9886d08ffbd.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/91/28/d3/9128d39c18ac4c28948e8383e37ef36eca2066bd.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/58/97/00/589700a3d61e0db98be2acab06d7587455adce9d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5c/3a/b2/5c3ab2ae19d72194ab37247adb6de730aebbde66.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cd/63/54/cd6354f5f05c1e49e903b85eacf51f2e39ff8b82.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/4f/6c/4b/4f6c4bbeb4b88ff1bc2ac9ab942e98b09245550d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/52/27/be/5227be27d2329a5730fdfb8a48034c8b43a80690.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b9/fa/a9/b9faa969db5bfd4920185fa4715954e9eb4306b0.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b3/2c/80/b32c8006c185e2a607a4f460d0ca29c47caf1fca.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d9/99/54/d99954a11df7b078f7e9f58bc59b2bb91e04becb.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5c/c2/a8/5cc2a8924c9e3fca8940490d6b7ba6f3f3bd95a3.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/cd/ad/00/cdad000b323c29961a2e6e377be7d6dd7bb38571.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/c1/a6/be/c1a6be82a211b0aa4ff581050f54cf71ad6cadd6.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f3/f4/44/f3f444d4be64b8400487e2104a67b3619efca0bb.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/50/d2/b5/50d2b50e90ac99155239ee595c5c3133ebdad61e.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/75/25/c0/7525c05f3e655c5e992f3da4d67ad92fe842392e.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/c0/88/ef/c088ef4521f0a0e7e9719679ae7df4f43d253d24.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a7/71/dd/a771dd056f44af8c59073e0e7d49aad5655db871.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/21/d1/c9/21d1c9486c3eff6d5ef3e5c752d8e446b1ef9054.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b0/5b/8b/b05b8ba6d35c3787e2f002e0ab973a810f8124d7.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/32/e3/ec/32e3eca93b90f10ab842d5be9b328eff28873cf5.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/97/89/ca/9789ca075723c44a36b46884c053bc1cfcc37767.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/20/87/9d/20879de03a779e67e8578232bdc6f05b1a5fe7dd.jpg?rule=ad-large"
+        ]
+      },
+      "attributes": [
+        {
+          "key": "activity_sector",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "value_label": "1",
+          "generic": false
+        },
+        {
+          "key": "brand",
+          "value": "Renault",
+          "values": [
+            "Renault"
+          ],
+          "key_label": "Marque",
+          "value_label": "Renault",
+          "generic": false
+        },
+        {
+          "key": "model",
+          "value": "Clio",
+          "values": [
+            "Clio",
+            "model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "Clio",
+          "generic": false
+        },
+        {
+          "key": "u_car_brand",
+          "value": "RENAULT",
+          "values": [
+            "RENAULT"
+          ],
+          "key_label": "Marque",
+          "value_label": "RENAULT",
+          "generic": true
+        },
+        {
+          "key": "u_car_model",
+          "value": "RENAULT_Clio",
+          "values": [
+            "RENAULT_Clio",
+            "RENAULT_model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "Clio",
+          "generic": true
+        },
+        {
+          "key": "regdate",
+          "value": "2026",
+          "values": [
+            "2026"
+          ],
+          "key_label": "Année modèle",
+          "value_label": "2026",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "mileage",
+          "value": "10",
+          "values": [
+            "10"
+          ],
+          "key_label": "Kilométrage",
+          "value_label": "10 km",
+          "value_label_reader": "10 Kilomètres",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "fuel",
+          "value": "6",
+          "values": [
+            "6"
+          ],
+          "key_label": "Énergie",
+          "value_label": "Hybride",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "gearbox",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Boîte de vitesse",
+          "value_label": "Automatique",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "doors",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de portes",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "seats",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de place(s)",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "u_car_finition",
+          "value": "RENAULT_Clio_esprit Alpine",
+          "values": [
+            "RENAULT_Clio_esprit Alpine",
+            "RENAULT_model_all_finition_all",
+            "RENAULT_Clio_finition_all"
+          ],
+          "key_label": "Finition Constructeur",
+          "value_label": "esprit Alpine",
+          "generic": true
+        },
+        {
+          "key": "u_car_version",
+          "value": "Clio 1.6 E-Tech 145ch full hybrid esprit Alpine - 25b",
+          "values": [
+            "Clio 1.6 E-Tech 145ch full hybrid esprit Alpine - 25b"
+          ],
+          "key_label": "Version Constructeur",
+          "value_label": "Clio 1.6 E-Tech 145ch full hybrid esprit Alpine - 25b",
+          "generic": true
+        },
+        {
+          "key": "issuance_date",
+          "value": "08/2026",
+          "values": [
+            "08/2026"
+          ],
+          "key_label": "Date de première mise en circulation",
+          "value_label": "08/2026",
+          "generic": true
+        },
+        {
+          "key": "vehicle_damage",
+          "value": "good_overall_condition",
+          "values": [
+            "good_overall_condition"
+          ],
+          "key_label": "État du véhicule",
+          "value_label": "Bon état général",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicle_type",
+          "value": "berline",
+          "values": [
+            "berline"
+          ],
+          "key_label": "Type de véhicule",
+          "value_label": "Berline",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "",
+          "values": [
+            "automatic_headlights",
+            "apple_carplay_android_auto",
+            "rearview_camera",
+            "air_conditioning",
+            "alloy_wheels",
+            "cruise_control"
+          ],
+          "key_label": "Équipements",
+          "value_label": "Allumage automatique des phares, Apple CarPlay / Android Auto, Caméra de recul, Climatisation, Jantes en alliage, Régulateur de vitesse",
+          "value_label_reader": ", Apple CarPlay ou Android Auto, , , , ",
+          "values_label": [
+            "Allumage automatique des phares",
+            "Apple CarPlay / Android Auto",
+            "Caméra de recul",
+            "Climatisation",
+            "Jantes en alliage",
+            "Régulateur de vitesse"
+          ],
+          "values_label_reader": [
+            "",
+            "Apple CarPlay ou Android Auto",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicule_color",
+          "value": "bleu",
+          "values": [
+            "bleu"
+          ],
+          "key_label": "Couleur",
+          "value_label": "Bleu",
+          "generic": true
+        },
+        {
+          "key": "critair",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "key_label": "Crit'Air",
+          "value_label": "1",
+          "generic": true
+        },
+        {
+          "key": "horsepower",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Puissance fiscale",
+          "value_label": "5 Cv",
+          "value_label_reader": "5 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "horse_power_din",
+          "value": "94",
+          "values": [
+            "94"
+          ],
+          "key_label": "Puissance DIN",
+          "value_label": "94 Ch",
+          "value_label_reader": "94 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "vehicle_vsp",
+          "value": "avecpermis",
+          "values": [
+            "avecpermis"
+          ],
+          "key_label": "Permis",
+          "value_label": "Avec permis",
+          "generic": true
+        },
+        {
+          "key": "recent_used_vehicle",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "has_visibility_option",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "store_logo",
+          "value": "https://img.leboncoin.fr/api/v1/lbcpb1/images/d7/9e/92/d79e927d-e455-4821-915a-4009a28697cb?rule=bo-thumb",
+          "values": [
+            "https://img.leboncoin.fr/api/v1/lbcpb1/images/d7/9e/92/d79e927d-e455-4821-915a-4009a28697cb?rule=bo-thumb"
+          ],
+          "value_label": "https://img.leboncoin.fr/api/v1/lbcpb1/images/d7/9e/92/d79e927d-e455-4821-915a-4009a28697cb?rule=bo-thumb",
+          "generic": false
+        },
+        {
+          "key": "store_name",
+          "value": "GROUPE ALSO",
+          "values": [
+            "GROUPE ALSO"
+          ],
+          "value_label": "GROUPE ALSO",
+          "generic": false
+        },
+        {
+          "key": "online_store_id",
+          "value": "13833",
+          "values": [
+            "13833"
+          ],
+          "value_label": "13833",
+          "generic": false
+        },
+        {
+          "key": "custom_ref",
+          "value": "1515-0001249",
+          "values": [
+            "1515-0001249"
+          ],
+          "key_label": "Référence",
+          "value_label": "1515-0001249",
+          "generic": true
+        },
+        {
+          "key": "is_import",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "car_price_min",
+          "value": "24170",
+          "values": [
+            "24170"
+          ],
+          "value_label": "24170",
+          "generic": false
+        },
+        {
+          "key": "car_price_max",
+          "value": "26710",
+          "values": [
+            "26710"
+          ],
+          "value_label": "26710",
+          "generic": false
+        },
+        {
+          "key": "car_price_positioning",
+          "value": "badge_key_6_5",
+          "values": [
+            "badge_key_6_5"
+          ],
+          "value_label": "Estimation indisponible",
+          "generic": false
+        },
+        {
+          "key": "argus_object_id",
+          "value": "2970516",
+          "values": [
+            "2970516"
+          ],
+          "value_label": "2970516",
+          "generic": false
+        },
+        {
+          "key": "spare_parts_availability",
+          "value": "non_renseignee",
+          "values": [
+            "non_renseignee"
+          ],
+          "key_label": "Durée de disponibilité des pièces détachées",
+          "value_label": "Non renseignée",
+          "generic": true
+        }
+      ],
+      "location": {
+        "country_id": "FR",
+        "region_id": "16",
+        "region_name": "Midi-Pyrénées",
+        "department_id": "31",
+        "department_name": "Haute-Garonne",
+        "city_label": "Portet-sur-Garonne 31120",
+        "city": "Portet-sur-Garonne",
+        "zipcode": "31120",
+        "lat": 43.51934,
+        "lng": 1.38982,
+        "source": "address",
+        "provider": "here",
+        "type": "",
+        "origin_type": "",
+        "is_shape": false,
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              1.38982,
+              43.51934
+            ]
+          },
+          "properties": null
+        }
+      },
+      "owner": {
+        "store_id": "568382",
+        "user_id": "125ebb32-0246-4f34-9339-ab09dd1f5927",
+        "type": "pro",
+        "name": "GROUPE ALSO RENAULT PORTET AUTOMOBILES",
+        "siren": "793469461",
+        "no_salesmen": true,
+        "activity_sector": "1"
+      },
+      "options": {
+        "has_option": false,
+        "booster": false,
+        "photosup": false,
+        "urgent": false,
+        "gallery": false,
+        "sub_toplist": false,
+        "continuous_top_ads": false,
+        "highlight": false
+      },
+      "has_phone": true,
+      "attributes_adview_positive": [
+        {
+          "key": "mileage",
+          "value": "10",
+          "key_label": "Kilométrage",
+          "value_label": "Faible kilométrage",
+          "value_label_reader": "Faible kilométrage",
+          "generic": false
+        },
+        {
+          "key": "critair",
+          "value": "1",
+          "key_label": "Crit'Air",
+          "value_label": "Crit'Air 1",
+          "value_label_reader": "Crit'Air 1",
+          "generic": false
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "cruise_control",
+          "key_label": "Équipements",
+          "value_label": "Régulateur de vitesse",
+          "value_label_reader": "Régulateur de vitesse",
+          "generic": false
+        }
+      ],
+      "attributes_characteristics": [
+        {
+          "key": "vehicle_interior_specs",
+          "value": "automatic_headlights",
+          "key_label": "Équipements",
+          "value_label": "Allumage automatique des phares",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "apple_carplay_android_auto",
+          "key_label": "Équipements",
+          "value_label": "Apple CarPlay / Android Auto",
+          "value_label_reader": "Apple CarPlay ou Android Auto",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "rearview_camera",
+          "key_label": "Équipements",
+          "value_label": "Caméra de recul",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "air_conditioning",
+          "key_label": "Équipements",
+          "value_label": "Climatisation",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "alloy_wheels",
+          "key_label": "Équipements",
+          "value_label": "Jantes en alliage",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "cruise_control",
+          "key_label": "Équipements",
+          "value_label": "Régulateur de vitesse",
+          "generic": true
+        }
+      ],
+      "similar": null,
+      "entitlements": [
+        "LBC_PRO_AUTO_NOSAMEADS_OPT",
+        "NO_SIMILAR_ADS"
+      ],
+      "counters": {}
+    },
+    {
+      "list_id": 3286007762,
+      "first_publication_date": "2026-10-10 21:17:29",
+      "expiration_date": "2026-12-09 20:17:29",
+      "index_date": "2026-10-10 21:17:29",
+      "status": "active",
+      "category_id": "2",
+      "category_name": "Voitures",
+      "subject": "Échange voiture bmw",
+      "body": "Je cherche à échangé ma bmw 116 d",
+      "brand": "leboncoin",
+      "ad_type": "offer",
+      "url": "https://www.leboncoin.fr/ad/voitures/3286007762",
+      "price": [
+        10
+      ],
+      "price_cents": 1000,
+      "images": {
+        "thumb_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/3f/38/25/3f38257abde4d6d7ccfacfdac1eac12f337c056e.jpg?rule=ad-thumb",
+        "small_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/3f/38/25/3f38257abde4d6d7ccfacfdac1eac12f337c056e.jpg?rule=ad-small",
+        "nb_images": 2,
+        "urls": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/3f/38/25/3f38257abde4d6d7ccfacfdac1eac12f337c056e.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a4/2d/49/a42d493ae0a9672a5c5bd16037303ff1f6f15129.jpg?rule=ad-image"
+        ],
+        "urls_thumb": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/3f/38/25/3f38257abde4d6d7ccfacfdac1eac12f337c056e.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a4/2d/49/a42d493ae0a9672a5c5bd16037303ff1f6f15129.jpg?rule=ad-thumb"
+        ],
+        "urls_large": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/3f/38/25/3f38257abde4d6d7ccfacfdac1eac12f337c056e.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a4/2d/49/a42d493ae0a9672a5c5bd16037303ff1f6f15129.jpg?rule=ad-large"
+        ]
+      },
+      "attributes": [
+        {
+          "key": "profile_picture_url",
+          "value": "https://img.leboncoin.fr/api/v1/tenants/9a6387a1-6259-4f2c-a887-7e67f23dd4cb/domains/20bda58f-d650-462e-a72a-a5a7ecf2bf88/buckets/21d2b0bc-e54c-4b64-a30b-89127b18b785/images/profile/pictures/default/d03e83eb-1c7d-5cd7-9d64-a4402340ef2c?rule=pp-small",
+          "values": [
+            "https://img.leboncoin.fr/api/v1/tenants/9a6387a1-6259-4f2c-a887-7e67f23dd4cb/domains/20bda58f-d650-462e-a72a-a5a7ecf2bf88/buckets/21d2b0bc-e54c-4b64-a30b-89127b18b785/images/profile/pictures/default/d03e83eb-1c7d-5cd7-9d64-a4402340ef2c?rule=pp-small"
+          ],
+          "value_label": "https://img.leboncoin.fr/api/v1/tenants/9a6387a1-6259-4f2c-a887-7e67f23dd4cb/domains/20bda58f-d650-462e-a72a-a5a7ecf2bf88/buckets/21d2b0bc-e54c-4b64-a30b-89127b18b785/images/profile/pictures/default/d03e83eb-1c7d-5cd7-9d64-a4402340ef2c?rule=pp-small",
+          "generic": false
+        },
+        {
+          "key": "brand",
+          "value": "Bmw",
+          "values": [
+            "Bmw"
+          ],
+          "key_label": "Marque",
+          "value_label": "Bmw",
+          "generic": false
+        },
+        {
+          "key": "model",
+          "value": "Serie 1",
+          "values": [
+            "Serie 1",
+            "model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "Serie 1",
+          "generic": false
+        },
+        {
+          "key": "u_car_brand",
+          "value": "BMW",
+          "values": [
+            "BMW"
+          ],
+          "key_label": "Marque",
+          "value_label": "BMW",
+          "generic": true
+        },
+        {
+          "key": "u_car_model",
+          "value": "BMW_Série 1",
+          "values": [
+            "BMW_Série 1",
+            "BMW_model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "Série 1",
+          "generic": true
+        },
+        {
+          "key": "regdate",
+          "value": "2010",
+          "values": [
+            "2010"
+          ],
+          "key_label": "Année modèle",
+          "value_label": "2010",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "mileage",
+          "value": "249525",
+          "values": [
+            "249525"
+          ],
+          "key_label": "Kilométrage",
+          "value_label": "249525 km",
+          "value_label_reader": "249525 Kilomètres",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "fuel",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Énergie",
+          "value_label": "Diesel",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "gearbox",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "key_label": "Boîte de vitesse",
+          "value_label": "Manuelle",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "doors",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de portes",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "seats",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de place(s)",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "issuance_date",
+          "value": "02/2010",
+          "values": [
+            "02/2010"
+          ],
+          "key_label": "Date de première mise en circulation",
+          "value_label": "02/2010",
+          "generic": true
+        },
+        {
+          "key": "vehicle_damage",
+          "value": "undamaged",
+          "values": [
+            "undamaged"
+          ],
+          "key_label": "État du véhicule",
+          "value_label": "Non endommagé",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicle_type",
+          "value": "berline",
+          "values": [
+            "berline"
+          ],
+          "key_label": "Type de véhicule",
+          "value_label": "Berline",
+          "generic": true
+        },
+        {
+          "key": "vehicle_upholstery",
+          "value": "",
+          "values": [
+            "fabric"
+          ],
+          "key_label": "Sellerie",
+          "value_label": "Tissu",
+          "values_label": [
+            "Tissu"
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicle_history",
+          "value": "",
+          "values": [
+            "imported_vehicle"
+          ],
+          "key_label": "Historique du véhicule",
+          "value_label": "Véhicule importé",
+          "values_label": [
+            "Véhicule importé"
+          ],
+          "generic": true
+        },
+        {
+          "key": "vehicle_maintenance",
+          "value": "",
+          "values": [
+            "maintenance_booklet_available"
+          ],
+          "key_label": "Entretien du véhicule",
+          "value_label": "Carnet d'entretien disponible",
+          "values_label": [
+            "Carnet d'entretien disponible"
+          ],
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "",
+          "values": [
+            "automatic_headlights",
+            "bluetooth",
+            "usb_chargers",
+            "air_conditioning",
+            "automatic_windscreen_wipers",
+            "fog_lights",
+            "cruise_control"
+          ],
+          "key_label": "Équipements",
+          "value_label": "Allumage automatique des phares, Bluetooth, Chargeurs USB, Climatisation, Essuie-glaces automatiques, Phares anti-brouillard, Régulateur de vitesse",
+          "value_label_reader": ", , Chargeurs U.S.B, , , , ",
+          "values_label": [
+            "Allumage automatique des phares",
+            "Bluetooth",
+            "Chargeurs USB",
+            "Climatisation",
+            "Essuie-glaces automatiques",
+            "Phares anti-brouillard",
+            "Régulateur de vitesse"
+          ],
+          "values_label_reader": [
+            "",
+            "",
+            "Chargeurs U.S.B",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicule_color",
+          "value": "bleu",
+          "values": [
+            "bleu"
+          ],
+          "key_label": "Couleur",
+          "value_label": "Bleu",
+          "generic": true
+        },
+        {
+          "key": "horsepower",
+          "value": "6",
+          "values": [
+            "6"
+          ],
+          "key_label": "Puissance fiscale",
+          "value_label": "6 Cv",
+          "value_label_reader": "6 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "horse_power_din",
+          "value": "116",
+          "values": [
+            "116"
+          ],
+          "key_label": "Puissance DIN",
+          "value_label": "116 Ch",
+          "value_label_reader": "116 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "vehicle_vsp",
+          "value": "avecpermis",
+          "values": [
+            "avecpermis"
+          ],
+          "key_label": "Permis",
+          "value_label": "Avec permis",
+          "generic": true
+        },
+        {
+          "key": "vehicle_available_payment_methods",
+          "value": "credit_card",
+          "values": [
+            "credit_card"
+          ],
+          "value_label": "credit_card",
+          "generic": false
+        },
+        {
+          "key": "is_import",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "value_label": "false",
+          "generic": false
+        },
+        {
+          "key": "vehicle_is_eligible_p2p",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "value_label": "2",
+          "generic": false
+        },
+        {
+          "key": "car_price_min",
+          "value": "3800",
+          "values": [
+            "3800"
+          ],
+          "value_label": "3800",
+          "generic": false
+        },
+        {
+          "key": "car_price_max",
+          "value": "4190",
+          "values": [
+            "4190"
+          ],
+          "value_label": "4190",
+          "generic": false
+        },
+        {
+          "key": "licence_plate_available",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        }
+      ],
+      "location": {
+        "country_id": "FR",
+        "region_id": "4",
+        "region_name": "Basse-Normandie",
+        "department_id": "61",
+        "department_name": "Orne",
+        "city_label": "Putanges-le-Lac 61210 Putanges-Pont-Écrepin",
+        "city": "Putanges-le-Lac",
+        "zipcode": "61210",
+        "district": "Putanges-Pont-Écrepin",
+        "lat": 48.7643,
+        "lng": -0.24279,
+        "source": "address",
+        "provider": "here",
+        "type": "",
+        "origin_type": "",
+        "is_shape": false,
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              -0.24279,
+              48.7643
+            ]
+          },
+          "properties": null
+        }
+      },
+      "owner": {
+        "store_id": "86273761",
+        "user_id": "904d342b-613b-40a0-b0b6-6768a23887dc",
+        "type": "private",
+        "name": "noahhamel",
+        "no_salesmen": true,
+        "activity_sector": ""
+      },
+      "options": {
+        "has_option": false,
+        "booster": false,
+        "photosup": false,
+        "urgent": false,
+        "gallery": false,
+        "sub_toplist": false,
+        "continuous_top_ads": false,
+        "highlight": false
+      },
+      "has_phone": false,
+      "attributes_adview_positive": [
+        {
+          "key": "orig_index_date",
+          "value": "2026-10-10 19:17:29 +0000 UTC",
+          "key_label": "Date de dépot de l'annonce",
+          "value_label": "Annonce récente",
+          "value_label_reader": "Annonce récente",
+          "generic": false
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "cruise_control",
+          "key_label": "Équipements",
+          "value_label": "Régulateur de vitesse",
+          "value_label_reader": "Régulateur de vitesse",
+          "generic": false
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "bluetooth",
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "value_label_reader": "Bluetooth",
+          "generic": false
+        }
+      ],
+      "attributes_characteristics": [
+        {
+          "key": "vehicle_interior_specs",
+          "value": "automatic_headlights",
+          "key_label": "Équipements",
+          "value_label": "Allumage automatique des phares",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "bluetooth",
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "usb_chargers",
+          "key_label": "Équipements",
+          "value_label": "Chargeurs USB",
+          "value_label_reader": "Chargeurs U.S.B",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "air_conditioning",
+          "key_label": "Équipements",
+          "value_label": "Climatisation",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "automatic_windscreen_wipers",
+          "key_label": "Équipements",
+          "value_label": "Essuie-glaces automatiques",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "fog_lights",
+          "key_label": "Équipements",
+          "value_label": "Phares anti-brouillard",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "cruise_control",
+          "key_label": "Équipements",
+          "value_label": "Régulateur de vitesse",
+          "generic": true
+        }
+      ],
+      "similar": null,
+      "counters": {}
+    },
+    {
+      "list_id": 3287933356,
+      "first_publication_date": "2026-10-13 21:25:02",
+      "index_date": "2026-10-13 21:25:02",
+      "status": "active",
+      "category_id": "2",
+      "category_name": "Voitures",
+      "subject": "RENAULT Renault 5 E-TECH Renault 5 Autonomie Confort 150 Techno a partir de 263 euros / mois en LOA",
+      "body": "Renault Portet Automobiles vous propose le NOUVELLE RENAULT 5 E-ETCH 150 TECHNO\n\nNOUVELLE RENAULT 5 E-ETCH 150 TECHNO\n\nSans apport à partir de 263€/ mois sur 36 mois en Location avec Option d'Achat / 30 000 kms\n\nOffre incluant l'entretien et perte financière\nPrime Coup de pouce CEE maximale de 9420€ comprise (variable selon éligibilté)\nVoir lien ci-dessous :\n[URL masquée pour votre sécurité]\n\nPRINCIPAUX EQUIPEMENTS ET OPTIONS :\n- Réplicateur de smartphone sans fil\n- Caméra de recul\n- Climatisation automatique\n- Chargeur de smartphone à induction\n- Cartes mains-libres\n- Renault Multi-sense\n- Câble de recharge mode 3\n- Open R-Link 10'3 (système multimédia, Google,...)\n- Batterie Européenne\n\nDOCUMENTS A FOURNIR :\n- 2 derniers bulletins salaire ( OU justificatif de revenus…)\n- RIB\n- Justificatif domicile - 3 mois (Facture EDF, internet, Mobile,...)\n- Carte d'identité\n- Permis de conduire\n- Dernier Avis d 'imposition\n\nDans le cadre d'un financement, assurances emprunteur à rajouter aux mensualités. Notre agence est ouverte du lundi au vendredi de 7h30 à 12h30 et de 13h30 à 18h30 Le samedi de 9h à 18h. 113 bis Route d'Espagne 31120 Portet sur Garonne\n\nOPTIONS ET ÉQUIPEMENTS :\nConduite :\n  - Carte mains-libres\n  - Régulateur de vitesse adaptatif avec fonction Stop & Go\n\nExtérieur :\n  - Aide au stationnement arrière\n  - Caméra de recul\n  - Peinture Noir Etoilé\n  - Rétroviseurs extérieurs rabattables électriquement\n\nIntérieur :\n  - Climatisation automatique avant\n\nPack :\n  - Détecteur de luminosité\n  - Toit Noir Etoilé\n\nSécurité :\n  - Freinage automatique d’urgence aux intersections\n\nAutres équipements et informations :\n  - OpenR link 10,1” : système multimédia connecté avec Google intégré et le compagnon virtuel de conduite reno",
+      "brand": "leboncoin",
+      "ad_type": "offer",
+      "url": "https://www.leboncoin.fr/ad/voitures/3287933356",
+      "price": [
+        263
+      ],
+      "price_cents": 26300,
+      "images": {
+        "thumb_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/86/76/33/8676338a118c6876d9e345deface319ea731971f.jpg?rule=ad-thumb",
+        "small_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/86/76/33/8676338a118c6876d9e345deface319ea731971f.jpg?rule=ad-small",
+        "nb_images": 47,
+        "urls": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/86/76/33/8676338a118c6876d9e345deface319ea731971f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/1b/5c/bd/1b5cbdb5061529eae9d94d07b923758e6c440a7f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e0/a5/db/e0a5db02d046b352291857fc6b9d35d674d07267.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b8/c6/1e/b8c61e0ea57d01bf002c94ef199af848e5255e26.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/06/6d/c6/066dc6f77aa6601ade35163d477ca61f1126b778.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/67/48/40/6748401f8e5f112115f68b73d26049ac72e4fb8c.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/17/52/0a/17520ab21b44f72489d30ad01d37ce52edf754af.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/71/11/9b/71119bf6ccecc5399aabee668811ebfe96057152.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/05/e7/86/05e78628732a86a2bfe402d6ce940830c37a11e2.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/ee/2a/48ee2a6099ade7340e45abb4802275f246542144.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b4/4f/2b/b44f2b16d3d6c7166f8edd009ea6253c26a6f6b3.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d0/c4/42/d0c4421b22f581bbf5f45ff0edbde2c722b91876.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/43/4c/d1/434cd169768c574d33759649d3b8e3c642ac3f28.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/7e/93/2f/7e932f0f60a398349f11e8ba6875b93b971f938c.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b5/6c/16/b56c1689f9724d75aa0efc56be6cc78c20e47db1.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/77/ff/5a/77ff5a123dec661807fada859fd5329506ff3be3.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/83/83/3c/83833c96bdc74f4291d3020175b06028a68f2721.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b2/aa/58/b2aa58aac83c468fc8c52acd9a65a6a8476e42e8.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a5/e6/20/a5e6206d6339e47515d17077e31ca7524a7370e4.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/72/61/87/7261878d07de8fcd0cc1fe70beb1d4e5364b69a4.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f8/c0/e4/f8c0e4ab0d78e44f21f47ab2da09ab24c715e56f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a6/69/0a/a6690abeb383125cf75a848be0123877f33bcf51.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d3/4e/cd/d34ecd653ba3375cb5894eb065c850225f35c9ca.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/a5/bd/a1a5bd46a4c33b2320cc67cf9d7f22895ef0aa2d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/95/7f/30/957f30d929c9e0b6e20f42fc41f91e4f4a1f23b6.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/50/f8/55/50f855644a85199f5db42bdf3dcce43ff13d5119.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/28/b3/9b/28b39becf54de27f807ca836b90ab347f5025502.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d6/c5/f4/d6c5f43beeccb9d829bf5b06a9859a5b71c018f7.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/43/b0/36/43b03692c3982308e47fdf3c96d2a604cd96dbca.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/da/75/ca/da75caf86cde200fde756e68b1b14da385884562.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/75/ab/5b/75ab5b704cf0a3c290d6ccb4e1b965738d7927fb.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/10/0a/c1/100ac1c1a2af5f532592ef57d8a223cf09bf44a3.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/da/96/e4/da96e4f550858dd855a6f8647965675524ac291d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/90/62/15/90621560b8947f9835a74df68e9201af2f6c4d38.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/71/42/2e/71422eef9eca37103c28dda1ccee5eae7274bd85.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/01/00/91/010091f9a22a8e2f012509cf2f894453c5e9518f.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/68/86/fb/6886fba7ba53253f35a45a78010e65867dd9c78e.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b2/e7/59/b2e759d13b32c1db279dcbf7f142d749db8e4249.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5e/30/ed/5e30ed6bd751b7ede7938b29df046b939bf94481.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/bf/e8/34/bfe834d293f7f25b92cb58b47714eb9262f0c45d.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/67/76/0c/67760c0480c931768f685991ef47ba3a67c7e9ef.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/83/57/90/83579091a045d24ee431f9908f13796c9d1089b0.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/40/49/0a/40490a8f8409ab2a450190e3e75cf5fdec74a0bc.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/be/c0/74/bec07431200bc1e8427083df3b03a67c7621e4e2.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/1f/2c/fc/1f2cfcdf77d5caec370841faf3fec0db3a149b47.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/74/c8/2f/74c82fe03fe85a94b4d82f54bf70b48b6bed1dec.jpg?rule=ad-image",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/6b/03/81/6b03810a70591e190d5c26e9968aced27542ceb9.jpg?rule=ad-image"
+        ],
+        "urls_thumb": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/86/76/33/8676338a118c6876d9e345deface319ea731971f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/1b/5c/bd/1b5cbdb5061529eae9d94d07b923758e6c440a7f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e0/a5/db/e0a5db02d046b352291857fc6b9d35d674d07267.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b8/c6/1e/b8c61e0ea57d01bf002c94ef199af848e5255e26.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/06/6d/c6/066dc6f77aa6601ade35163d477ca61f1126b778.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/67/48/40/6748401f8e5f112115f68b73d26049ac72e4fb8c.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/17/52/0a/17520ab21b44f72489d30ad01d37ce52edf754af.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/71/11/9b/71119bf6ccecc5399aabee668811ebfe96057152.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/05/e7/86/05e78628732a86a2bfe402d6ce940830c37a11e2.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/ee/2a/48ee2a6099ade7340e45abb4802275f246542144.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b4/4f/2b/b44f2b16d3d6c7166f8edd009ea6253c26a6f6b3.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d0/c4/42/d0c4421b22f581bbf5f45ff0edbde2c722b91876.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/43/4c/d1/434cd169768c574d33759649d3b8e3c642ac3f28.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/7e/93/2f/7e932f0f60a398349f11e8ba6875b93b971f938c.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b5/6c/16/b56c1689f9724d75aa0efc56be6cc78c20e47db1.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/77/ff/5a/77ff5a123dec661807fada859fd5329506ff3be3.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/83/83/3c/83833c96bdc74f4291d3020175b06028a68f2721.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b2/aa/58/b2aa58aac83c468fc8c52acd9a65a6a8476e42e8.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a5/e6/20/a5e6206d6339e47515d17077e31ca7524a7370e4.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/72/61/87/7261878d07de8fcd0cc1fe70beb1d4e5364b69a4.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f8/c0/e4/f8c0e4ab0d78e44f21f47ab2da09ab24c715e56f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a6/69/0a/a6690abeb383125cf75a848be0123877f33bcf51.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d3/4e/cd/d34ecd653ba3375cb5894eb065c850225f35c9ca.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/a5/bd/a1a5bd46a4c33b2320cc67cf9d7f22895ef0aa2d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/95/7f/30/957f30d929c9e0b6e20f42fc41f91e4f4a1f23b6.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/50/f8/55/50f855644a85199f5db42bdf3dcce43ff13d5119.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/28/b3/9b/28b39becf54de27f807ca836b90ab347f5025502.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d6/c5/f4/d6c5f43beeccb9d829bf5b06a9859a5b71c018f7.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/43/b0/36/43b03692c3982308e47fdf3c96d2a604cd96dbca.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/da/75/ca/da75caf86cde200fde756e68b1b14da385884562.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/75/ab/5b/75ab5b704cf0a3c290d6ccb4e1b965738d7927fb.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/10/0a/c1/100ac1c1a2af5f532592ef57d8a223cf09bf44a3.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/da/96/e4/da96e4f550858dd855a6f8647965675524ac291d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/90/62/15/90621560b8947f9835a74df68e9201af2f6c4d38.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/71/42/2e/71422eef9eca37103c28dda1ccee5eae7274bd85.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/01/00/91/010091f9a22a8e2f012509cf2f894453c5e9518f.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/68/86/fb/6886fba7ba53253f35a45a78010e65867dd9c78e.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b2/e7/59/b2e759d13b32c1db279dcbf7f142d749db8e4249.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5e/30/ed/5e30ed6bd751b7ede7938b29df046b939bf94481.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/bf/e8/34/bfe834d293f7f25b92cb58b47714eb9262f0c45d.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/67/76/0c/67760c0480c931768f685991ef47ba3a67c7e9ef.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/83/57/90/83579091a045d24ee431f9908f13796c9d1089b0.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/40/49/0a/40490a8f8409ab2a450190e3e75cf5fdec74a0bc.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/be/c0/74/bec07431200bc1e8427083df3b03a67c7621e4e2.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/1f/2c/fc/1f2cfcdf77d5caec370841faf3fec0db3a149b47.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/74/c8/2f/74c82fe03fe85a94b4d82f54bf70b48b6bed1dec.jpg?rule=ad-thumb",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/6b/03/81/6b03810a70591e190d5c26e9968aced27542ceb9.jpg?rule=ad-thumb"
+        ],
+        "urls_large": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/86/76/33/8676338a118c6876d9e345deface319ea731971f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/1b/5c/bd/1b5cbdb5061529eae9d94d07b923758e6c440a7f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/e0/a5/db/e0a5db02d046b352291857fc6b9d35d674d07267.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b8/c6/1e/b8c61e0ea57d01bf002c94ef199af848e5255e26.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/06/6d/c6/066dc6f77aa6601ade35163d477ca61f1126b778.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/67/48/40/6748401f8e5f112115f68b73d26049ac72e4fb8c.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/17/52/0a/17520ab21b44f72489d30ad01d37ce52edf754af.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/71/11/9b/71119bf6ccecc5399aabee668811ebfe96057152.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/05/e7/86/05e78628732a86a2bfe402d6ce940830c37a11e2.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/48/ee/2a/48ee2a6099ade7340e45abb4802275f246542144.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b4/4f/2b/b44f2b16d3d6c7166f8edd009ea6253c26a6f6b3.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d0/c4/42/d0c4421b22f581bbf5f45ff0edbde2c722b91876.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/43/4c/d1/434cd169768c574d33759649d3b8e3c642ac3f28.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/7e/93/2f/7e932f0f60a398349f11e8ba6875b93b971f938c.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b5/6c/16/b56c1689f9724d75aa0efc56be6cc78c20e47db1.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/77/ff/5a/77ff5a123dec661807fada859fd5329506ff3be3.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/83/83/3c/83833c96bdc74f4291d3020175b06028a68f2721.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b2/aa/58/b2aa58aac83c468fc8c52acd9a65a6a8476e42e8.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a5/e6/20/a5e6206d6339e47515d17077e31ca7524a7370e4.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/72/61/87/7261878d07de8fcd0cc1fe70beb1d4e5364b69a4.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/f8/c0/e4/f8c0e4ab0d78e44f21f47ab2da09ab24c715e56f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a6/69/0a/a6690abeb383125cf75a848be0123877f33bcf51.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d3/4e/cd/d34ecd653ba3375cb5894eb065c850225f35c9ca.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/a1/a5/bd/a1a5bd46a4c33b2320cc67cf9d7f22895ef0aa2d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/95/7f/30/957f30d929c9e0b6e20f42fc41f91e4f4a1f23b6.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/50/f8/55/50f855644a85199f5db42bdf3dcce43ff13d5119.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/28/b3/9b/28b39becf54de27f807ca836b90ab347f5025502.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/d6/c5/f4/d6c5f43beeccb9d829bf5b06a9859a5b71c018f7.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/43/b0/36/43b03692c3982308e47fdf3c96d2a604cd96dbca.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/da/75/ca/da75caf86cde200fde756e68b1b14da385884562.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/75/ab/5b/75ab5b704cf0a3c290d6ccb4e1b965738d7927fb.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/10/0a/c1/100ac1c1a2af5f532592ef57d8a223cf09bf44a3.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/da/96/e4/da96e4f550858dd855a6f8647965675524ac291d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/90/62/15/90621560b8947f9835a74df68e9201af2f6c4d38.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/71/42/2e/71422eef9eca37103c28dda1ccee5eae7274bd85.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/01/00/91/010091f9a22a8e2f012509cf2f894453c5e9518f.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/68/86/fb/6886fba7ba53253f35a45a78010e65867dd9c78e.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/b2/e7/59/b2e759d13b32c1db279dcbf7f142d749db8e4249.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/5e/30/ed/5e30ed6bd751b7ede7938b29df046b939bf94481.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/bf/e8/34/bfe834d293f7f25b92cb58b47714eb9262f0c45d.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/67/76/0c/67760c0480c931768f685991ef47ba3a67c7e9ef.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/83/57/90/83579091a045d24ee431f9908f13796c9d1089b0.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/40/49/0a/40490a8f8409ab2a450190e3e75cf5fdec74a0bc.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/be/c0/74/bec07431200bc1e8427083df3b03a67c7621e4e2.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/1f/2c/fc/1f2cfcdf77d5caec370841faf3fec0db3a149b47.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/74/c8/2f/74c82fe03fe85a94b4d82f54bf70b48b6bed1dec.jpg?rule=ad-large",
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/6b/03/81/6b03810a70591e190d5c26e9968aced27542ceb9.jpg?rule=ad-large"
+        ]
+      },
+      "attributes": [
+        {
+          "key": "activity_sector",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "value_label": "1",
+          "generic": false
+        },
+        {
+          "key": "brand",
+          "value": "Renault",
+          "values": [
+            "Renault"
+          ],
+          "key_label": "Marque",
+          "value_label": "Renault",
+          "generic": false
+        },
+        {
+          "key": "model",
+          "value": "Autres",
+          "values": [
+            "Autres",
+            "model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "Autres",
+          "generic": false
+        },
+        {
+          "key": "u_car_brand",
+          "value": "RENAULT",
+          "values": [
+            "RENAULT"
+          ],
+          "key_label": "Marque",
+          "value_label": "RENAULT",
+          "generic": true
+        },
+        {
+          "key": "u_car_model",
+          "value": "RENAULT_5",
+          "values": [
+            "RENAULT_5",
+            "RENAULT_model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "regdate",
+          "value": "2026",
+          "values": [
+            "2026"
+          ],
+          "key_label": "Année modèle",
+          "value_label": "2026",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "mileage",
+          "value": "5000",
+          "values": [
+            "5000"
+          ],
+          "key_label": "Kilométrage",
+          "value_label": "5000 km",
+          "value_label_reader": "5000 Kilomètres",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "fuel",
+          "value": "4",
+          "values": [
+            "4"
+          ],
+          "key_label": "Énergie",
+          "value_label": "Électrique",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "gearbox",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Boîte de vitesse",
+          "value_label": "Automatique",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "doors",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de portes",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "seats",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de place(s)",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "u_car_finition",
+          "value": "RENAULT_5_Techno",
+          "values": [
+            "RENAULT_5_Techno",
+            "RENAULT_model_all_finition_all",
+            "RENAULT_5_finition_all"
+          ],
+          "key_label": "Finition Constructeur",
+          "value_label": "Techno",
+          "generic": true
+        },
+        {
+          "key": "u_car_version",
+          "value": "E-Tech Electrique 150ch 52kWh Techno autonomie confort - 26b",
+          "values": [
+            "E-Tech Electrique 150ch 52kWh Techno autonomie confort - 26b"
+          ],
+          "key_label": "Version Constructeur",
+          "value_label": "E-Tech Electrique 150ch 52kWh Techno autonomie confort - 26b",
+          "generic": true
+        },
+        {
+          "key": "issuance_date",
+          "value": "09/2026",
+          "values": [
+            "09/2026"
+          ],
+          "key_label": "Date de première mise en circulation",
+          "value_label": "09/2026",
+          "generic": true
+        },
+        {
+          "key": "vehicle_damage",
+          "value": "good_overall_condition",
+          "values": [
+            "good_overall_condition"
+          ],
+          "key_label": "État du véhicule",
+          "value_label": "Bon état général",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicle_type",
+          "value": "berline",
+          "values": [
+            "berline"
+          ],
+          "key_label": "Type de véhicule",
+          "value_label": "Berline",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "",
+          "values": [
+            "parking_assistance",
+            "rearview_camera",
+            "air_conditioning",
+            "cruise_control",
+            "power_folding_mirrors"
+          ],
+          "key_label": "Équipements",
+          "value_label": "Aide au stationnement, Caméra de recul, Climatisation, Régulateur de vitesse, Rétroviseurs rabattables électriquement",
+          "value_label_reader": ", , , , ",
+          "values_label": [
+            "Aide au stationnement",
+            "Caméra de recul",
+            "Climatisation",
+            "Régulateur de vitesse",
+            "Rétroviseurs rabattables électriquement"
+          ],
+          "values_label_reader": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicule_color",
+          "value": "noir",
+          "values": [
+            "noir"
+          ],
+          "key_label": "Couleur",
+          "value_label": "Noir",
+          "generic": true
+        },
+        {
+          "key": "horsepower",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Puissance fiscale",
+          "value_label": "5 Cv",
+          "value_label_reader": "5 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "horse_power_din",
+          "value": "150",
+          "values": [
+            "150"
+          ],
+          "key_label": "Puissance DIN",
+          "value_label": "150 Ch",
+          "value_label_reader": "150 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "vehicle_vsp",
+          "value": "avecpermis",
+          "values": [
+            "avecpermis"
+          ],
+          "key_label": "Permis",
+          "value_label": "Avec permis",
+          "generic": true
+        },
+        {
+          "key": "recent_used_vehicle",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "has_visibility_option",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "store_logo",
+          "value": "https://img.leboncoin.fr/api/v1/lbcpb1/images/d7/9e/92/d79e927d-e455-4821-915a-4009a28697cb?rule=bo-thumb",
+          "values": [
+            "https://img.leboncoin.fr/api/v1/lbcpb1/images/d7/9e/92/d79e927d-e455-4821-915a-4009a28697cb?rule=bo-thumb"
+          ],
+          "value_label": "https://img.leboncoin.fr/api/v1/lbcpb1/images/d7/9e/92/d79e927d-e455-4821-915a-4009a28697cb?rule=bo-thumb",
+          "generic": false
+        },
+        {
+          "key": "store_name",
+          "value": "GROUPE ALSO",
+          "values": [
+            "GROUPE ALSO"
+          ],
+          "value_label": "GROUPE ALSO",
+          "generic": false
+        },
+        {
+          "key": "online_store_id",
+          "value": "13833",
+          "values": [
+            "13833"
+          ],
+          "value_label": "13833",
+          "generic": false
+        },
+        {
+          "key": "custom_ref",
+          "value": "1515-0001315",
+          "values": [
+            "1515-0001315"
+          ],
+          "key_label": "Référence",
+          "value_label": "1515-0001315",
+          "generic": true
+        },
+        {
+          "key": "is_import",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_report_public_url",
+          "value": "https://autoviza.fr/report/report?uid=09a1ebe0-afe0-4dfd-93a6-5f07a4a6b69f",
+          "values": [
+            "https://autoviza.fr/report/report?uid=09a1ebe0-afe0-4dfd-93a6-5f07a4a6b69f"
+          ],
+          "value_label": "https://autoviza.fr/report/report?uid=09a1ebe0-afe0-4dfd-93a6-5f07a4a6b69f",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_report_status",
+          "value": "visible",
+          "values": [
+            "visible"
+          ],
+          "value_label": "visible",
+          "generic": false
+        },
+        {
+          "key": "argus_object_id",
+          "value": "3063240",
+          "values": [
+            "3063240"
+          ],
+          "value_label": "3063240",
+          "generic": false
+        },
+        {
+          "key": "spare_parts_availability",
+          "value": "non_renseignee",
+          "values": [
+            "non_renseignee"
+          ],
+          "key_label": "Durée de disponibilité des pièces détachées",
+          "value_label": "Non renseignée",
+          "generic": true
+        },
+        {
+          "key": "licence_plate_available",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        }
+      ],
+      "location": {
+        "country_id": "FR",
+        "region_id": "16",
+        "region_name": "Midi-Pyrénées",
+        "department_id": "31",
+        "department_name": "Haute-Garonne",
+        "city_label": "Portet-sur-Garonne 31120",
+        "city": "Portet-sur-Garonne",
+        "zipcode": "31120",
+        "lat": 43.51934,
+        "lng": 1.38982,
+        "source": "address",
+        "provider": "here",
+        "type": "",
+        "origin_type": "",
+        "is_shape": false,
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              1.38982,
+              43.51934
+            ]
+          },
+          "properties": null
+        }
+      },
+      "owner": {
+        "store_id": "568382",
+        "user_id": "125ebb32-0246-4f34-9339-ab09dd1f5927",
+        "type": "pro",
+        "name": "GROUPE ALSO RENAULT PORTET AUTOMOBILES",
+        "siren": "793469461",
+        "no_salesmen": true,
+        "activity_sector": "1"
+      },
+      "options": {
+        "has_option": false,
+        "booster": false,
+        "photosup": false,
+        "urgent": false,
+        "gallery": false,
+        "sub_toplist": false,
+        "continuous_top_ads": false,
+        "highlight": false
+      },
+      "has_phone": true,
+      "attributes_adview_positive": [
+        {
+          "key": "mileage",
+          "value": "5000",
+          "key_label": "Kilométrage",
+          "value_label": "Faible kilométrage",
+          "value_label_reader": "Faible kilométrage",
+          "generic": false
+        },
+        {
+          "key": "orig_index_date",
+          "value": "2026-10-13 19:25:02 +0000 UTC",
+          "key_label": "Date de dépot de l'annonce",
+          "value_label": "Annonce récente",
+          "value_label_reader": "Annonce récente",
+          "generic": false
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "parking_assistance",
+          "key_label": "Équipements",
+          "value_label": "Aide au stationnement",
+          "value_label_reader": "Aide au stationnement",
+          "generic": false
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "cruise_control",
+          "key_label": "Équipements",
+          "value_label": "Régulateur de vitesse",
+          "value_label_reader": "Régulateur de vitesse",
+          "generic": false
+        }
+      ],
+      "attributes_characteristics": [
+        {
+          "key": "vehicle_interior_specs",
+          "value": "parking_assistance",
+          "key_label": "Équipements",
+          "value_label": "Aide au stationnement",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "rearview_camera",
+          "key_label": "Équipements",
+          "value_label": "Caméra de recul",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "air_conditioning",
+          "key_label": "Équipements",
+          "value_label": "Climatisation",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "cruise_control",
+          "key_label": "Équipements",
+          "value_label": "Régulateur de vitesse",
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "power_folding_mirrors",
+          "key_label": "Équipements",
+          "value_label": "Rétroviseurs rabattables électriquement",
+          "generic": true
+        }
+      ],
+      "similar": null,
+      "entitlements": [
+        "LBC_PRO_AUTO_NOSAMEADS_OPT",
+        "NO_SIMILAR_ADS"
+      ],
+      "counters": {}
+    },
+    {
+      "list_id": 3283753599,
+      "first_publication_date": "2026-10-07 09:45:03",
+      "expiration_date": "2026-12-06 08:45:03",
+      "index_date": "2026-10-10 15:22:46",
+      "status": "active",
+      "category_id": "2",
+      "category_name": "Voitures",
+      "subject": "Spécialisée dans l'achat de véhicules chez les particuliers",
+      "body": "Spécialisée dans l'achat de véhicules chez les particuliers . \n\nNous rachetons en permanence tout type de voitures\n\nAvec / Sans Contrôle Technique \nAvec / Sans problème Mécanique \nAvec / Sans problème de carte grise \nAvec / Sans procédure \nFaible / Fort kilometrage \nToute Année, \nMEME HS \n\nBonne journée à vous \n\nCordialement",
+      "brand": "leboncoin",
+      "ad_type": "offer",
+      "url": "https://www.leboncoin.fr/ad/voitures/3283753599",
+      "price": [
+        300
+      ],
+      "price_cents": 30000,
+      "images": {
+        "thumb_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/31/ca/21/31ca215aa3322c21faa2ec1f80206f6be15ae059.jpg?rule=ad-thumb",
+        "small_url": "https://img.leboncoin.fr/api/v1/lbcpb1/images/31/ca/21/31ca215aa3322c21faa2ec1f80206f6be15ae059.jpg?rule=ad-small",
+        "nb_images": 1,
+        "urls": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/31/ca/21/31ca215aa3322c21faa2ec1f80206f6be15ae059.jpg?rule=ad-image"
+        ],
+        "urls_thumb": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/31/ca/21/31ca215aa3322c21faa2ec1f80206f6be15ae059.jpg?rule=ad-thumb"
+        ],
+        "urls_large": [
+          "https://img.leboncoin.fr/api/v1/lbcpb1/images/31/ca/21/31ca215aa3322c21faa2ec1f80206f6be15ae059.jpg?rule=ad-large"
+        ]
+      },
+      "attributes": [
+        {
+          "key": "activity_sector",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "value_label": "1",
+          "generic": false
+        },
+        {
+          "key": "brand",
+          "value": "Peugeot",
+          "values": [
+            "Peugeot"
+          ],
+          "key_label": "Marque",
+          "value_label": "Peugeot",
+          "generic": false
+        },
+        {
+          "key": "model",
+          "value": "206",
+          "values": [
+            "206",
+            "model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "206",
+          "generic": false
+        },
+        {
+          "key": "u_car_brand",
+          "value": "PEUGEOT",
+          "values": [
+            "PEUGEOT"
+          ],
+          "key_label": "Marque",
+          "value_label": "PEUGEOT",
+          "generic": true
+        },
+        {
+          "key": "u_car_model",
+          "value": "PEUGEOT_206",
+          "values": [
+            "PEUGEOT_206",
+            "PEUGEOT_model_all"
+          ],
+          "key_label": "Modèle",
+          "value_label": "206",
+          "generic": true
+        },
+        {
+          "key": "regdate",
+          "value": "2001",
+          "values": [
+            "2001"
+          ],
+          "key_label": "Année modèle",
+          "value_label": "2001",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "mileage",
+          "value": "200000",
+          "values": [
+            "200000"
+          ],
+          "key_label": "Kilométrage",
+          "value_label": "200000 km",
+          "value_label_reader": "200000 Kilomètres",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "fuel",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "key_label": "Énergie",
+          "value_label": "Essence",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "gearbox",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "key_label": "Boîte de vitesse",
+          "value_label": "Automatique",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "doors",
+          "value": "3",
+          "values": [
+            "3"
+          ],
+          "key_label": "Nombre de portes",
+          "value_label": "3",
+          "generic": true
+        },
+        {
+          "key": "seats",
+          "value": "5",
+          "values": [
+            "5"
+          ],
+          "key_label": "Nombre de place(s)",
+          "value_label": "5",
+          "generic": true
+        },
+        {
+          "key": "vehicle_technical_inspection_valid",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "key_label": "Contrôle technique valide",
+          "value_label": "Non",
+          "generic": true
+        },
+        {
+          "key": "issuance_date",
+          "value": "10/2001",
+          "values": [
+            "10/2001"
+          ],
+          "key_label": "Date de première mise en circulation",
+          "value_label": "10/2001",
+          "generic": true
+        },
+        {
+          "key": "vehicle_damage",
+          "value": "good_overall_condition",
+          "values": [
+            "good_overall_condition"
+          ],
+          "key_label": "État du véhicule",
+          "value_label": "Bon état général",
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicle_type",
+          "value": "cabriolet",
+          "values": [
+            "cabriolet"
+          ],
+          "key_label": "Type de véhicule",
+          "value_label": "Cabriolet",
+          "generic": true
+        },
+        {
+          "key": "vehicle_upholstery",
+          "value": "",
+          "values": [
+            "fabric"
+          ],
+          "key_label": "Sellerie",
+          "value_label": "Tissu",
+          "values_label": [
+            "Tissu"
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicle_maintenance",
+          "value": "",
+          "values": [
+            "nonsmoking_vehicle",
+            "useful_repairs_done"
+          ],
+          "key_label": "Entretien du véhicule",
+          "value_label": "Véhicule non fumeur, Réparations utiles déjà faites",
+          "values_label": [
+            "Véhicule non fumeur",
+            "Réparations utiles déjà faites"
+          ],
+          "generic": true
+        },
+        {
+          "key": "vehicle_interior_specs",
+          "value": "",
+          "values": [
+            "bluetooth"
+          ],
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "values_label": [
+            "Bluetooth"
+          ],
+          "values_label_reader": [
+            ""
+          ],
+          "generic": true,
+          "display_ad_card": true
+        },
+        {
+          "key": "vehicule_color",
+          "value": "argent",
+          "values": [
+            "argent"
+          ],
+          "key_label": "Couleur",
+          "value_label": "Argent",
+          "generic": true
+        },
+        {
+          "key": "horsepower",
+          "value": "7",
+          "values": [
+            "7"
+          ],
+          "key_label": "Puissance fiscale",
+          "value_label": "7 Cv",
+          "value_label_reader": "7 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "horse_power_din",
+          "value": "110",
+          "values": [
+            "110"
+          ],
+          "key_label": "Puissance DIN",
+          "value_label": "110 Ch",
+          "value_label_reader": "110 Chevaux",
+          "generic": true
+        },
+        {
+          "key": "vehicle_vsp",
+          "value": "avecpermis",
+          "values": [
+            "avecpermis"
+          ],
+          "key_label": "Permis",
+          "value_label": "Avec permis",
+          "generic": true
+        },
+        {
+          "key": "car_contract",
+          "value": "1",
+          "values": [
+            "1"
+          ],
+          "key_label": "Soumis à LOA/LLD",
+          "value_label": "Non",
+          "generic": true
+        },
+        {
+          "key": "recent_used_vehicle",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "value_label": "false",
+          "generic": false
+        },
+        {
+          "key": "has_visibility_option",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "store_logo",
+          "value": "https://img.leboncoin.fr/api/v1/lbcpb1/images/5b/df/91/5bdf9150-7c34-49dd-8e18-a3fff9b5d3a9?rule=bo-thumb",
+          "values": [
+            "https://img.leboncoin.fr/api/v1/lbcpb1/images/5b/df/91/5bdf9150-7c34-49dd-8e18-a3fff9b5d3a9?rule=bo-thumb"
+          ],
+          "value_label": "https://img.leboncoin.fr/api/v1/lbcpb1/images/5b/df/91/5bdf9150-7c34-49dd-8e18-a3fff9b5d3a9?rule=bo-thumb",
+          "generic": false
+        },
+        {
+          "key": "store_name",
+          "value": "Sunauto",
+          "values": [
+            "Sunauto"
+          ],
+          "value_label": "Sunauto",
+          "generic": false
+        },
+        {
+          "key": "online_store_id",
+          "value": "6973800",
+          "values": [
+            "6973800"
+          ],
+          "value_label": "6973800",
+          "generic": false
+        },
+        {
+          "key": "vehicle_commercial_warranty",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "key_label": "Garantie commerciale",
+          "value_label": "Non",
+          "generic": false
+        },
+        {
+          "key": "vehicle_manufacturer_warranty",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "key_label": "Garantie constructeur",
+          "value_label": "Non",
+          "generic": false
+        },
+        {
+          "key": "is_import",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "value_label": "false",
+          "generic": false
+        },
+        {
+          "key": "old_price",
+          "value": "2490",
+          "values": [
+            "2490"
+          ],
+          "value_label": "2490",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_report_public_url",
+          "value": "https://autoviza.fr/report/report?uid=92018c79-0b74-464f-abd7-b09d4c3bfe3d",
+          "values": [
+            "https://autoviza.fr/report/report?uid=92018c79-0b74-464f-abd7-b09d4c3bfe3d"
+          ],
+          "value_label": "https://autoviza.fr/report/report?uid=92018c79-0b74-464f-abd7-b09d4c3bfe3d",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_report_status",
+          "value": "visible",
+          "values": [
+            "visible"
+          ],
+          "value_label": "visible",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_teaser_critair",
+          "value": "3",
+          "values": [
+            "3"
+          ],
+          "value_label": "3",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_teaser_owners",
+          "value": "2",
+          "values": [
+            "2"
+          ],
+          "value_label": "2",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_teaser_expertises",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "value_label": "false",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_teaser_special_uses",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_teaser_atypical_operations",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "value_label": "false",
+          "generic": false
+        },
+        {
+          "key": "vehicle_history_teaser_importations",
+          "value": "false",
+          "values": [
+            "false"
+          ],
+          "value_label": "false",
+          "generic": false
+        },
+        {
+          "key": "spare_parts_availability",
+          "value": "non_renseignee",
+          "values": [
+            "non_renseignee"
+          ],
+          "key_label": "Durée de disponibilité des pièces détachées",
+          "value_label": "Non renseignée",
+          "generic": true
+        },
+        {
+          "key": "licence_plate_available",
+          "value": "true",
+          "values": [
+            "true"
+          ],
+          "value_label": "true",
+          "generic": false
+        }
+      ],
+      "location": {
+        "country_id": "FR",
+        "region_id": "12",
+        "region_name": "Ile-de-France",
+        "department_id": "77",
+        "department_name": "Seine-et-Marne",
+        "city_label": "Lagny-sur-Marne 77400",
+        "city": "Lagny-sur-Marne",
+        "zipcode": "77400",
+        "lat": 48.87781,
+        "lng": 2.70143,
+        "source": "city",
+        "provider": "here",
+        "type": "",
+        "origin_type": "",
+        "is_shape": true,
+        "feature": {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              2.70143,
+              48.87781
+            ]
+          },
+          "properties": null
+        }
+      },
+      "owner": {
+        "store_id": "64745677",
+        "user_id": "1dfa2b9f-c1e2-42fe-a03d-6bc4873dd92c",
+        "type": "pro",
+        "name": "Sunauto",
+        "siren": "753868686",
+        "no_salesmen": true,
+        "activity_sector": "1"
+      },
+      "options": {
+        "has_option": false,
+        "booster": false,
+        "photosup": false,
+        "urgent": false,
+        "gallery": false,
+        "sub_toplist": false,
+        "continuous_top_ads": false,
+        "highlight": false
+      },
+      "has_phone": true,
+      "attributes_adview_positive": [
+        {
+          "key": "vehicle_interior_specs",
+          "value": "bluetooth",
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "value_label_reader": "Bluetooth",
+          "generic": false
+        }
+      ],
+      "attributes_characteristics": [
+        {
+          "key": "vehicle_interior_specs",
+          "value": "bluetooth",
+          "key_label": "Équipements",
+          "value_label": "Bluetooth",
+          "generic": true
+        }
+      ],
+      "similar": null,
+      "counters": {}
+    }
+  ]
+}
