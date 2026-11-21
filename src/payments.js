@@ -343,16 +343,27 @@ async function createStripeCheckout(config, form, purchaseId, fetchImpl) {
   }
 }
 
-const PRIVATE_IP_PREFIXES = ['10.', '127.', '0.', '169.254.', '192.168.'];
-const PRIVATE_IP_172 = /^172\.(1[6-9]|2\d|3[01])\./;
-const PRIVATE_HOSTS = new Set(['localhost', 'metadata.google.internal', 'metadata']);
-function isPrivateHost(host) {
+import dns from 'node:dns';
+import { isPublicAddress } from './gateway.js';
+
+async function assertPublicHost(host) {
   const h = (host || '').toLowerCase().replace(/^\[|\]$/g, '');
-  if (PRIVATE_HOSTS.has(h)) return true;
-  if (PRIVATE_IP_PREFIXES.some(p => h.startsWith(p))) return true;
-  if (PRIVATE_IP_172.test(h)) return true;
-  if (h === '::1' || h.startsWith('fc') || h.startsWith('fd') || h.startsWith('fe80')) return true;
-  return false;
+  if (!h || h === 'localhost' || h.endsWith('.local') || h === 'metadata.google.internal' || h === 'metadata') {
+    throw new PublicError(400, 'Host must be a public hostname');
+  }
+  if (net.isIP(h)) {
+    if (!isPublicAddress(h)) throw new PublicError(400, 'Host must be a public IP address');
+    return;
+  }
+  const addresses = await new Promise((resolve, reject) => {
+    dns.resolve4(h, (err, addrs) => {
+      if (err) dns.resolve6(h, (err6, addrs6) => err6 ? reject(err6) : resolve(addrs6));
+      else resolve(addrs);
+    });
+  }).catch(() => { throw new PublicError(400, 'Could not resolve hostname'); });
+  for (const addr of addresses) {
+    if (!isPublicAddress(addr)) throw new PublicError(400, 'Host resolves to a private IP address');
+  }
 }
 
 function parseJson(payload) {
@@ -812,6 +823,9 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
         if (!config.stripeKey || !config.webhookSecret) {
           return json(response, 503, { error: 'Payments are not configured' });
         }
+        const legacyIp = clientAddress(request);
+        if (!checkoutAttempts.allowed(legacyIp)) return json(response, 429, { error: 'Too many checkout attempts. Please wait a moment.' });
+        checkoutAttempts.fail(legacyIp);
         if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
           throw new PublicError(415, 'Content-Type must be application/json');
         }
@@ -880,6 +894,8 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
                 stripePriceId: session.metadata?.price_id ?? null,
               });
               await activateByStripeSubscription(stripeSubId);
+            } else {
+              console.error(`STRIPE SUBSCRIPTION: checkout ${session.id} paid but missing metadata — subscription_id=${subscriptionId ?? 'null'}, stripe_sub=${stripeSubId ?? 'null'}`);
             }
           } else {
             const purchaseId = session.client_reference_id;
@@ -1050,6 +1066,9 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
 
           if (request.method === 'POST' && subPath === '/delivery-config') {
             assertSameOrigin(request);
+            if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+              throw new PublicError(415, 'Content-Type must be application/json');
+            }
             const sub = await getSubscription(subId, client.username);
             if (!sub) return json(response, 404, { error: 'Subscription not found' });
             const input = parseJson(await readBody(request, config.maxBodyBytes));
@@ -1058,7 +1077,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
             if (method === 'sftp') {
               if (!input?.sftp_host || !input?.sftp_username) throw new PublicError(400, 'SFTP host and username are required');
               const sftpHost = String(input.sftp_host).trim().slice(0, 255);
-              if (isPrivateHost(sftpHost)) throw new PublicError(400, 'SFTP host must be a public hostname');
+              await assertPublicHost(sftpHost);
               cfg.sftp_host = sftpHost;
               cfg.sftp_port = Math.max(1, Math.min(65535, parseInt(input.sftp_port) || 22));
               cfg.sftp_username = String(input.sftp_username).trim().slice(0, 128);
@@ -1070,7 +1089,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
               let parsed;
               try { parsed = new URL(webhookUrl); } catch { throw new PublicError(400, 'Invalid webhook URL'); }
               if (parsed.protocol !== 'https:') throw new PublicError(400, 'Webhook URL must use HTTPS');
-              if (isPrivateHost(parsed.hostname)) throw new PublicError(400, 'Webhook URL must point to a public host');
+              await assertPublicHost(parsed.hostname);
               cfg.webhook_url = webhookUrl;
               cfg.webhook_secret = input.webhook_secret ? String(input.webhook_secret).slice(0, 256) : null;
             } else {
@@ -1121,6 +1140,12 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
 
           if (request.method === 'PATCH' && subPath === '') {
             assertSameOrigin(request);
+            if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+              throw new PublicError(415, 'Content-Type must be application/json');
+            }
+            const patchIp = clientAddress(request);
+            if (!checkoutAttempts.allowed(patchIp)) return json(response, 429, { error: 'Too many attempts. Please wait a moment.' });
+            checkoutAttempts.fail(patchIp);
             const sub = await getSubscription(subId, client.username);
             if (!sub) return json(response, 404, { error: 'Subscription not found' });
             const input = parseJson(await readBody(request, config.maxBodyBytes));

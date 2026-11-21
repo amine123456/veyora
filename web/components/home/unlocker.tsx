@@ -13,7 +13,7 @@ export function HomeUnlocker() {
             </h2>
             <p className="sub sub--ink sub--left">
               The Web Unlocker API fetches a public page for you with a single request. Just{' '}
-              <b>$0.20 per 1,000 requests</b> — the cheapest in the market. Every new account gets{' '}
+              <b>$0.20 per 1,000 requests</b> — significantly less than most alternatives. Every new account gets{' '}
               <b>$1.00 free credit</b>, enough for 5,000 requests with no payment needed.
             </p>
             <ul className="ufeat">
@@ -25,7 +25,7 @@ export function HomeUnlocker() {
                 </i>
                 <div>
                   <b>$0.20 per 1,000 requests</b>
-                  <span>5–25× cheaper than Bright Data, Oxylabs and ScrapingBee. Paid from your prepaid wallet.</span>
+                  <span>A fraction of what most web-scraping APIs charge. CAPTCHA pages add $0.005 each. Paid from your prepaid wallet.</span>
                 </div>
               </li>
               <li data-reveal="" style={{ ['--d' as string]: '70ms' }}>
@@ -69,8 +69,8 @@ export function HomeUnlocker() {
               <a className="btn btn--ink btn--lg" href="/signup">
                 Get an API key
               </a>{' '}
-              <a className="btn btn--outline btn--lg" href="/login">
-                Open dashboard
+              <a className="btn btn--outline btn--lg" href="/docs#unlocker">
+                Read the docs
               </a>
             </div>
           </div>

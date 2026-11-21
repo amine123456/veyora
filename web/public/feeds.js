@@ -38,7 +38,7 @@
   // ---- Syntax highlighting for JSON ----
 
   function highlightJson(obj) {
-    var raw = JSON.stringify(obj, null, 2);
+    var raw = esc(JSON.stringify(obj, null, 2));
     return raw.replace(
       /("(?:\\.|[^"\\])*")\s*:/g,
       '<span class="json-key">$1</span>:'

@@ -15,7 +15,8 @@
 .legal p code, .legal li code, .legal td code {
   background: #F4F2EC; padding: 2px 7px; border-radius: 6px; font-size: 13px;
 }
-.legal table { width: 100%; border-collapse: collapse; margin: 16px 0 20px; font-size: 15px; }
+.legal .table-wrap { overflow-x: auto; margin: 16px 0 20px; }
+.legal table { width: 100%; border-collapse: collapse; font-size: 15px; }
 .legal th { text-align: left; font-weight: 600; color: var(--ink); padding: 10px 12px; border-bottom: 2px solid var(--line); }
 .legal td { padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--muted); vertical-align: top; }
 .legal .card + h2 { margin-top: 2.5em; }

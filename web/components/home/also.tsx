@@ -118,7 +118,7 @@ export function HomeAlso() {
             <div className="cir" data-circuit="b" aria-hidden="true" />
             <figure className="al__quote">
               <blockquote data-quote="">
-                <mark>Real home IPs, not datacenter ranges.</mark> Every residential address comes from a real ISP,
+                <mark>Residential IPs from real ISPs.</mark> Every exit address comes from a consumer internet provider,
                 across 195 countries, with sticky or rotating sessions.
               </blockquote>
               <figcaption className="mono">Veyora · residential network</figcaption>
@@ -211,7 +211,7 @@ export function HomeAlso() {
                     </li>
                   </ul>
                   <p className="sel sel--y code mono">
-                    {'curl -X POST https://YOUR_HOST/v1/unlock'}
+                    {'curl -X POST https://veyora.pro/v1/unlock'}
                     <br />
                     {'  -d \'{"url": "https://example.com/"}\''}
                   </p>
