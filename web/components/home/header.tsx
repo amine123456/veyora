@@ -24,7 +24,7 @@ export function HomeHeader() {
             </a>{' '}
             <ul className="nav__links nav__links--r">
               <li>
-                <a href="#compare">Network</a>
+                <a href="/data-feeds">Data Feeds</a>
               </li>
               <li>
                 <a href="/docs">Docs</a>
@@ -66,7 +66,7 @@ export function HomeHeader() {
               <a href="#pricing">Pricing</a>
             </li>
             <li>
-              <a href="#compare">Network</a>
+              <a href="/data-feeds">Data Feeds</a>
             </li>
             <li>
               <a href="/docs">Docs</a>
@@ -88,7 +88,7 @@ export function HomeHeader() {
               <a href="#pricing">Pricing</a>
             </li>
             <li>
-              <a href="#compare">Network</a>
+              <a href="/data-feeds">Data Feeds</a>
             </li>
             <li>
               <a href="/docs">Docs</a>

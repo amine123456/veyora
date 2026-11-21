@@ -226,8 +226,7 @@ export function HomeAlso() {
                 One balance <span className="c-b">pays for everything</span>
               </h3>
               <p>
-                Residential and mobile traffic by the GB, Web Unlocker by the request. Top up in USDT on BNB Smart
-                Chain.
+                Residential and mobile traffic by the GB, Web Unlocker by the request. Top up with card or USDT.
               </p>
             </header>
             <div className="al__cards">
@@ -288,7 +287,7 @@ export function HomeAlso() {
                       </svg>
                     </i>
                     <span>
-                      <b>USDT on BNB Smart Chain (BEP-20)</b>
+                      <b>Card or USDT</b>
                       <small>Prepaid, from $10</small>
                     </span>
                   </li>
@@ -311,7 +310,7 @@ export function HomeAlso() {
                     </i>
                     <span>
                       <b>No contract</b>
-                      <small>Cryptocurrency payments are final</small>
+                      <small>No long-term commitment</small>
                     </span>
                   </li>
                 </ul>

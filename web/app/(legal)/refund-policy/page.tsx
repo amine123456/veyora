@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'No Refund Policy — Veyora',
-  description: 'Veyora no refund policy: all cryptocurrency purchases are final.',
+  title: 'Refund Policy — Veyora',
+  description: 'Veyora refund, cancellation, and dispute policy for card and cryptocurrency payments.',
 };
 
 export default function RefundPolicyPage() {
@@ -12,31 +12,57 @@ export default function RefundPolicyPage() {
         <article className="legal">
           <div className="container">
             <p className="eyebrow">Legal</p>
-            <h1>No Refund Policy</h1>
-            <p className="meta">Effective October 29, 2026</p>
+            <h1>Refund Policy</h1>
+            <p className="meta">Effective November 20, 2026</p>
             <p className="lead">
-              Veyora accepts cryptocurrency payments only. All purchases are final and non-refundable.
+              This policy explains how refunds, cancellations, and payment disputes are handled for card and
+              cryptocurrency purchases on Veyora.
             </p>
-            <div className="card">
-              <h2>All sales are final</h2>
-              <p>
-                We do not provide refunds, returns, reversals, or exchanges after a cryptocurrency payment is sent. This
-                applies to unused or partially used traffic, repeat purchases, service incompatibility with your
-                intended use, cryptocurrency price changes, and accounts restricted for violating our terms.
-              </p>
-            </div>
-            <h2>Check before paying</h2>
+            <h2>Card payments (Stripe)</h2>
+            <h3>Balance top-ups</h3>
             <p>
-              Before sending payment, confirm the selected plan, traffic amount, cryptocurrency, blockchain network,
-              destination address, and transaction amount. You are responsible for payments sent using the wrong
-              currency, network, address, or amount.
+              Prepaid balance top-ups paid by card are generally non-refundable once the balance has been used. If you
+              request a refund before using any of the credited balance, we will review and process a full refund within
+              7 business days. Partially used balances may be eligible for a prorated refund at our discretion.
             </p>
-            <h2>Payment or service problems</h2>
+            <h3>Managed Data Feed subscriptions</h3>
             <p>
-              If a confirmed payment is not credited correctly or you experience a technical issue, submit the{' '}
-              <a href="/support">support form</a> and choose "Billing or payment." We will investigate and correct
-              verified account-crediting errors, but this does not create a right to a cryptocurrency refund. Nothing in
-              this policy limits rights that cannot legally be excluded.
+              Data Feed subscriptions renew monthly. You may cancel at any time from your dashboard; cancellation takes
+              effect at the end of the current billing period and no further charges will be made. We do not provide
+              partial-month refunds for the remaining days of a billing period after cancellation.
+            </p>
+            <p>
+              If you cancel within 48 hours of your first subscription payment and no data has been delivered, you are
+              eligible for a full refund. Contact us through the <a href="/support">support form</a>.
+            </p>
+            <h3>Service issues</h3>
+            <p>
+              If a confirmed card payment is not credited correctly, or if the service is materially unavailable for an
+              extended period affecting your paid subscription, contact <a href="/support">support</a>. We will
+              investigate and, where appropriate, issue a refund or account credit. Refunds for card payments are
+              returned to the original payment method.
+            </p>
+            <h2>Cryptocurrency payments</h2>
+            <p>
+              Cryptocurrency payments (USDT) are non-refundable due to the irreversible nature of blockchain
+              transactions. Before sending payment, confirm the amount, cryptocurrency, blockchain network, and
+              destination address. If a confirmed crypto payment is not credited to your account, contact{' '}
+              <a href="/support">support</a> and we will investigate and correct verified crediting errors.
+            </p>
+            <h2>Chargebacks and disputes</h2>
+            <p>
+              If you believe a charge is unauthorized or incorrect, please contact us through{' '}
+              <a href="/support">support</a> before filing a dispute with your bank. We respond to all disputes
+              promptly. Filing a chargeback for legitimate charges may result in account suspension pending resolution.
+            </p>
+            <h2>How to request a refund</h2>
+            <p>
+              Submit a request through our <a href="/support">support form</a> and select "Billing or payment." Include
+              your account email and a description of the issue. We aim to respond within 2 business days.
+            </p>
+            <h2>Contact</h2>
+            <p>
+              For billing questions or refund requests, use our <a href="/support">support form</a>.
             </p>
           </div>
         </article>

@@ -6,6 +6,7 @@ import { fetchThroughProxy, chromeHeaders } from "./fetcher.js";
 import { createLedger } from "./ledger.js";
 import { resolveTarget } from "./gateway.js";
 import { authenticateApiKey, insertUsageEvent, releaseFunds, reserveFunds, returnSandboxLive, sandboxLiveUsed, takeSandboxLive } from "./store.js";
+import { feedCatalogMap } from "./feeds-store.js";
 import { scenarioList, simulate } from "./sandbox.js";
 import * as siteKnowledge from "./site-knowledge.js";
 
@@ -376,6 +377,13 @@ export function createUnlocker({
   const activeByAccount = new Map();
   let active = 0;
 
+  // Feed catalog cache for the blocked → data feeds suggestion.
+  let feedCatalogCache = new Map();
+  const refreshFeedCatalog = () => feedCatalogMap().then((m) => { feedCatalogCache = m; }).catch(() => {});
+  refreshFeedCatalog();
+  const feedCatalogTimer = setInterval(refreshFeedCatalog, 5 * 60_000);
+  feedCatalogTimer.unref();
+
   // Several plain HTTP tries, each on a new IP, before any browser: DataDome sites such as
   // leboncoin.fr block some IPs but serve plain requests from others, while every browser
   // engine gets caught there. Blocked HTTP answers are tiny, so retries cost little.
@@ -606,7 +614,7 @@ export function createUnlocker({
 
   const SOLVER_IP_TRIES = 4;
   const CAMOUFOX_IP_TRIES = 3;
-  const CAMOUFOX_DD_IP_TRIES = 8;
+  const CAMOUFOX_DD_IP_TRIES = 50;
 
   function solverProxyString(currentExit, username, country) {
     const endpoint = upstreamEndpoint(gateway, currentExit.pool);
@@ -819,6 +827,7 @@ export function createUnlocker({
     let exit = sessions.get(exitKey) ?? newExit(poolOf(poolForStep(step)));
     if (exit.pool !== poolOf(poolForStep(step)) && !session) exit = newExit(poolOf(poolForStep(step)));
     let camoufoxTries = 0;
+    let ddPreFilterSkips = 0;
     const attempts = [];
     const wireByPool = { residential: 0, mobile: 0 };
     const rank = { retry: 0, blocked: 1, small: 2, final: 3, ok: 4 };
@@ -876,6 +885,7 @@ export function createUnlocker({
     }
 
     // A caller that hung up gets no further attempts: nobody is left to receive the page.
+    if (waf) log.info?.(`Unlocker: ${site} waf=${waf} jumpTo=${jumpTo} firstCamoufox=${firstCamoufoxStep} maxAttempts=${config.maxAttempts} pools=${pools.length}`);
     for (let attempt = 0; attempt < config.maxAttempts && Date.now() < deadline - 250 && !aborted(); attempt += 1) {
       if (attempt > 0) {
         step = Math.max(step + 1, jumpTo);
@@ -885,9 +895,42 @@ export function createUnlocker({
         exit = newExit(poolOf(poolForStep(step)));
       }
       const rung = poolForStep(step);
+      if (waf === "datadome") log.info?.(`Unlocker: ${site} attempt=${attempt} step=${step} rung=${rung} camoufoxTries=${camoufoxTries}`);
       if (isCamoufoxRung(rung)) camoufoxTries += 1;
       const attemptStarted = Date.now();
       try {
+        // DataDome IP pre-filter: before launching the expensive Camoufox browser (~20s),
+        // do a quick HTTP probe (~1s) to check if this proxy IP is DataDome-banned (t=bv).
+        // If banned, skip to the next IP immediately.
+        if (isCamoufoxRung(rung) && siteWaf.get(site) === "datadome" && solverImpl?.detectDatadome) {
+          const probeExit = exit;
+          const probeCountry = countryForPool(probeExit.pool);
+          try {
+            const probe = await fetchOnExit(probeExit, username, probeCountry, url, Math.min(deadline, Date.now() + 10_000));
+            wireByPool[probeExit.pool] += probe.wireBytes;
+            const dd = solverImpl.detectDatadome(probe.body, { websiteURL: url.href });
+            if (dd && !dd.solvable) {
+              // t=bv: IP is permanently banned by DataDome — Camoufox can't solve this.
+              // Skip to a new IP without launching the expensive browser (~15s startup).
+              ddPreFilterSkips += 1;
+              const timeLeft = deadline - Date.now();
+              log.info?.(`Unlocker: ${site} DD pre-filter: IP banned (t=bv), skip ${ddPreFilterSkips} timeLeft=${Math.round(timeLeft / 1000)}s`);
+              attempts.push({ pool: probeExit.pool, outcome: "blocked", status: probe.status, ms: Date.now() - attemptStarted, ddPreFilter: true });
+              if (timeLeft > 60_000) {
+                attempt -= 1;
+                camoufoxTries -= 1;
+                step -= 1;
+                exit = newExit(poolOf(poolForStep(step + 1)));
+                continue;
+              }
+              log.info?.(`Unlocker: ${site} DD pre-filter: low on time after ${ddPreFilterSkips} skips, launching camoufox`);
+            } else {
+              log.info?.(`Unlocker: ${site} DD pre-filter: IP ok (dd=${dd ? 'solvable' : 'clean'}) after ${ddPreFilterSkips} skips, launching camoufox`);
+            }
+          } catch (probeErr) {
+            log.info?.(`Unlocker: ${site} DD pre-filter failed: ${probeErr.code ?? probeErr.message}, proceeding with camoufox`);
+          }
+        }
         let result;
         const exitCountry = countryForPool(exit.pool);
         if (isSolverRung(rung)) {
@@ -922,6 +965,7 @@ export function createUnlocker({
         const currentWaf = siteWaf.get(site);
         if (outcome === "blocked" && currentWaf) {
           if (!isCamoufoxRung(rung) && !isSolverRung(rung) && firstCamoufoxStep >= 0 && step < firstCamoufoxStep) {
+            if (currentWaf === "datadome") log.info?.(`Unlocker: ${site} fast-track HTTP→camoufox step=${firstCamoufoxStep - 1}`);
             step = firstCamoufoxStep - 1;
           } else if (isCamoufoxRung(rung) && currentWaf !== "cloudflare") {
             // DataDome, Akamai, Imperva, PerimeterX, AWS: Camoufox is effective when it
@@ -930,10 +974,12 @@ export function createUnlocker({
             // uses successfully. Give DataDome more retries than other WAFs.
             const maxTries = currentWaf === "datadome" ? CAMOUFOX_DD_IP_TRIES : CAMOUFOX_IP_TRIES;
             if (camoufoxTries < maxTries) {
+              if (currentWaf === "datadome") log.info?.(`Unlocker: ${site} camoufox retry ${camoufoxTries}/${maxTries}`);
               step -= 1;
             } else {
               const nextCamoufox = pools.findIndex((r, index) => index > step && isCamoufoxRung(r));
               if (nextCamoufox >= 0) {
+                if (currentWaf === "datadome") log.info?.(`Unlocker: ${site} camoufox exhausted pool, next camoufox at ${nextCamoufox}`);
                 step = nextCamoufox - 1;
                 camoufoxTries = 0;
               } else {
@@ -941,8 +987,10 @@ export function createUnlocker({
                 const solverStep = pools.findIndex((r) => isSolverRung(r));
                 const nextStep = fsStep >= 0 && step < fsStep ? fsStep : solverStep;
                 if (nextStep >= 0 && step < nextStep) {
+                  if (currentWaf === "datadome") log.info?.(`Unlocker: ${site} all camoufox exhausted, jumping to step ${nextStep}`);
                   step = nextStep - 1;
                 } else {
+                  if (currentWaf === "datadome") log.info?.(`Unlocker: ${site} all camoufox+solver exhausted, breaking`);
                   break;
                 }
               }
@@ -971,6 +1019,7 @@ export function createUnlocker({
       } catch (error) {
         wireByPool[exit.pool] += error.wireBytes ?? 0;
         const code = error.code ?? "NETWORK";
+        if (siteWaf.get(site) === "datadome") log.info?.(`Unlocker: ${site} error code=${code} rung=${rung} msg=${(error.message || "").slice(0, 120)}`);
         attempts.push({ pool: exit.pool, outcome: "error", error: code, ms: Date.now() - attemptStarted });
         lastError = code;
         if (!RETRYABLE_ERRORS.has(code)) break;
@@ -986,6 +1035,7 @@ export function createUnlocker({
         }
       }
     }
+    if (siteWaf.get(site) === "datadome") log.info?.(`Unlocker: ${site} loop ended: attempts=${attempts.length} bestOutcome=${bestOutcome} aborted=${aborted()} deadline_left=${Math.round((deadline - Date.now()) / 1000)}s`);
 
     const billable = bestOutcome === "ok" || bestOutcome === "small";
     if (billable) {
@@ -1329,7 +1379,18 @@ export function createUnlocker({
           const queued = solverQueue.push({ site: outcome.site, url: url.href, exitInfo: { pool: outcome.pool, sid: crypto.randomBytes(8).toString("hex") }, markers: outcome.attempts.map((a) => a.result).filter(Boolean) });
           if (queued) log.info?.(`Queued ${outcome.site} for human solver (task ${queued})`);
         }
-        return send(response, 502, { success: false, error: `The site blocked every attempt (${outcome.attempts.length}). You were not charged.`, ...summary });
+        const blockedReply = { success: false, error: `The site blocked every attempt (${outcome.attempts.length}). You were not charged.`, ...summary };
+        const feedMatch = feedCatalogCache.get(outcome.site);
+        if (feedMatch) {
+          blockedReply.suggestion = {
+            type: "data_feed",
+            message: "We crawl this site daily with custom infrastructure. Get structured data delivered to your endpoint.",
+            catalogUrl: "/data-feeds",
+            feedId: feedMatch.feedId,
+            feedName: feedMatch.feedName,
+          };
+        }
+        return send(response, 502, blockedReply);
       }
       if (outcome.error === "TOO_LARGE") {
         return send(response, 502, { success: false, error: "The page is larger than the response limit. You were not charged.", ...summary });

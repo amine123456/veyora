@@ -131,6 +131,17 @@ code, pre { font-family: var(--font-mono); }
 .btn--sm { min-height: 36px; padding: 0 14px; font-size: 13.5px; }
 .btn--danger { background: var(--surface); color: var(--red); border-color: #F1C6C1; }
 .btn--danger:hover { background: var(--red-soft); border-color: var(--red); }
+.btn--warn { background: #FFF3E0; color: #E65100; border-color: #FFCC80; font-weight: 600; }
+.btn--warn:hover { background: #FFE0B2; border-color: #E65100; }
+
+/* feed chips (dashboard) */
+.feed-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; background: #f4f3f0; color: var(--muted); white-space: nowrap; }
+.feed-chip--active { background: #E8F5E9; color: #1B5E20; }
+.feed-chip--coming { background: #EDE7F6; color: #4527A0; }
+
+/* delivery panel */
+.delivery-panel { margin-top: 8px; }
+.delivery-form { max-width: 480px; }
 
 /* copy */
 .copy {
@@ -237,6 +248,12 @@ code, pre { font-family: var(--font-mono); }
 .meter__fill { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--accent); transition: width .7s var(--ease); }
 .empty { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border-radius: var(--r-md); font-size: 14.5px; line-height: 1.45; color: #FFE98A; background: rgba(255, 221, 31, .1); border: 1px solid rgba(255, 221, 31, .3); }
 .empty .ic { font-size: 19px; margin-top: 1px; }
+
+/* payment method tabs */
+.pay-methods { display: flex; gap: 4px; margin-bottom: 12px; }
+.pay-tab { padding: 7px 16px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.pay-tab:hover { border-color: var(--ink); color: var(--ink); }
+.pay-tab--active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
 /* top-up packs (tiles are created by auth.js) */
 .packs { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 12px; }

@@ -28,6 +28,40 @@ import {
   revokeApiKey,
   verifyAccount,
 } from './store.js';
+import {
+  listFeeds,
+  getFeed,
+  createSubscription,
+  listSubscriptions,
+  getSubscription,
+  updateSubscription,
+  cancelSubscription,
+  setDeliveryConfig,
+  getDeliveryConfig,
+  getDeliveryLogs,
+  getStripeCustomerId,
+  setStripeCustomerId,
+  getOrCreateStripeProduct,
+  saveStripeProduct,
+  linkStripeSubscription,
+  activateByStripeSubscription,
+  pauseByStripeSubscription,
+  cancelByStripeSubscription,
+  reactivateByStripeSubscription,
+  updatePeriodEnd,
+  findSubscriptionByStripe,
+  recordStripeEvent,
+} from './feeds-store.js';
+import {
+  createCustomer as createStripeCustomer,
+  createProduct as createStripeProduct,
+  createPrice as createStripePrice,
+  createSubscriptionCheckout,
+  cancelStripeSubscription,
+  pauseStripeSubscription,
+  resumeStripeSubscription,
+  validStripeIdentifier as validStripeId,
+} from './stripe.js';
 import { createMailer } from './resend.js';
 
 const publicDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
@@ -54,6 +88,9 @@ const publicFiles = new Map([
   ['/favicon.svg', { file: 'favicon.svg', type: 'image/svg+xml' }],
   ['/favicon.ico', { file: 'favicon.svg', type: 'image/svg+xml' }],
   ['/docs', { file: 'docs.html', type: html }],
+  ['/data-feeds', { file: 'data-feeds.html', type: html }],
+  ['/feeds.js', { file: 'feeds.js', type: 'text/javascript; charset=utf-8' }],
+  ['/feeds.css', { file: 'feeds.css', type: 'text/css; charset=utf-8' }],
   ['/verify-email', { file: 'verify-email.html', type: html }],
   ['/verify-email.js', { file: 'verify-email.js', type: 'text/javascript; charset=utf-8' }],
   ['/nav.js', { file: 'nav.js', type: 'text/javascript; charset=utf-8' }],
@@ -296,6 +333,18 @@ async function createStripeCheckout(config, form, purchaseId, fetchImpl) {
   }
 }
 
+const PRIVATE_IP_PREFIXES = ['10.', '127.', '0.', '169.254.', '192.168.'];
+const PRIVATE_IP_172 = /^172\.(1[6-9]|2\d|3[01])\./;
+const PRIVATE_HOSTS = new Set(['localhost', 'metadata.google.internal', 'metadata']);
+function isPrivateHost(host) {
+  const h = (host || '').toLowerCase().replace(/^\[|\]$/g, '');
+  if (PRIVATE_HOSTS.has(h)) return true;
+  if (PRIVATE_IP_PREFIXES.some(p => h.startsWith(p))) return true;
+  if (PRIVATE_IP_172.test(h)) return true;
+  if (h === '::1' || h.startsWith('fc') || h.startsWith('fd') || h.startsWith('fe80')) return true;
+  return false;
+}
+
 function parseJson(payload) {
   try {
     return JSON.parse(payload.toString('utf8'));
@@ -414,6 +463,7 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
   const accountAttempts = authLimiter(config.authAttemptsPerMinute);
   const signupAttempts = authLimiter(SIGNUPS_PER_MINUTE);
   const supportAttempts = authLimiter(5);
+  const checkoutAttempts = authLimiter(5);
   const hashing = concurrencyLimit(config.maxConcurrentAuth);
   const server = http.createServer(async (request, response) => {
     try {
@@ -626,6 +676,9 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
 
       if (request.method === 'POST' && request.url === '/api/checkout') {
         assertSameOrigin(request);
+        const checkoutIp = clientAddress(request);
+        if (!checkoutAttempts.allowed(checkoutIp)) return json(response, 429, { error: 'Too many checkout attempts. Please wait a moment.' });
+        checkoutAttempts.fail(checkoutIp);
         if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
           throw new PublicError(415, 'Content-Type must be application/json');
         }
@@ -656,6 +709,50 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
         }
         await bindPaymentSession(pending.purchaseId, invoice.invoiceRef);
         return json(response, 200, { checkoutUrl: invoice.invoiceUrl });
+      }
+
+      if (request.method === 'POST' && request.url === '/api/checkout/stripe') {
+        assertSameOrigin(request);
+        const checkoutIp = clientAddress(request);
+        if (!checkoutAttempts.allowed(checkoutIp)) return json(response, 429, { error: 'Too many checkout attempts. Please wait a moment.' });
+        checkoutAttempts.fail(checkoutIp);
+        if (!String(request.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+          throw new PublicError(415, 'Content-Type must be application/json');
+        }
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        if (!config.stripeKey) return json(response, 503, { error: 'Card payment is not set up yet' });
+        const input = parseJson(await readBody(request, config.maxBodyBytes));
+        const selected = availableTopups.get(input?.topupId ?? input?.packageId);
+        if (!selected) throw new PublicError(400, 'Unknown top-up');
+
+        let pending;
+        try {
+          pending = await createPendingPayment(client.username, selected);
+        } catch (error) {
+          if (error.message === 'Too many pending purchases') throw new PublicError(429, 'Too many unpaid checkouts. Finish or wait for one to expire.');
+          throw error;
+        }
+        try {
+          const form = new URLSearchParams({
+            mode: 'payment',
+            success_url: config.successUrl,
+            cancel_url: config.cancelUrl,
+            client_reference_id: pending.purchaseId,
+            'line_items[0][quantity]': '1',
+            'line_items[0][price_data][currency]': 'usd',
+            'line_items[0][price_data][unit_amount]': String(selected.cents),
+            'line_items[0][price_data][product_data][name]': `$${(selected.cents / 100).toFixed(0)} balance top-up`,
+            'metadata[purchase_id]': pending.purchaseId,
+          });
+          if (client.email) form.set('customer_email', client.email);
+          const session = await createStripeCheckout(config, form, pending.purchaseId, fetchImpl);
+          await bindPaymentSession(pending.purchaseId, session.id);
+          return json(response, 200, { checkoutUrl: session.url });
+        } catch (error) {
+          await cancelPendingPayment(pending.purchaseId).catch(() => {});
+          throw error;
+        }
       }
 
       if (request.method === 'POST' && request.url === '/nowpayments/ipn') {
@@ -690,9 +787,15 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
       }
 
       if (request.method === 'GET' && request.url === '/packages') {
-        return json(response, 200, [...availableTopups.values()].map(({ id, cents, currency, bonusPercent, micros }) => ({
-          id, cents, currency, bonusPercent, creditMicros: micros,
-        })));
+        return json(response, 200, {
+          topups: [...availableTopups.values()].map(({ id, cents, currency, bonusPercent, micros }) => ({
+            id, cents, currency, bonusPercent, creditMicros: micros,
+          })),
+          methods: {
+            crypto: Boolean(config.nowpayments),
+            stripe: Boolean(config.stripeKey),
+          },
+        });
       }
 
       if (request.method === 'POST' && request.url === '/checkout') {
@@ -753,29 +856,309 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
           throw new PublicError(400, 'Invalid event');
         }
 
+        const isNew = await recordStripeEvent(event.id, event.type);
+        if (!isNew) return json(response, 200, { received: true });
+
         if (event.type === 'checkout.session.completed' && event.data?.object?.payment_status === 'paid') {
           const session = event.data.object;
-          const purchaseId = session.client_reference_id;
-          if (!validStripeIdentifier(session.id, 'cs_')
-            || typeof purchaseId !== 'string'
-            || purchaseId !== session.metadata?.purchase_id
-            || !Number.isSafeInteger(session.amount_total)
-            || typeof session.currency !== 'string') {
-            throw new PublicError(400, 'Invalid payment');
-          }
-          try {
-            await completePayment({
-              eventId: event.id,
-              purchaseId,
-              sessionId: session.id,
-              amountTotal: session.amount_total,
-              currency: session.currency,
-            });
-          } catch {
-            throw new PublicError(400, 'Invalid payment');
+          if (session.mode === 'subscription') {
+            const subscriptionId = session.metadata?.subscription_id || session.client_reference_id;
+            const stripeSubId = session.subscription;
+            if (typeof subscriptionId === 'string' && validStripeId(stripeSubId, 'sub_')) {
+              await linkStripeSubscription(subscriptionId, {
+                stripeSubscriptionId: stripeSubId,
+                stripePriceId: session.metadata?.price_id ?? null,
+              });
+              await activateByStripeSubscription(stripeSubId);
+            }
+          } else {
+            const purchaseId = session.client_reference_id;
+            if (!validStripeIdentifier(session.id, 'cs_')
+              || typeof purchaseId !== 'string'
+              || purchaseId !== session.metadata?.purchase_id
+              || !Number.isSafeInteger(session.amount_total)
+              || typeof session.currency !== 'string') {
+              throw new PublicError(400, 'Invalid payment');
+            }
+            try {
+              await completePayment({
+                eventId: event.id,
+                purchaseId,
+                sessionId: session.id,
+                amountTotal: session.amount_total,
+                currency: session.currency,
+              });
+            } catch {
+              throw new PublicError(400, 'Invalid payment');
+            }
           }
         }
+
+        if (event.type === 'invoice.paid') {
+          const invoice = event.data?.object;
+          const stripeSubId = invoice?.subscription;
+          if (stripeSubId && validStripeId(stripeSubId, 'sub_')) {
+            const periodEnd = invoice.lines?.data?.[0]?.period?.end;
+            if (periodEnd) await updatePeriodEnd(stripeSubId, new Date(periodEnd * 1000).toISOString());
+            await reactivateByStripeSubscription(stripeSubId);
+          }
+        }
+
+        if (event.type === 'invoice.payment_failed') {
+          const invoice = event.data?.object;
+          const stripeSubId = invoice?.subscription;
+          if (stripeSubId && validStripeId(stripeSubId, 'sub_')) {
+            await pauseByStripeSubscription(stripeSubId);
+          }
+        }
+
+        if (event.type === 'customer.subscription.deleted') {
+          const sub = event.data?.object;
+          if (sub?.id && validStripeId(sub.id, 'sub_')) {
+            await cancelByStripeSubscription(sub.id);
+          }
+        }
+
+        if (event.type === 'customer.subscription.updated') {
+          const sub = event.data?.object;
+          if (sub?.id && validStripeId(sub.id, 'sub_')) {
+            if (sub.current_period_end) await updatePeriodEnd(sub.id, new Date(sub.current_period_end * 1000).toISOString());
+            if (sub.status === 'canceled') await cancelByStripeSubscription(sub.id);
+          }
+        }
+
+        if (event.type.startsWith('charge.dispute.')) {
+          const dispute = event.data?.object;
+          const tag = event.type.split('.').pop();
+          console.error(`STRIPE DISPUTE [${tag}]: id=${dispute?.id ?? '?'}, status=${dispute?.status ?? '?'}, amount=${dispute?.amount ?? '?'} ${dispute?.currency ?? '?'}, reason=${dispute?.reason ?? '?'}, payment_intent=${dispute?.payment_intent ?? '?'}`);
+        }
+
         return json(response, 200, { received: true });
+      }
+
+      // --- Data Feeds: public catalog ---
+      if (request.method === 'GET' && request.url.startsWith('/api/feeds')) {
+        const url = new URL(request.url, 'http://localhost');
+        if (url.pathname === '/api/feeds') {
+          const filters = {};
+          if (url.searchParams.has('vertical')) filters.vertical = url.searchParams.get('vertical');
+          if (url.searchParams.has('status')) filters.status = url.searchParams.get('status');
+          if (url.searchParams.has('country')) filters.country = url.searchParams.get('country');
+          return json(response, 200, { feeds: await listFeeds(filters) });
+        }
+        const feedPath = url.pathname.slice('/api/feeds/'.length);
+        const sampleMatch = feedPath.match(/^([a-z0-9_-]+)\/sample$/);
+        if (sampleMatch) {
+          try {
+            const samplePath = path.join(publicDirectory, 'samples', `${sampleMatch[1]}.json`);
+            const data = await readFile(samplePath, 'utf8');
+            response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+            return void response.end(data);
+          } catch { return json(response, 404, { error: 'Sample not available' }); }
+        }
+        if (feedPath && !feedPath.includes('/')) {
+          const feedId = feedPath;
+          const feed = await getFeed(feedId);
+          if (!feed) return json(response, 404, { error: 'Feed not found' });
+          return json(response, 200, feed);
+        }
+      }
+
+      // --- Data Feeds: authenticated subscription routes ---
+      if (request.url.startsWith('/api/subscriptions') || request.url === '/api/feeds/contact') {
+        const client = await getSessionClient(sessionToken(request));
+        if (!client) return json(response, 401, { error: 'Not signed in' });
+        const url = new URL(request.url, 'http://localhost');
+
+        if (request.method === 'GET' && url.pathname === '/api/subscriptions') {
+          return json(response, 200, { subscriptions: await listSubscriptions(client.username) });
+        }
+
+        if (request.method === 'POST' && url.pathname === '/api/subscriptions') {
+          assertSameOrigin(request);
+          const subIp = clientAddress(request);
+          if (!checkoutAttempts.allowed(subIp)) return json(response, 429, { error: 'Too many attempts. Please wait a moment.' });
+          checkoutAttempts.fail(subIp);
+          const input = parseJson(await readBody(request, config.maxBodyBytes));
+          const feedId = String(input?.feedId ?? '').trim();
+          const frequency = String(input?.frequency ?? 'daily');
+          const deliveryMethod = String(input?.deliveryMethod ?? 'sftp');
+          if (!feedId) throw new PublicError(400, 'Missing feedId');
+          if (!['daily', 'weekly', 'monthly'].includes(frequency)) throw new PublicError(400, 'Invalid frequency');
+          if (!['sftp', 'snowflake', 'webhook', 'manual'].includes(deliveryMethod)) throw new PublicError(400, 'Invalid delivery method');
+          const feed = await getFeed(feedId);
+          if (!feed || feed.status !== 'active') throw new PublicError(404, 'Feed not available');
+          const multiplier = frequency === 'weekly' ? 0.6 : frequency === 'monthly' ? 0.3 : 1;
+          const priceCents = Math.round(feed.base_price_cents * multiplier);
+          try {
+            const sub = await createSubscription(client.username, feedId, { frequency, deliveryMethod, priceCents, currency: feed.currency });
+            if (config.stripeKey) {
+              let customerId = await getStripeCustomerId(client.username);
+              if (!customerId) {
+                const customer = await createStripeCustomer(config, { email: client.email, username: client.username }, fetchImpl);
+                customerId = customer.id;
+                await setStripeCustomerId(client.username, customerId);
+              }
+              let cached = await getOrCreateStripeProduct(feedId, frequency);
+              if (!cached) {
+                const product = await createStripeProduct(config, {
+                  name: `${feed.site_name} Data Feed (${frequency})`,
+                  description: `Structured data delivery from ${feed.site_domain}`,
+                  metadata: { feed_id: feedId, frequency, service_type: 'data_delivery' },
+                }, fetchImpl);
+                const price = await createStripePrice(config, { productId: product.id, unitAmount: priceCents, currency: feed.currency }, fetchImpl);
+                await saveStripeProduct(feedId, frequency, { productId: product.id, priceId: price.id, priceCents, currency: feed.currency });
+                cached = { price_id: price.id };
+              }
+              const session = await createSubscriptionCheckout(config, {
+                customerId,
+                priceId: cached.price_id,
+                subscriptionId: sub.id,
+                successUrl: `${config.successUrl}${config.successUrl.includes('?') ? '&' : '?'}feed_sub=1`,
+                cancelUrl: config.cancelUrl,
+              }, fetchImpl);
+              return json(response, 201, { ...sub, checkoutUrl: session.url });
+            }
+            return json(response, 201, sub);
+          } catch (error) {
+            if (error.status) throw new PublicError(error.status, error.message);
+            throw error;
+          }
+        }
+
+        // Routes with subscription ID: /api/subscriptions/:id[/...]
+        const subMatch = url.pathname.match(/^\/api\/subscriptions\/([0-9a-f-]{36})(\/.*)?$/);
+        if (subMatch) {
+          const subId = subMatch[1];
+          const subPath = subMatch[2] ?? '';
+
+          if (request.method === 'GET' && subPath === '/deliveries') {
+            const sub = await getSubscription(subId, client.username);
+            if (!sub) return json(response, 404, { error: 'Subscription not found' });
+            return json(response, 200, { deliveries: await getDeliveryLogs(subId) });
+          }
+
+          if (request.method === 'POST' && subPath === '/delivery-config') {
+            assertSameOrigin(request);
+            const sub = await getSubscription(subId, client.username);
+            if (!sub) return json(response, 404, { error: 'Subscription not found' });
+            const input = parseJson(await readBody(request, config.maxBodyBytes));
+            const method = input?.webhook_url ? 'webhook' : input?.sftp_host ? 'sftp' : sub.delivery_method;
+            const cfg = { method };
+            if (method === 'sftp') {
+              if (!input?.sftp_host || !input?.sftp_username) throw new PublicError(400, 'SFTP host and username are required');
+              const sftpHost = String(input.sftp_host).trim().slice(0, 255);
+              if (isPrivateHost(sftpHost)) throw new PublicError(400, 'SFTP host must be a public hostname');
+              cfg.sftp_host = sftpHost;
+              cfg.sftp_port = Math.max(1, Math.min(65535, parseInt(input.sftp_port) || 22));
+              cfg.sftp_username = String(input.sftp_username).trim().slice(0, 128);
+              cfg.sftp_password = String(input.sftp_password ?? '').slice(0, 256);
+              cfg.sftp_path = String(input.sftp_path ?? '/').trim().slice(0, 512);
+            } else if (method === 'webhook') {
+              if (!input?.webhook_url) throw new PublicError(400, 'Webhook URL is required');
+              const webhookUrl = String(input.webhook_url).trim().slice(0, 512);
+              let parsed;
+              try { parsed = new URL(webhookUrl); } catch { throw new PublicError(400, 'Invalid webhook URL'); }
+              if (parsed.protocol !== 'https:') throw new PublicError(400, 'Webhook URL must use HTTPS');
+              if (isPrivateHost(parsed.hostname)) throw new PublicError(400, 'Webhook URL must point to a public host');
+              cfg.webhook_url = webhookUrl;
+              cfg.webhook_secret = input.webhook_secret ? String(input.webhook_secret).slice(0, 256) : null;
+            } else {
+              cfg.notes = String(input?.notes ?? '').trim().slice(0, 500);
+            }
+            if (method !== sub.delivery_method) await updateSubscription(subId, client.username, { deliveryMethod: method });
+            const saved = await setDeliveryConfig(subId, cfg);
+            return json(response, 200, { method: saved.method, configured: true });
+          }
+
+          if (request.method === 'POST' && subPath === '/checkout') {
+            assertSameOrigin(request);
+            const coIp = clientAddress(request);
+            if (!checkoutAttempts.allowed(coIp)) return json(response, 429, { error: 'Too many checkout attempts. Please wait a moment.' });
+            checkoutAttempts.fail(coIp);
+            if (!config.stripeKey) throw new PublicError(503, 'Stripe payments not configured');
+            const sub = await getSubscription(subId, client.username);
+            if (!sub) return json(response, 404, { error: 'Subscription not found' });
+            if (sub.status !== 'pending' || sub.stripe_subscription_id) throw new PublicError(400, 'Subscription already has an active payment');
+            const feed = await getFeed(sub.feed_id);
+            if (!feed) throw new PublicError(404, 'Feed not found');
+            let customerId = await getStripeCustomerId(client.username);
+            if (!customerId) {
+              const customer = await createStripeCustomer(config, { email: client.email, username: client.username }, fetchImpl);
+              customerId = customer.id;
+              await setStripeCustomerId(client.username, customerId);
+            }
+            let cached = await getOrCreateStripeProduct(sub.feed_id, sub.frequency);
+            if (!cached) {
+              const product = await createStripeProduct(config, {
+                name: `${feed.site_name} Data Feed (${sub.frequency})`,
+                description: `Structured data delivery from ${feed.site_domain}`,
+                metadata: { feed_id: sub.feed_id, frequency: sub.frequency, service_type: 'data_delivery' },
+              }, fetchImpl);
+              const price = await createStripePrice(config, { productId: product.id, unitAmount: sub.price_cents, currency: sub.currency }, fetchImpl);
+              await saveStripeProduct(sub.feed_id, sub.frequency, { productId: product.id, priceId: price.id, priceCents: sub.price_cents, currency: sub.currency });
+              cached = { price_id: price.id };
+            }
+            const session = await createSubscriptionCheckout(config, {
+              customerId,
+              priceId: cached.price_id,
+              subscriptionId: sub.id,
+              successUrl: `${config.successUrl}${config.successUrl.includes('?') ? '&' : '?'}feed_sub=1`,
+              cancelUrl: config.cancelUrl,
+            }, fetchImpl);
+            return json(response, 200, { checkoutUrl: session.url });
+          }
+
+          if (request.method === 'PATCH' && subPath === '') {
+            assertSameOrigin(request);
+            const sub = await getSubscription(subId, client.username);
+            if (!sub) return json(response, 404, { error: 'Subscription not found' });
+            const input = parseJson(await readBody(request, config.maxBodyBytes));
+            const updates = {};
+            if (input?.status === 'paused' && sub.status === 'active') {
+              if (sub.stripe_subscription_id) await pauseStripeSubscription(config, sub.stripe_subscription_id, fetchImpl);
+              updates.status = 'paused';
+            }
+            if (input?.status === 'active' && sub.status === 'paused') {
+              if (sub.stripe_subscription_id) await resumeStripeSubscription(config, sub.stripe_subscription_id, fetchImpl);
+              updates.status = 'active';
+            }
+            if (input?.frequency && ['daily', 'weekly', 'monthly'].includes(input.frequency)) updates.frequency = input.frequency;
+            if (!Object.keys(updates).length) throw new PublicError(400, 'Nothing to update');
+            const updated = await updateSubscription(subId, client.username, updates);
+            if (!updated) return json(response, 404, { error: 'Subscription not found' });
+            return json(response, 200, updated);
+          }
+
+          if (request.method === 'DELETE' && subPath === '') {
+            assertSameOrigin(request);
+            const sub = await getSubscription(subId, client.username);
+            if (!sub) return json(response, 404, { error: 'Subscription not found' });
+            if (sub.stripe_subscription_id) {
+              await cancelStripeSubscription(config, sub.stripe_subscription_id, fetchImpl).catch(() => {});
+            }
+            const cancelled = await cancelSubscription(subId, client.username);
+            if (!cancelled) return json(response, 404, { error: 'Subscription not found' });
+            return json(response, 200, { ok: true });
+          }
+        }
+
+        // Contact form for custom feed requests
+        if (request.method === 'POST' && url.pathname === '/api/feeds/contact') {
+          assertSameOrigin(request);
+          const input = parseJson(await readBody(request, config.maxBodyBytes));
+          const message = String(input?.message ?? '').trim();
+          const website = String(input?.website ?? '').trim();
+          if (message.length < 10 || message.length > 4000) throw new PublicError(400, 'Message must be between 10 and 4000 characters');
+          const record = {
+            id: crypto.randomUUID(), createdAt: new Date().toISOString(), type: 'feed_request',
+            username: client.username, email: client.email, website, message,
+          };
+          const supportFile = path.resolve(config.supportFile ?? './data/support-requests.jsonl');
+          await mkdir(path.dirname(supportFile), { recursive: true });
+          await appendFile(supportFile, `${JSON.stringify(record)}\n`, { encoding: 'utf8', mode: 0o600 });
+          return json(response, 201, { ok: true, id: record.id });
+        }
       }
 
       return json(response, 404, { error: 'Not found' });

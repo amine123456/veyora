@@ -128,17 +128,17 @@ export function HomeCompare() {
               </tr>
               <tr>
                 <th scope="row">
-                  Crypto top-ups <em className="tagv tagv--sm">example framing</em>
+                  Payment methods <em className="tagv tagv--sm">example framing</em>
                 </th>
-                <td>Rare</td>
-                <td>Rare</td>
+                <td>Card only</td>
+                <td>Card only</td>
                 <td className="is-us yes">
                   <i>
                     <svg>
                       <use href="#i-check" />
                     </svg>
                   </i>
-                  USDT on BSC
+                  Card &amp; USDT
                 </td>
               </tr>
             </tbody>

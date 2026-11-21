@@ -57,7 +57,7 @@ export function HomeTop() {
           </h1>
           <p className="sub">
             5 million residential IPs across 195 countries, sticky or a fresh IP every request. HTTP, HTTPS and SOCKS5.
-            Prepaid in USDT.
+            Prepaid with card or USDT.
           </p>
           <div className="cta-row">
             <a className="btn btn--yellow btn--lg" href="#pricing">

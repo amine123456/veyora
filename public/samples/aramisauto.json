@@ -1,0 +1,4056 @@
+{
+  "feed_id": "aramisauto",
+  "total_records": 3350,
+  "file_size_mb": 10.0,
+  "sample_count": 5,
+  "fields": [
+    "title",
+    "make",
+    "model",
+    "price_eur",
+    "mileage_km",
+    "first_registration",
+    "fuel",
+    "transmission",
+    "images",
+    "id",
+    "url",
+    "source",
+    "detail",
+    "crawled_at"
+  ],
+  "field_count": 14,
+  "deep_field_count": 176,
+  "records": [
+    {
+      "title": "Renault SYMBIOZ E-Tech full hybrid 160 ch Techno",
+      "make": "Renault",
+      "model": "SYMBIOZ",
+      "price_eur": 26999,
+      "mileage_km": 0,
+      "first_registration": "2026-09-30",
+      "fuel": "Hybride Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6ad1d99659826.jpg"
+      ],
+      "id": "1028862",
+      "url": "https://www.aramisauto.com/voitures/renault/symbioz/techno/v352173/?vehicleId=1028862",
+      "source": "sitemap",
+      "detail": {
+        "id": "1028862",
+        "offerId": "v352173",
+        "offerType": {
+          "id": "km0",
+          "label": "0 km"
+        },
+        "availability": {
+          "id": "available",
+          "label": "Disponible"
+        },
+        "makerName": "Renault",
+        "modelName": "SYMBIOZ",
+        "modelIteration": "Symbioz",
+        "makerModelIteration": "Renault Symbioz",
+        "engineName": "E-Tech full hybrid 160 ch",
+        "trimLevel": "Techno",
+        "energyType": {
+          "id": "full-hybrid-gasoline",
+          "label": "Hybride Essence"
+        },
+        "transmission": {
+          "id": "automatic",
+          "label": "Automatique"
+        },
+        "body": {
+          "id": "suv",
+          "label": "4x4 et SUV"
+        },
+        "color": {
+          "id": "black",
+          "label": "Noir"
+        },
+        "mileage": {
+          "km": 0,
+          "mi": 0
+        },
+        "firstRegistrationDate": "2026-09-30",
+        "mainEnginePower": {
+          "kw": 80.16936375,
+          "ch": 109,
+          "bhp": 107.50888763
+        },
+        "sellingPriceWithTaxes": {
+          "eur": 26999,
+          "gbp": null
+        },
+        "advertisedPrice": {
+          "eur": 26999
+        },
+        "catalogPriceWithOptionsWithTaxes": {
+          "eur": 37300,
+          "gbp": null
+        },
+        "catalogDiscount": {
+          "percent": 27.62
+        },
+        "financing": null,
+        "indicativeFinancing": {
+          "months": 48,
+          "installment": {
+            "eur": 167,
+            "gbp": null
+          },
+          "type": "leasing",
+          "hasPurchaseOption": null
+        },
+        "promotions": [
+          {
+            "id": "0",
+            "color": "#E6EAFF",
+            "label": "Exclusivité LOA",
+            "discount": null
+          },
+          {
+            "id": "540",
+            "color": "#6ad724",
+            "label": "BLACK MONTH",
+            "discount": null
+          },
+          {
+            "id": "7",
+            "color": "#6AD724",
+            "label": "PRIX EN BAISSE",
+            "discount": {
+              "eur": 300,
+              "gbp": null
+            }
+          }
+        ],
+        "highlights": [
+          {
+            "id": "android-auto",
+            "label": "Android Auto"
+          },
+          {
+            "id": "apple-carplay",
+            "label": "Apple CarPlay"
+          },
+          {
+            "id": "bluetooth",
+            "label": "Bluetooth"
+          },
+          {
+            "id": "reverse-camera",
+            "label": "Caméra de recul"
+          },
+          {
+            "id": "air-conditioning",
+            "label": "Climatisation"
+          },
+          {
+            "id": "gps",
+            "label": "GPS"
+          },
+          {
+            "id": "alloy-wheels",
+            "label": "Jantes en alliage"
+          },
+          {
+            "id": "cruise-control",
+            "label": "Régulateur de vitesse"
+          },
+          {
+            "id": "reverse-radar",
+            "label": "Radar de recul"
+          }
+        ],
+        "thumbnailUrl": "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6ad1d99659826.jpg",
+        "electricRange": null,
+        "shortestDeliveryTime": {
+          "days": 1
+        },
+        "freeDeliveryLocation": {
+          "id": "CLE",
+          "label": "Clermont-Ferrand"
+        },
+        "variants": [
+          {
+            "vehicleId": "1028856",
+            "colorId": "black",
+            "manufacturerColor": "Noir Etoilé (GNE)"
+          }
+        ],
+        "manufacturerColor": "Noir Etoilé (GNE)",
+        "manufacturerInterior": "Sellerie Techno",
+        "combinedHybridEnginePower": null,
+        "doors": 5,
+        "media": [
+          {
+            "type": "photo",
+            "photoType": null,
+            "url": "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6ad1d99659826.jpg"
+          }
+        ],
+        "view360": null,
+        "equipments": [
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Contrôle de la traction (TCS)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Jantes alliage 18'' diamantées Gravity",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Système de contrôle de trajectoire ESC avec aide au démarrage en côte",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Système de freinage d'urgence avancé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Système multimédia openR link 10.4\"  avecGoogle intégré",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Boîte de vitesse hybride multimode 6 rapports",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Caméra détection de fatigue du conducteur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Pack connectivité avancée",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Pack connectivité standard, via l'app My Renault",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Appuie-têtes AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Banquette AR coulissante et rabattable 1/3 - 2/3",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Boitier connect AIVC",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Carte \"Mains libres\"",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Climatisation automatique",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Direction assistée",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Lève-vitres AV électriques à impulsion",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Lunette AR chauffante",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Miroirs de courtoisie rétroéclairés",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Ouverture du hayon manuelle",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Renault Multi-sense",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Rétroviseurs extérieurs dégivrants, réglables et rabattables électriquement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Siège AV réglable en hauteur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Tableau de bord avec écran numérique et personnalisable 10\"",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Rétroviseur intérieur électrochrome sans contour",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Cartographie Standard",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Chargeur smartphone à induction",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Caméra de recul",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Airbags frontaux conducteur et passager adaptatif",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Airbags latéraux AV",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Alerte de distance de sécurité",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Alerte franchissement de ligne et assistant maintien dans la voie",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Allumage automatique des essuie-glaces",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Antiblocage des roues ABS",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Appel d'urgence",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Ceinture centrale AR 3 points",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Condamnation centralisée des portes",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Eclairage AV et AR Full LED Pure Vision",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Feux de stop à LED",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Filtre à particules",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Frein de parking électrique avec fonction Auto-Hold",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Indicateur de changement de vitesse",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Kit de gonflage",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "My Safety switch (raccourci vers configuration personnalisée des aides à la conduite)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Prédisposition  éthylotest",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Reconnaissance des panneaux de signalisation",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Répétiteurs latéraux de changement de direction",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Système de surveillance de la pression des pneus",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Témoin d'oubli de ceinture de sécurité",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Vitres latérales et AR surteintées",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Système ISOFIX (i-Size) aux places AR (latérales)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Régulateur de vitesse adaptatif",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Aide au freinage d'urgence (A.F.U.)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Aide au parking AV/AR et latéral",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Airbag passager déconnectable",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Antenne Requin",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Feux AR 3D",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Feux AR avec signature lumineuse Y",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Poignées de portes ton caisse",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Volant textile enduit grainé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "option",
+              "label": "Option"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Peinture métallisée",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": {
+              "eur": 900,
+              "gbp": null
+            }
+          },
+          {
+            "type": {
+              "id": "option",
+              "label": "Option"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Immatriculation définitive réalisée 3 mois après la livraison",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          }
+        ],
+        "co2Emissions": {
+          "nedc": null,
+          "wltp": {
+            "gpkm": 99
+          }
+        },
+        "fuelConsumptionCombined": {
+          "nedc": null,
+          "wltp": {
+            "ltp100km": 4.4,
+            "mpg": 64.20022727272726
+          }
+        },
+        "fuelConsumptionUrban": null,
+        "fuelConsumptionExtraUrban": null,
+        "fuelTankCapacity": null,
+        "height": {
+          "m": null,
+          "cm": 158,
+          "in": null
+        },
+        "width": {
+          "m": null,
+          "cm": 180,
+          "in": null
+        },
+        "length": {
+          "m": null,
+          "cm": 441,
+          "in": null
+        },
+        "seats": 5,
+        "topSpeed": {
+          "kmph": 180,
+          "mph": 112
+        },
+        "acceleration0100Km": {
+          "sec": 9.1
+        },
+        "electricBatteryQuickChargeTime": null,
+        "electricBatteryMediumChargeTime": null,
+        "electricBatterySlowChargeTime": null,
+        "weight": {
+          "kg": 1390
+        },
+        "bootSpaceBackCapacityMax": {
+          "lt": 1582,
+          "gal": null
+        },
+        "bootSpaceBackCapacityMin": {
+          "lt": 492,
+          "gal": null
+        },
+        "bootSpaceFrontCapacity": null,
+        "electricBatteryCapacity": null,
+        "electricBatteryStateOfHealth": null,
+        "electricBatteryWarrantyMileage": null,
+        "electricBatteryWarrantyPeriod": null,
+        "electricOutletMaximumPower": null,
+        "engineDisplacement": {
+          "cc": 1789
+        },
+        "gearboxType": null,
+        "numberOfGears": 6,
+        "driveType": {
+          "id": "fwd",
+          "label": "Traction avant"
+        },
+        "reference": "261817D110-26RSYM / 2675914",
+        "additionalInfo": "Identique concession classique avec options. Immatriculation définitive réalisée 3 mois après la livraison.\r\n\r\n Véhicule disponible à l'achat hors LOA à 28999 ",
+        "euronorm": null,
+        "licencePlate": null,
+        "defectsDiagram": null,
+        "isMarketplace": false,
+        "manufacturerWarrantyExpirationDate": "2028-09-30",
+        "additionalWarranties": {
+          "puretech": false
+        },
+        "financingMethods": {
+          "cash": false,
+          "loan": false,
+          "leasing": true
+        },
+        "frenchData": {
+          "critair": "1",
+          "fiscalPower": {
+            "cv": 6
+          },
+          "ecologicalBonus": {
+            "eur": 0,
+            "gbp": null
+          },
+          "ecologicalMalus": {
+            "eur": 0,
+            "gbp": null
+          },
+          "ecologicalMalusWeight": null,
+          "ecologicalMalusCo2": null,
+          "genreCarteGrise": "VP"
+        },
+        "refurbishmentOperations": [],
+        "lastSafetyInspectionDate": null,
+        "nextSafetyInspectionDate": null,
+        "qualityCertificateUrl": null,
+        "refurbishmentCertificateUrl": null,
+        "stateOfHealthCertificateUrl": null,
+        "similarOffers": {
+          "offerIdsA": [
+            "v352216",
+            "rv1037318",
+            "rv1039302",
+            "v352172",
+            "v308299",
+            "rv1039943",
+            "rv1027158",
+            "rv1039954",
+            "rv1039707"
+          ],
+          "offerIdsB": [
+            "v352216",
+            "rv1037318",
+            "rv1039302",
+            "v352172",
+            "v308299",
+            "rv1039943",
+            "rv1027158",
+            "rv1039954",
+            "rv1039707"
+          ]
+        },
+        "belgianData": null,
+        "ukData": null,
+        "serviceMaintenanceContractCost": null,
+        "insurances": []
+      },
+      "crawled_at": "2026-11-19T20:45:34.547257+00:00"
+    },
+    {
+      "title": "MG MG3 1.5 L Hybrid+ 195 ch Luxury",
+      "make": "MG",
+      "model": "MG3",
+      "price_eur": 20499,
+      "mileage_km": 0,
+      "first_registration": "2026-10-30",
+      "fuel": "Hybride Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6a885203baace.jpg"
+      ],
+      "id": "1024823",
+      "url": "https://www.aramisauto.com/voitures/mg/mg3/luxury/v351782/?vehicleId=1024823",
+      "source": "sitemap",
+      "detail": {
+        "id": "1024823",
+        "offerId": "v351782",
+        "offerType": {
+          "id": "km0",
+          "label": "0 km"
+        },
+        "availability": {
+          "id": "available",
+          "label": "Disponible"
+        },
+        "makerName": "MG",
+        "modelName": "MG3",
+        "modelIteration": "MG3",
+        "makerModelIteration": "MG MG3",
+        "engineName": "1.5 L Hybrid+ 195 ch",
+        "trimLevel": "Luxury",
+        "energyType": {
+          "id": "full-hybrid-gasoline",
+          "label": "Hybride Essence"
+        },
+        "transmission": {
+          "id": "automatic",
+          "label": "Automatique"
+        },
+        "body": {
+          "id": "urban",
+          "label": "Citadine"
+        },
+        "color": {
+          "id": "grey",
+          "label": "Gris"
+        },
+        "mileage": {
+          "km": 0,
+          "mi": 0
+        },
+        "firstRegistrationDate": "2026-10-30",
+        "mainEnginePower": {
+          "kw": 75.0208725,
+          "ch": 102,
+          "bhp": 100.60464714
+        },
+        "sellingPriceWithTaxes": {
+          "eur": 20499,
+          "gbp": null
+        },
+        "advertisedPrice": {
+          "eur": 20499
+        },
+        "catalogPriceWithOptionsWithTaxes": {
+          "eur": 25140,
+          "gbp": null
+        },
+        "catalogDiscount": {
+          "percent": 18.46
+        },
+        "financing": null,
+        "indicativeFinancing": {
+          "months": 36,
+          "installment": {
+            "eur": 143,
+            "gbp": null
+          },
+          "type": "leasing",
+          "hasPurchaseOption": null
+        },
+        "promotions": [
+          {
+            "id": "7",
+            "color": "#6AD724",
+            "label": "PRIX EN BAISSE",
+            "discount": {
+              "eur": 100,
+              "gbp": null
+            }
+          }
+        ],
+        "highlights": [
+          {
+            "id": "android-auto",
+            "label": "Android Auto"
+          },
+          {
+            "id": "apple-carplay",
+            "label": "Apple CarPlay"
+          },
+          {
+            "id": "bluetooth",
+            "label": "Bluetooth"
+          },
+          {
+            "id": "reverse-camera",
+            "label": "Caméra de recul"
+          },
+          {
+            "id": "air-conditioning",
+            "label": "Climatisation"
+          },
+          {
+            "id": "gps",
+            "label": "GPS"
+          },
+          {
+            "id": "alloy-wheels",
+            "label": "Jantes en alliage"
+          },
+          {
+            "id": "cruise-control",
+            "label": "Régulateur de vitesse"
+          },
+          {
+            "id": "reverse-radar",
+            "label": "Radar de recul"
+          }
+        ],
+        "thumbnailUrl": "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6a885203baace.jpg",
+        "electricRange": null,
+        "shortestDeliveryTime": {
+          "days": 1
+        },
+        "freeDeliveryLocation": {
+          "id": "CLE",
+          "label": "Clermont-Ferrand"
+        },
+        "variants": [
+          {
+            "vehicleId": "1024822",
+            "colorId": "grey",
+            "manufacturerColor": "Cosmic Silver (MBC0)"
+          },
+          {
+            "vehicleId": "1024829",
+            "colorId": "black",
+            "manufacturerColor": "Pebble Black (PBC0)"
+          },
+          {
+            "vehicleId": "1024831",
+            "colorId": "red",
+            "manufacturerColor": "Diamond Red (RSJ0)"
+          }
+        ],
+        "manufacturerColor": "Cosmic Silver (MBC0)",
+        "manufacturerInterior": "Sièges en TEP/Tissu noir",
+        "combinedHybridEnginePower": null,
+        "doors": 5,
+        "media": [
+          {
+            "type": "photo",
+            "photoType": null,
+            "url": "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6a885203baace.jpg"
+          }
+        ],
+        "view360": null,
+        "equipments": [
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Anti-pincement de la vitre du conducteur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Assistant de conduite intelligent (ICA)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Avertissement de changement de voie (LCA)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Capteur de pression des pneus TPMS direct",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Ceintures de sécurité AR: 2 côtés 3 points + prétensionneur et limiteur de charge",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Ceintures de sécurité AV: 3 points + prétensionneur et limiteur de charge",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Commutateur de l'airbag latéral du passager AV",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Essuie-glace sans cadre",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Filtre PM2.5",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Frein de parking électronique (EPB)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Intérieur couleur noir",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Pneus 195/55 R16",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Rangements sous le plancher",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Rappel de ceintures de sécurité AV/AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Siège passager AV réglable 4 directions",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Système E-Call",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Système iSMART Lite avec commandes à distance du véhicule",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Vitres électriques AV/AR dont vitre conducteur à impulsion",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "7 Airbags (frontaux, latéraux, rideaux et central)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Avertisseur de somnolence (DMS)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Boîte automatique 3 rapports",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Caméra haute définition à 360° avec capteur AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Clé bluetooth",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "2 ports USB-C à l'AV (x1 données, x1 alimentation uniquement)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Accoudoir central AV avec rangement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Bouches d'aération AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Cache-bagages",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Capteur de luminosité",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Climatisation automatique",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Démarrage sans clé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Eclairage du coffre",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Fonction \"follow me home\"",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Maintien automatique à l'arrêt (Auto Hold)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Pare-soleils avec miroir de courtoisie",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Poches aumonières derrière les sièges AV",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Prise 12V",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Siège conducteur réglable dans 6 directions",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Sièges AV chauffants",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Sièges en similicuir/tissu noir",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Banquette AR rabattable 40:60",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Direction assistée",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Rétroviseurs extérieurs chauffants et rabattables électriquement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Volant réglable en hauteur et profondeur avec commandes au volant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "6 HP",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Connectivité Bluetooth",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Ecran tactile 10,25\"",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Radio AM/FM/DAB+",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Système de navigation",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Apple CarPlay / Android Auto sans fil",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Accès sans clé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Aide au maintien dans la voie (LKA)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Alerte de circulation transversale AR (RCTA)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Avertissement de collision frontale (FCW)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Capteur de pluie",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Capteurs de stationnement AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Compteur numérique 7\"",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Essuie-glace AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Feux antibrouillard AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Feux de jour à LED",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Freinage automatique d'urgence (AEB)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Gestion intelligente des feux de route (IHC)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Kit anti-crevaison",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Limiteur de vitesse",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Maintien d'urgence sur la voie (ELK)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Régulateur de vitesse adaptatif (ACC)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Siège AR ISOFIX avec ancrages supérieur et inférieur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Surveillance des angles morts (BSD)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Système d'aide au respect de la vitesse (SAS)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Verrouillage à distance",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Vitres et lunette AR surteintées",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Volant chauffant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "ABS",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Alarme",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Contrôle de traction (TCS)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "ESP",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Jantes alliage 16\"",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Phares à LED",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Volant en cuir microfibre",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "option",
+              "label": "Option"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Peinture métallisée",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": {
+              "eur": 650,
+              "gbp": null
+            }
+          }
+        ],
+        "co2Emissions": {
+          "nedc": null,
+          "wltp": {
+            "gpkm": 100
+          }
+        },
+        "fuelConsumptionCombined": {
+          "nedc": null,
+          "wltp": {
+            "ltp100km": 4.4,
+            "mpg": 64.20022727272726
+          }
+        },
+        "fuelConsumptionUrban": null,
+        "fuelConsumptionExtraUrban": null,
+        "fuelTankCapacity": null,
+        "height": {
+          "m": null,
+          "cm": 150,
+          "in": null
+        },
+        "width": {
+          "m": null,
+          "cm": 180,
+          "in": null
+        },
+        "length": {
+          "m": null,
+          "cm": 411,
+          "in": null
+        },
+        "seats": 5,
+        "topSpeed": {
+          "kmph": 170,
+          "mph": 106
+        },
+        "acceleration0100Km": {
+          "sec": 8
+        },
+        "electricBatteryQuickChargeTime": null,
+        "electricBatteryMediumChargeTime": null,
+        "electricBatterySlowChargeTime": null,
+        "weight": {
+          "kg": 1233
+        },
+        "bootSpaceBackCapacityMax": {
+          "lt": 983,
+          "gal": null
+        },
+        "bootSpaceBackCapacityMin": {
+          "lt": 293,
+          "gal": null
+        },
+        "bootSpaceFrontCapacity": null,
+        "electricBatteryCapacity": null,
+        "electricBatteryStateOfHealth": null,
+        "electricBatteryWarrantyMileage": null,
+        "electricBatteryWarrantyPeriod": null,
+        "electricOutletMaximumPower": null,
+        "engineDisplacement": {
+          "cc": 1490
+        },
+        "gearboxType": null,
+        "numberOfGears": 3,
+        "driveType": {
+          "id": "fwd",
+          "label": "Traction avant"
+        },
+        "reference": "256315D70-26MMG3 / 2671544",
+        "additionalInfo": "Identique concession classique avec options. ",
+        "euronorm": null,
+        "licencePlate": null,
+        "defectsDiagram": null,
+        "isMarketplace": false,
+        "manufacturerWarrantyExpirationDate": "2033-10-30",
+        "additionalWarranties": {
+          "puretech": false
+        },
+        "financingMethods": {
+          "cash": true,
+          "loan": true,
+          "leasing": true
+        },
+        "frenchData": {
+          "critair": "1",
+          "fiscalPower": {
+            "cv": 5
+          },
+          "ecologicalBonus": {
+            "eur": 0,
+            "gbp": null
+          },
+          "ecologicalMalus": {
+            "eur": 0,
+            "gbp": null
+          },
+          "ecologicalMalusWeight": null,
+          "ecologicalMalusCo2": null,
+          "genreCarteGrise": "VP"
+        },
+        "refurbishmentOperations": [],
+        "lastSafetyInspectionDate": null,
+        "nextSafetyInspectionDate": null,
+        "qualityCertificateUrl": null,
+        "refurbishmentCertificateUrl": null,
+        "stateOfHealthCertificateUrl": null,
+        "similarOffers": {
+          "offerIdsA": [
+            "v352904",
+            "v349092",
+            "v351883",
+            "v352513",
+            "rv1041071",
+            "v352445",
+            "rv1040830",
+            "rv1039519",
+            "rv1040462",
+            "rv1040317"
+          ],
+          "offerIdsB": [
+            "v352904",
+            "v349092",
+            "v351883",
+            "v352513",
+            "rv1041071",
+            "v352445",
+            "rv1040830",
+            "rv1039519",
+            "rv1040462",
+            "rv1040317"
+          ]
+        },
+        "belgianData": null,
+        "ukData": null,
+        "serviceMaintenanceContractCost": null,
+        "insurances": []
+      },
+      "crawled_at": "2026-11-19T20:45:34.542143+00:00"
+    },
+    {
+      "title": "Peugeot 208 Hybrid 145 ch e-DCS6 GT suréquipée",
+      "make": "Peugeot",
+      "model": "208",
+      "price_eur": 22999,
+      "mileage_km": 10,
+      "first_registration": "2026-07-31",
+      "fuel": "Mild Hybrid Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6a7f102747253.jpg"
+      ],
+      "id": "1033658",
+      "url": "https://www.aramisauto.com/voitures/peugeot/208/gt/v353699/?vehicleId=1033658",
+      "source": "sitemap",
+      "detail": {
+        "id": "1033658",
+        "offerId": "v353699",
+        "offerType": {
+          "id": "km0",
+          "label": "0 km"
+        },
+        "availability": {
+          "id": "available",
+          "label": "Disponible"
+        },
+        "makerName": "Peugeot",
+        "modelName": "208",
+        "modelIteration": "208",
+        "makerModelIteration": "Peugeot 208",
+        "engineName": "Hybrid 145 ch e-DCS6",
+        "trimLevel": "GT suréquipée",
+        "energyType": {
+          "id": "mild-hybrid-gasoline",
+          "label": "Mild Hybrid Essence"
+        },
+        "transmission": {
+          "id": "automatic",
+          "label": "Automatique"
+        },
+        "body": {
+          "id": "urban",
+          "label": "Citadine"
+        },
+        "color": {
+          "id": "grey",
+          "label": "Gris"
+        },
+        "mileage": {
+          "km": 10,
+          "mi": 6
+        },
+        "firstRegistrationDate": "2026-07-31",
+        "mainEnginePower": {
+          "kw": 100.02783,
+          "ch": 136,
+          "bhp": 134.13952952
+        },
+        "sellingPriceWithTaxes": {
+          "eur": 22999,
+          "gbp": null
+        },
+        "advertisedPrice": {
+          "eur": 22999
+        },
+        "catalogPriceWithOptionsWithTaxes": {
+          "eur": 32050,
+          "gbp": null
+        },
+        "catalogDiscount": {
+          "percent": 28.24
+        },
+        "financing": null,
+        "indicativeFinancing": {
+          "months": 48,
+          "installment": {
+            "eur": 154,
+            "gbp": null
+          },
+          "type": "leasing",
+          "hasPurchaseOption": null
+        },
+        "promotions": [
+          {
+            "id": "539",
+            "color": "#6ad710",
+            "label": "PROMO 208",
+            "discount": null
+          },
+          {
+            "id": "7",
+            "color": "#6AD724",
+            "label": "PRIX EN BAISSE",
+            "discount": {
+              "eur": 500,
+              "gbp": null
+            }
+          }
+        ],
+        "highlights": [
+          {
+            "id": "android-auto",
+            "label": "Android Auto"
+          },
+          {
+            "id": "apple-carplay",
+            "label": "Apple CarPlay"
+          },
+          {
+            "id": "bluetooth",
+            "label": "Bluetooth"
+          },
+          {
+            "id": "reverse-camera",
+            "label": "Caméra de recul"
+          },
+          {
+            "id": "air-conditioning",
+            "label": "Climatisation"
+          },
+          {
+            "id": "alloy-wheels",
+            "label": "Jantes en alliage"
+          },
+          {
+            "id": "cruise-control",
+            "label": "Régulateur de vitesse"
+          },
+          {
+            "id": "reverse-radar",
+            "label": "Radar de recul"
+          }
+        ],
+        "thumbnailUrl": "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6a7f102747253.jpg",
+        "electricRange": null,
+        "shortestDeliveryTime": {
+          "days": 1
+        },
+        "freeDeliveryLocation": {
+          "id": "CLE",
+          "label": "Clermont-Ferrand"
+        },
+        "variants": [
+          {
+            "vehicleId": "1033658",
+            "colorId": "grey",
+            "manufacturerColor": "Gris Artense (M0F4)"
+          },
+          {
+            "vehicleId": "1033653",
+            "colorId": "grey",
+            "manufacturerColor": "Gris Selenium (M0LD)"
+          },
+          {
+            "vehicleId": "1033631",
+            "colorId": "white",
+            "manufacturerColor": "Blanc Okenite (M0SU)"
+          },
+          {
+            "vehicleId": "1033685",
+            "colorId": "black",
+            "manufacturerColor": "Noir Perla Nera (M09V)"
+          }
+        ],
+        "manufacturerColor": "Gris Artense (M0F4)",
+        "manufacturerInterior": "Sellerie Alcantara® Mistral ICONIUM accompagnement TEP Isabella, trimatière Alcantara Noir et surpiqûres Vert Adamite",
+        "combinedHybridEnginePower": null,
+        "doors": 5,
+        "media": [
+          {
+            "type": "photo",
+            "photoType": null,
+            "url": "https://storage.googleapis.com/aramis_vehicles/production/betamodels/i_6a7f102747253.jpg"
+          }
+        ],
+        "view360": null,
+        "equipments": [
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Eclairage intérieur Eclairager AV I-DOME à LED  (1 plafonnier et 2 liseuses tactiles), 2 liseuses à LED AR, Miroir de courtoisie dans pare-soleil éclairé à LED, Eclairage à LED partie basse rangement et caves à pieds",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Peugeot Connect SOS & Assistance et Teleservices SOS & Assistance : Appel d'urgence automatique ou manuel par push SOS, et mise en relation directe avec la plateforme d'assistance PEUGEOT (24h/24 7j/7) ,   Teleservices : Détection du besoin d'une intervention technique ou d'une opération d'entretien périodique et transmission au réseau PEUGEOT pour prise de rendez vous",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Peugeot i-Connect: Radio DAB avec écran tactile couleur personnalisable 10\" HD, Bluetooth - Mirror Screen sans fil (Apple CarPlay/Android Auto)  - Wifi  - 1 prise USB type C ( Data+charge), 1 prise USB type C (Charge) sur console AV  - 1 prise USB type C (Charge) et 1 prise USB type A (Charge) pour passagers AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Planche de bord Slush avec décor carbone slush et double surpiqûres Adamite/Tramontane et baguette Noir brillante avec jonc chromé et jonc lumineux",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Seuils de portes aluminium avec lettrage PEUGEOT",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Visiopark 1 Caméra de recul HD, aide au stationnement AV et AR graphique et sonore",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Intervalle de maintenance 25 000 km ou 1 an",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Pack Safety Régulateur / Limiteur de vitesse,   Freinage d'urgence automatique avec alerte risque de collision,   Freinage automatique d'urgence avec détection élargie (3 caméras haut de pare-brise) et protection des usagers de la route vulnérables (piétons, cyclistes,),   Alerte active de franchissement involontaire de ligne et bas côté,   Reconnaissance étendue des panneaux de signalisation et préconisation de vitesse,   Alerte attention conducteur pilotée par caméra interne",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Eclairage coffre à lampe",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Essuie-vitre AV à déclenchement automatique",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Lève-vitres AR électriques et séquentiels avec antipincement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Lève-vitres AV électriques et séquentiels avec antipincement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Prise 12 V et rangement pour smartphone en façade centrale",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Rétroviseurs extérieurs dégivrants avec réglage et rabattement électriques",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Siège conducteur avec réglage manuel en hauteur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Siège passager AV à réglage manuel en hauteur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Télécommande 3 boutons + clé standard",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Volant réglable en hauteur et en profondeur",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Accès et démarrage mains libres Proximity",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Banquette rabattable 1/3 - 2/3",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "4 poignées de maintien rétractables (2 à l'AV et 2 à l'AR)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Air conditionné automatique mono-zone",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "comfort",
+              "label": "Confort"
+            },
+            "manufacturerDescription": "Appuis-tête réglables en hauteur AV (x2) et AR (x3)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "Peugeot i-Cockpit 3D avec combiné tête haute numérique 10''",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "multimedia",
+              "label": "Multimédia"
+            },
+            "manufacturerDescription": "6 HPs (2 tweeters et 2 woofers à l'AV et 2 HPs à l'AR)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Ceinture de sécurité AR centrale 3 points, avec détection de non bouclage",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Ceintures de sécurité AR latérales avec enrouleurs pyrotechniques, limiteurs d'effort et détection de non bouclage",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Ceintures de sécurité AV conducteur et passager à enrouleurs pyrotechniques avec limiteurs d'effort et détection de non bouclage",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Commutation automatique des feux de route / feux de croisement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Console haute avec accoudoir & frein de stationnement électrique 1 prise USB type C (Charge) et 1 prise USB type A (Charge) pour passagers AR, Sélecteur de mode de conduite Normal/Eco/Sport",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Détection de sous-gonflage indirecte",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Direction assistée électrique",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "ESP Déconnectable avec aide au démarrage en pente",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Fixations ISOFIX et Top Tether aux places latérales AR",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Pack Visibilité Allumage automatique des feux de croisement",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Pare-brise teinté",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Programme de Stabilité Electronique (ESC) avec ASR, ABS, REF, AFU, CDS et TSM",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Rétroviseur intérieur électrochrome",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Roue de secours galette",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "Verrouillage automatique de tous les ouvrants en roulant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "security",
+              "label": "Sécurité"
+            },
+            "manufacturerDescription": "6 Airbags (Frontaux auto-adaptatifs, latéraux AV et rideaux AV/AR)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Calandre haute de gamme noir grainée avec marquage couleur caisse",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Commande d'ouverture des portes couleur caisse",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Coques de rétroviseurs extérieurs Noir Brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Enjoliveur bas de calandre noir grainé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Enjoliveur DRL Noir grainé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Enjoliveur entre feux AR noir brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Enjoliveur supérieur de calandre Noir grainé",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Enjoliveurs d'ailes Noir Brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Feux AR signature 3 griffes, stop, recul et indicateur de direction à LEDs",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Jantes alliage 17\" diamantées YANAKA bi--ton vernis brillant et Noir Orbital avec inserts Noir Orbital et vernis mat",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Jupes AR inférieure Noir brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Jupes AR supérieure Noir brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Lécheurs de vitres Noir mat",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Projecteurs \"Peugeot Full LED Technology\" avec feux diurnes à LED 3 griffes",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Vitres latérales AR et lunette AR chauffante temporisée surteintées",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Antenne requin",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "exterior",
+              "label": "Extérieur"
+            },
+            "manufacturerDescription": "Becquet rapporté Noir Brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Eclairage polyambiant 8 couleurs (Liés aux modes de conduite)",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Habitacle et ciel de pavillon Noir",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Panneaux de porte AR avec grain Karsten avec baguette Noir brillant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Panneaux de porte AV avec médaillon TPE surmoulé Carbone, baguette Noir brillante avec jonc lumineux (8 couleurs) et crosse de tirage TEP avec surpiqûres Adamite",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Pédalier Sport aluminium",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Volant compact cuir fleur avec commandes multimédia intégrées et badge GT",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "standard",
+              "label": "Standard"
+            },
+            "category": {
+              "id": "interior",
+              "label": "Intérieur"
+            },
+            "manufacturerDescription": "Accoudoirs sur portes AV et AR en TEP avec surpiqûre Adamite",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": null
+          },
+          {
+            "type": {
+              "id": "option",
+              "label": "Option"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "Peinture métallisée",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": {
+              "eur": 850,
+              "gbp": null
+            }
+          },
+          {
+            "type": {
+              "id": "option",
+              "label": "Option"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "WNFX-Intérieur Alcantara Executive : Sellerie Alcantara® Mistral \"ICONIUM\" accompagnement TEP Isabella, trimatière Alcantara Noir et surpiqûres Vert Adamite avec Siège conducteur à réglages électriques et massant, chauffant & Siège passager avant à réglage manuel en hauteur, chauffant",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": {
+              "eur": 1400,
+              "gbp": null
+            }
+          },
+          {
+            "type": {
+              "id": "option",
+              "label": "Option"
+            },
+            "category": {
+              "id": "other",
+              "label": "Autre"
+            },
+            "manufacturerDescription": "WYAL : VisioPark 2 avec Surveillance angle mort : Caméras avant et de recul HD avec restitution sur l'écran tactile d'une vue avant ou arrière, et d'une vue de dessus de  l'environnement du véhicule sur 360° Rétroviseurs extérieurs avec éclairage d'accueil à LED et témoins de surveillance d’angles morts",
+            "genericDescription": null,
+            "catalogPriceWithTaxes": {
+              "eur": 400,
+              "gbp": null
+            }
+          }
+        ],
+        "co2Emissions": {
+          "nedc": null,
+          "wltp": {
+            "gpkm": 105
+          }
+        },
+        "fuelConsumptionCombined": {
+          "nedc": null,
+          "wltp": {
+            "ltp100km": 4.5,
+            "mpg": 62.773555555555554
+          }
+        },
+        "fuelConsumptionUrban": null,
+        "fuelConsumptionExtraUrban": null,
+        "fuelTankCapacity": null,
+        "height": {
+          "m": null,
+          "cm": 143,
+          "in": null
+        },
+        "width": {
+          "m": null,
+          "cm": 175,
+          "in": null
+        },
+        "length": {
+          "m": null,
+          "cm": 406,
+          "in": null
+        },
+        "seats": 5,
+        "topSpeed": {
+          "kmph": 210,
+          "mph": 130
+        },
+        "acceleration0100Km": {
+          "sec": 8.1
+        },
+        "electricBatteryQuickChargeTime": null,
+        "electricBatteryMediumChargeTime": null,
+        "electricBatterySlowChargeTime": null,
+        "weight": {
+          "kg": 1228
+        },
+        "bootSpaceBackCapacityMax": {
+          "lt": 1163,
+          "gal": null
+        },
+        "bootSpaceBackCapacityMin": {
+          "lt": 352,
+          "gal": null
+        },
+        "bootSpaceFrontCapacity": null,
+        "electricBatteryCapacity": null,
+        "electricBatteryStateOfHealth": null,
+        "electricBatteryWarrantyMileage": null,
+        "electricBatteryWarrantyPeriod": null,
+        "electricOutletMaximumPower": null,
+        "engineDisplacement": {
+          "cc": 1199
+        },
+        "gearboxType": null,
+        "numberOfGears": 6,
+        "driveType": {
+          "id": "fwd",
+          "label": "Traction avant"
+        },
+        "reference": "261018D54-26P208 / 2680961",
+        "additionalInfo": "Identique concession classique avec options.",
+        "euronorm": null,
+        "licencePlate": null,
+        "defectsDiagram": null,
+        "isMarketplace": false,
+        "manufacturerWarrantyExpirationDate": "2028-07-31",
+        "additionalWarranties": {
+          "puretech": false
+        },
+        "financingMethods": {
+          "cash": true,
+          "loan": true,
+          "leasing": true
+        },
+        "frenchData": {
+          "critair": "1",
+          "fiscalPower": {
+            "cv": 7
+          },
+          "ecologicalBonus": {
+            "eur": 0,
+            "gbp": null
+          },
+          "ecologicalMalus": {
+            "eur": 0,
+            "gbp": null
+          },
+          "ecologicalMalusWeight": null,
+          "ecologicalMalusCo2": null,
+          "genreCarteGrise": "VP"
+        },
+        "refurbishmentOperations": [],
+        "lastSafetyInspectionDate": null,
+        "nextSafetyInspectionDate": null,
+        "qualityCertificateUrl": null,
+        "refurbishmentCertificateUrl": null,
+        "stateOfHealthCertificateUrl": null,
+        "similarOffers": {
+          "offerIdsA": [
+            "v352501",
+            "rv1015196",
+            "v352496",
+            "rv1041071",
+            "v351300",
+            "v353359",
+            "rv1040541",
+            "v350507",
+            "rv1040462",
+            "rv1040317"
+          ],
+          "offerIdsB": [
+            "v352501",
+            "rv1015196",
+            "v352496",
+            "rv1041071",
+            "v351300",
+            "v353359",
+            "rv1040541",
+            "v350507",
+            "rv1040462",
+            "rv1040317"
+          ]
+        },
+        "belgianData": null,
+        "ukData": null,
+        "serviceMaintenanceContractCost": null,
+        "insurances": []
+      },
+      "crawled_at": "2026-11-19T20:45:34.551881+00:00"
+    },
+    {
+      "id": "1026032",
+      "offer_id": "rv1026032",
+      "url": "https://www.aramisauto.com/voitures/byd/seal-u/boost/rv1026032?vehicleId=1026032",
+      "title": "BYD  SEAL U  1.5l DM-i 218 ch PHEV  Boost",
+      "make": "BYD",
+      "model": "SEAL U",
+      "price_eur": 32499,
+      "mileage_km": 12810,
+      "first_registration": "2025-04-29",
+      "fuel": "Hybride Rechargeable Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1026032/byd-seal-u-boost-1793110284-1026032-1-large.jpg"
+      ],
+      "raw": {
+        "id": "1026032",
+        "offerId": "rv1026032",
+        "offerType": {
+          "id": "used",
+          "label": "Occasion"
+        },
+        "availability": {
+          "id": "reserved",
+          "label": "Réservé"
+        },
+        "makerName": "BYD",
+        "modelName": "SEAL U",
+        "modelIteration": "Seal U",
+        "makerModelIteration": null,
+        "engineName": "1.5l DM-i 218 ch PHEV",
+        "trimLevel": "Boost",
+        "energyType": {
+          "id": "plugin-hybrid-gasoline",
+          "label": "Hybride Rechargeable Essence"
+        },
+        "transmission": {
+          "id": "automatic",
+          "label": "Automatique"
+        },
+        "body": {
+          "id": "suv",
+          "label": "4x4 et SUV"
+        },
+        "color": {
+          "id": "white",
+          "label": "Blanc"
+        },
+        "mileage": {
+          "km": 12810,
+          "mi": 7960
+        },
+        "firstRegistrationDate": "2025-04-29",
+        "mainEnginePower": {
+          "kw": 72.0788775,
+          "ch": 98,
+          "bhp": 96.65936686
+        },
+        "sellingPriceWithTaxes": {
+          "eur": 32499,
+          "gbp": null
+        },
+        "advertisedPrice": {
+          "eur": 32499
+        },
+        "catalogPriceWithOptionsWithTaxes": {
+          "eur": 39600,
+          "gbp": null
+        },
+        "catalogDiscount": {
+          "percent": 17.93
+        },
+        "financing": {
+          "type": "leasing",
+          "installment": {
+            "eur": 309,
+            "gbp": null
+          },
+          "duration": {
+            "months": 66,
+            "isOptimal": true
+          },
+          "deposit": {
+            "money": null,
+            "percent": 30
+          },
+          "annualMileage": {
+            "km": 10000,
+            "mi": 6214
+          },
+          "fixedInterestRate": null,
+          "apr": null,
+          "hasPurchaseOption": null
+        },
+        "indicativeFinancing": {
+          "months": 66,
+          "installment": {
+            "eur": 309,
+            "gbp": null
+          },
+          "type": "leasing",
+          "hasPurchaseOption": null
+        },
+        "promotions": [
+          {
+            "id": "540",
+            "color": "#6ad724",
+            "label": "BLACK MONTH",
+            "discount": null
+          },
+          {
+            "id": "7",
+            "color": "#6AD724",
+            "label": "PRIX EN BAISSE",
+            "discount": {
+              "eur": 410,
+              "gbp": null
+            }
+          }
+        ],
+        "highlights": [
+          {
+            "id": "android-auto",
+            "label": "Android Auto"
+          },
+          {
+            "id": "apple-carplay",
+            "label": "Apple CarPlay"
+          },
+          {
+            "id": "bluetooth",
+            "label": "Bluetooth"
+          },
+          {
+            "id": "reverse-camera",
+            "label": "Caméra de recul"
+          },
+          {
+            "id": "air-conditioning",
+            "label": "Climatisation"
+          },
+          {
+            "id": "gps",
+            "label": "GPS"
+          },
+          {
+            "id": "alloy-wheels",
+            "label": "Jantes en alliage"
+          },
+          {
+            "id": "cruise-control",
+            "label": "Régulateur de vitesse"
+          },
+          {
+            "id": "reverse-radar",
+            "label": "Radar de recul"
+          },
+          {
+            "id": "sunroof",
+            "label": "Toit ouvrant"
+          }
+        ],
+        "thumbnailUrl": "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1026032/byd-seal-u-boost-1793110284-1026032-1-large.jpg",
+        "electricRange": {
+          "nedc": null,
+          "wltp": {
+            "km": 80,
+            "mi": 50
+          }
+        },
+        "shortestDeliveryTime": {
+          "days": 1
+        },
+        "freeDeliveryLocation": {
+          "id": "DOZ",
+          "label": "Donzère"
+        },
+        "variants": [
+          {
+            "vehicleId": "1026032",
+            "colorId": "white",
+            "manufacturerColor": "Snow White"
+          }
+        ]
+      },
+      "crawled_at": "2026-11-19T20:19:04.756441+00:00"
+    },
+    {
+      "id": "1025437",
+      "offer_id": "rv1025437",
+      "url": "https://www.aramisauto.com/voitures/volvo/xc60/plus-style-dark/rv1025437?vehicleId=1025437",
+      "title": "Volvo  XC60  T6 AWD 253+145 Geartronic 8  Plus Style Dark",
+      "make": "Volvo",
+      "model": "XC60",
+      "price_eur": 35499,
+      "mileage_km": 80442,
+      "first_registration": "2024-01-24",
+      "fuel": "Hybride Rechargeable Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1025437/volvo-xc60-plus-style-dark-1790733090-1025437-1-large.jpg"
+      ],
+      "raw": {
+        "id": "1025437",
+        "offerId": "rv1025437",
+        "offerType": {
+          "id": "used",
+          "label": "Occasion"
+        },
+        "availability": {
+          "id": "available",
+          "label": "Disponible"
+        },
+        "makerName": "Volvo",
+        "modelName": "XC60",
+        "modelIteration": "XC60",
+        "makerModelIteration": null,
+        "engineName": "T6 AWD 253+145 Geartronic 8",
+        "trimLevel": "Plus Style Dark",
+        "energyType": {
+          "id": "plugin-hybrid-gasoline",
+          "label": "Hybride Rechargeable Essence"
+        },
+        "transmission": {
+          "id": "automatic",
+          "label": "Automatique"
+        },
+        "body": {
+          "id": "suv",
+          "label": "4x4 et SUV"
+        },
+        "color": {
+          "id": "black",
+          "label": "Noir"
+        },
+        "mileage": {
+          "km": 80442,
+          "mi": 49984
+        },
+        "firstRegistrationDate": "2024-01-24",
+        "mainEnginePower": {
+          "kw": 186.08118375,
+          "ch": 253,
+          "bhp": 249.53897771
+        },
+        "sellingPriceWithTaxes": {
+          "eur": 35499,
+          "gbp": null
+        },
+        "advertisedPrice": {
+          "eur": 35499
+        },
+        "catalogPriceWithOptionsWithTaxes": {
+          "eur": 75930,
+          "gbp": null
+        },
+        "catalogDiscount": null,
+        "financing": {
+          "type": "leasing",
+          "installment": {
+            "eur": 244,
+            "gbp": null
+          },
+          "duration": {
+            "months": 30,
+            "isOptimal": true
+          },
+          "deposit": {
+            "money": null,
+            "percent": 30
+          },
+          "annualMileage": {
+            "km": 10000,
+            "mi": 6214
+          },
+          "fixedInterestRate": null,
+          "apr": null,
+          "hasPurchaseOption": null
+        },
+        "indicativeFinancing": {
+          "months": 30,
+          "installment": {
+            "eur": 244,
+            "gbp": null
+          },
+          "type": "leasing",
+          "hasPurchaseOption": null
+        },
+        "promotions": [
+          {
+            "id": "7",
+            "color": "#6AD724",
+            "label": "PRIX EN BAISSE",
+            "discount": {
+              "eur": 500,
+              "gbp": null
+            }
+          }
+        ],
+        "highlights": [
+          {
+            "id": "4x4",
+            "label": "4x4"
+          },
+          {
+            "id": "android-auto",
+            "label": "Android Auto"
+          },
+          {
+            "id": "apple-carplay",
+            "label": "Apple CarPlay"
+          },
+          {
+            "id": "bluetooth",
+            "label": "Bluetooth"
+          },
+          {
+            "id": "reverse-camera",
+            "label": "Caméra de recul"
+          },
+          {
+            "id": "air-conditioning",
+            "label": "Climatisation"
+          },
+          {
+            "id": "gps",
+            "label": "GPS"
+          },
+          {
+            "id": "leather",
+            "label": "Cuir"
+          },
+          {
+            "id": "alloy-wheels",
+            "label": "Jantes en alliage"
+          },
+          {
+            "id": "cruise-control",
+            "label": "Régulateur de vitesse"
+          },
+          {
+            "id": "reverse-radar",
+            "label": "Radar de recul"
+          },
+          {
+            "id": "sunroof",
+            "label": "Toit ouvrant"
+          }
+        ],
+        "thumbnailUrl": "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1025437/volvo-xc60-plus-style-dark-1790733090-1025437-1-large.jpg",
+        "electricRange": {
+          "nedc": null,
+          "wltp": {
+            "km": 76,
+            "mi": 47
+          }
+        },
+        "shortestDeliveryTime": {
+          "days": 1
+        },
+        "freeDeliveryLocation": {
+          "id": "DOZ",
+          "label": "Donzère"
+        },
+        "variants": [
+          {
+            "vehicleId": "1025437",
+            "colorId": "black",
+            "manufacturerColor": "Noir"
+          }
+        ]
+      },
+      "crawled_at": "2026-11-19T20:18:59.436494+00:00"
+    }
+  ]
+}

@@ -13,7 +13,7 @@ export default function TermsPage() {
           <div className="container">
             <p className="eyebrow">Legal</p>
             <h1>Terms of Service</h1>
-            <p className="meta">Effective November 7, 2026</p>
+            <p className="meta">Effective November 20, 2026</p>
             <p className="lead">
               These terms govern your access to and use of Veyora. By creating an account or using the service, you
               agree to them.
@@ -27,9 +27,9 @@ export default function TermsPage() {
             <h2>The service</h2>
             <p>
               Veyora provides metered residential and mobile proxy traffic, a Web Unlocker API that fetches public web
-              pages on your behalf, and related account tools. Availability, routing, locations, and performance can
-              vary because networks and third-party destinations change. We may modify the service to maintain security,
-              reliability, or legal compliance.
+              pages on your behalf, Managed Data Feeds delivering structured datasets via SFTP or webhook, and related
+              account tools. Availability, routing, locations, and performance can vary because networks and third-party
+              destinations change. We may modify the service to maintain security, reliability, or legal compliance.
             </p>
             <h2>Acceptable use</h2>
             <p>
@@ -39,15 +39,21 @@ export default function TermsPage() {
             </p>
             <h2>Purchases and payments</h2>
             <p>
-              Veyora accepts cryptocurrency payments only. Payments add funds to a prepaid USD balance, credited after
-              payment confirmation; larger top-ups may include a bonus shown before checkout. The balance pays for proxy
-              traffic by the GB and for Web Unlocker requests per successful request (requests the site blocks or that
-              fail are not charged). Prices are shown in your dashboard and may change for future usage. The balance is
-              not cash, earns no interest, and cannot be withdrawn or transferred. Traffic packs bought before the
-              balance existed remain valid and are used first for residential traffic. All purchases are final and
-              non-refundable. You must verify the plan, amount, cryptocurrency, blockchain network, and destination
-              address before paying. Balances, API keys and credentials may not be transferred or resold without written
-              permission. See our <a href="/refund-policy">No Refund Policy</a>.
+              Veyora accepts payment by credit or debit card (processed by Stripe) and by cryptocurrency (USDT).
+              Payments add funds to a prepaid USD balance, credited after payment confirmation; larger top-ups may
+              include a bonus shown before checkout. Managed Data Feed subscriptions are billed monthly by card; the
+              first charge occurs at checkout and subsequent charges recur on the same date each month until you cancel.
+            </p>
+            <p>
+              The balance pays for proxy traffic by the GB and for Web Unlocker requests per successful request
+              (requests the site blocks or that fail are not charged). Prices are shown in your dashboard and may
+              change for future usage. The balance is not cash, earns no interest, and cannot be withdrawn or
+              transferred. Balances, API keys and credentials may not be transferred or resold without written
+              permission.
+            </p>
+            <p>
+              Before completing a purchase, verify the amount, payment method, and product. See
+              our <a href="/refund-policy">Refund Policy</a> for cancellation, refund and dispute procedures.
             </p>
             <h2>Availability and liability</h2>
             <p>

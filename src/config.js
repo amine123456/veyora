@@ -275,8 +275,8 @@ export function paymentConfig() {
   if (!loopback(host)) {
     throw new Error('PAYMENTS_HOST must be loopback; expose it through a TLS reverse proxy');
   }
-  if (Boolean(stripeKey) !== Boolean(webhookSecret)) {
-    throw new Error('STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET must be configured together');
+  if (webhookSecret && !stripeKey) {
+    throw new Error('STRIPE_WEBHOOK_SECRET requires STRIPE_SECRET_KEY');
   }
   const nowpaymentsApiKey = process.env.NOWPAYMENTS_API_KEY?.trim() || '';
   const nowpaymentsIpnSecret = process.env.NOWPAYMENTS_IPN_SECRET?.trim() || '';

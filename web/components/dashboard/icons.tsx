@@ -347,6 +347,11 @@ export function DashboardIcons() {
             <path d="M3 12L12 17L21 12" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
             <path d="M3 17L12 22L21 17" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
           </symbol>
+          <symbol id="i-database" viewBox="0 0 24 24" fill="none">
+            <ellipse cx="12" cy="5" rx="9" ry="3" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M3 5V12C3 13.66 7.03 15 12 15C16.97 15 21 13.66 21 12V5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M3 12V19C3 20.66 7.03 22 12 22C16.97 22 21 20.66 21 19V12" stroke="currentColor" strokeWidth="1.5" />
+          </symbol>
         </defs>
       </svg>
     </>

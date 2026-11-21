@@ -1,8 +1,16 @@
 .env
+.env.bak*
 data/
 node_modules/
 npm-debug.log*
 *-deploy.tar.gz
+.cache/
+.config/
+.local/
+.npm/
+certs/
+models/
+camotest_*.mjs
 
 # Not part of Veyora
 eng.traineddata

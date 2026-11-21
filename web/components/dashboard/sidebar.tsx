@@ -40,6 +40,13 @@ export function DashboardSidebar() {
             </svg>
             Test it
           </a>{' '}
+          <p className="snav__label">Data</p>{' '}
+          <a className="snav__a" href="#data-feeds">
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-database" />
+            </svg>
+            Data Feeds
+          </a>{' '}
           <p className="snav__label">Activity</p>{' '}
           <a className="snav__a" href="#usage">
             <svg className="ic" aria-hidden="true">

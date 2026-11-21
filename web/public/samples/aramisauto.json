@@ -1,0 +1,183 @@
+{
+  "feed_id": "aramisauto",
+  "total_records": 3211,
+  "file_size_mb": 9.0,
+  "sample_count": 10,
+  "fields": [
+    "id",
+    "url",
+    "title",
+    "make",
+    "model",
+    "price_eur",
+    "mileage_km",
+    "first_registration",
+    "fuel",
+    "transmission",
+    "images",
+    "crawled_at"
+  ],
+  "field_count": 12,
+  "records": [
+    {
+      "id": "1031597",
+      "url": "https://www.aramisauto.com/voitures/peugeot/2008/allure/rv1031597?vehicleId=1031597",
+      "title": "Peugeot  2008  50 kWh - 136ch  Allure",
+      "make": "Peugeot",
+      "model": "2008",
+      "price_eur": 19999,
+      "mileage_km": 52845,
+      "first_registration": "2023-12-29",
+      "fuel": "Électrique",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1031597/peugeot-2008-allure-1793812760-1031597-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:00:39.724038+00:00"
+    },
+    {
+      "id": "965243",
+      "url": "https://www.aramisauto.com/voitures/fiat/500x/city-cross-business-surequipee/rv965243?vehicleId=965243",
+      "title": "Fiat  500X  1.0 FireFly Turbo T3 120 BVM6  City Cross Business Suréquipée",
+      "make": "Fiat",
+      "model": "500X",
+      "price_eur": 13499,
+      "mileage_km": 33473,
+      "first_registration": "2019-03-26",
+      "fuel": "Essence",
+      "transmission": "Manuelle",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/965243/image/360/fiat-500x-city-cross-business-20260129162207-965243-100001-uhd.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:08:29.677802+00:00"
+    },
+    {
+      "id": "1033289",
+      "url": "https://www.aramisauto.com/voitures/renault/twingo/equilibre/rv1033289?vehicleId=1033289",
+      "title": "Renault  TWINGO  1.0 SCe 65 BVM5  Equilibre",
+      "make": "Renault",
+      "model": "TWINGO",
+      "price_eur": 10999,
+      "mileage_km": 44080,
+      "first_registration": "2022-09-30",
+      "fuel": "Essence",
+      "transmission": "Manuelle",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1033289/renault-twingo-3-equilibre-1793988160-1033289-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:03:44.989691+00:00"
+    },
+    {
+      "id": "1037669",
+      "url": "https://www.aramisauto.com/voitures/ds/ds-3/so-chic-gps/rv1037669?vehicleId=1037669",
+      "title": "DS  DS 3  1.2 PureTech 82 BVM5  So Chic + GPS",
+      "make": "DS",
+      "model": "DS 3",
+      "price_eur": 8499,
+      "mileage_km": 86165,
+      "first_registration": "2018-06-25",
+      "fuel": "Essence",
+      "transmission": "Manuelle",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1037669/ds-ds3-so-chic-1793967040-1037669-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:08:49.649381+00:00"
+    },
+    {
+      "id": "1038879",
+      "url": "https://www.aramisauto.com/voitures/citroen/c3/feel/rv1038879?vehicleId=1038879",
+      "title": "Citroën  C3  1.2 PureTech 82 BVM5  Feel",
+      "make": "Citroën",
+      "model": "C3",
+      "price_eur": 7999,
+      "mileage_km": 59905,
+      "first_registration": "2020-02-20",
+      "fuel": "Essence",
+      "transmission": "Manuelle",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1038879/citroen-c3-feel-1793785551-1038879-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:05:34.747274+00:00"
+    },
+    {
+      "id": "1027097",
+      "url": "https://www.aramisauto.com/voitures/volkswagen/golf-sportsvan/connect/rv1027097?vehicleId=1027097",
+      "title": "Volkswagen  GOLF SPORTSVAN  1.0 TSI 115 BMT DSG7  Connect",
+      "make": "Volkswagen",
+      "model": "GOLF SPORTSVAN",
+      "price_eur": 13999,
+      "mileage_km": 98920,
+      "first_registration": "2019-02-27",
+      "fuel": "Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1027097/volkswagen-golf-sportsvan-connect-1790232908-1027097-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:06:25.125420+00:00"
+    },
+    {
+      "id": "1036828",
+      "url": "https://www.aramisauto.com/voitures/opel/grandland/gs/rv1036828?vehicleId=1036828",
+      "title": "Opel  GRANDLAND  1.2 Turbo 130 ch  GS",
+      "make": "Opel",
+      "model": "GRANDLAND",
+      "price_eur": 17999,
+      "mileage_km": 16100,
+      "first_registration": "2024-02-29",
+      "fuel": "Essence",
+      "transmission": "Manuelle",
+      "images": [
+        "https://storage.googleapis.com/aramis_mp_prod/pictures/1036828/54216290_20261023121143.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:06:49.703774+00:00"
+    },
+    {
+      "id": "1034912",
+      "url": "https://www.aramisauto.com/voitures/ford/focus/st-line-design-attelage/rv1034912?vehicleId=1034912",
+      "title": "Ford  FOCUS  1.0 Flexifuel 125 BVM6  ST-Line Design + Attelage",
+      "make": "Ford",
+      "model": "FOCUS",
+      "price_eur": 18499,
+      "mileage_km": 40622,
+      "first_registration": "2022-07-20",
+      "fuel": "Mild Hybrid Essence",
+      "transmission": "Manuelle",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1034912/ford-focus-st-line-design-1793015211-1034912-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:09:34.569475+00:00"
+    },
+    {
+      "id": "1036883",
+      "url": "https://www.aramisauto.com/voitures/aion/v/na/rv1036883?vehicleId=1036883",
+      "title": "AION  V  LUXURY",
+      "make": "AION",
+      "model": "V",
+      "price_eur": 36399,
+      "mileage_km": 200,
+      "first_registration": "2026-09-16",
+      "fuel": "Électrique",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_mp_prod/pictures/1036883/54217808_20261023151213.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:11:59.604132+00:00"
+    },
+    {
+      "id": "1022955",
+      "url": "https://www.aramisauto.com/voitures/dacia/duster/extreme-surequipee/rv1022955?vehicleId=1022955",
+      "title": "Dacia  DUSTER  Hybrid 140  Extreme Suréquipée",
+      "make": "Dacia",
+      "model": "DUSTER",
+      "price_eur": 23999,
+      "mileage_km": 25650,
+      "first_registration": "2024-09-17",
+      "fuel": "Hybride Essence",
+      "transmission": "Automatique",
+      "images": [
+        "https://storage.googleapis.com/aramis_vehicles/production/stock/vo/1022955/dacia-duster-extreme-1791848908-1022955-1-large.jpg"
+      ],
+      "crawled_at": "2026-11-09T04:07:19.716302+00:00"
+    }
+  ]
+}

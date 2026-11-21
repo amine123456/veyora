@@ -1,0 +1,1411 @@
+{
+  "feed_id": "hasnalauto",
+  "total_records": 118106,
+  "file_size_mb": 709.2,
+  "sample_count": 5,
+  "fields": [
+    "seoH1",
+    "hirkod",
+    "vetelar",
+    "kepekDb",
+    "kep",
+    "talalatiLogo",
+    "talalatiInfoSor",
+    "tagek",
+    "userDeclaration",
+    "price",
+    "prices",
+    "pricing",
+    "category",
+    "highlightedParameters",
+    "condition",
+    "manufactureDate",
+    "classification",
+    "detail_photos",
+    "detail_photo_count",
+    "detail_description",
+    "detail_color",
+    "detail_params",
+    "detail_equipment",
+    "detail_zip",
+    "detail_city",
+    "detail_address",
+    "detail_seller_name",
+    "detail_seller_url",
+    "detail_seller_id",
+    "detail_email",
+    "detail_phone",
+    "detail_cylinder",
+    "detail_lat",
+    "detail_lon",
+    "enriched_at",
+    "enriched_status",
+    "url",
+    "detail_seller_website",
+    "detail_seller_hq_address"
+  ],
+  "field_count": 39,
+  "deep_field_count": 117,
+  "records": [
+    {
+      "seoH1": "MAZDA CX-30 2.5 e-Skyactive Exclusive-Line 140le 6AT. 2027-es modellév DECEMBERI ÉRKEZÉS",
+      "hirkod": 23646378,
+      "vetelar": "12 540 000 Ft",
+      "kepekDb": 1,
+      "kep": {
+        "kicsi": {
+          "url": "https://img.hasznaltautocdn.com/118x88/23646378/32779583.jpg",
+          "width": 118,
+          "height": 88
+        },
+        "normal": {
+          "url": "https://img.hasznaltautocdn.com/640x480/23646378/32779583.jpg",
+          "width": 640,
+          "height": 480
+        },
+        "xl": {
+          "url": "https://img.hasznaltautocdn.com/2048x1536/23646378/32779583.jpg",
+          "width": 2048,
+          "height": 1536
+        }
+      },
+      "talalatiLogo": "https://seller.hasznaltautocdn.com/80x60/2407/logo-listing.jpg",
+      "talalatiInfoSor": [
+        "Benzin, 2026",
+        "2 488 cm³, 140 LE",
+        "3 km"
+      ],
+      "tagek": [
+        {
+          "label": "Szalonautó",
+          "type": "szalonauto"
+        }
+      ],
+      "userDeclaration": {
+        "label": "Fogyasztóvédelmi nyilatkozat",
+        "hasDeclaredAsCompany": true,
+        "declaredCompanyName": "Zakar és Társa Kft."
+      },
+      "price": [
+        {
+          "value": "14 540 800 Ft",
+          "type": "primary"
+        },
+        {
+          "value": "Akciós: 12 540 000 Ft",
+          "type": "secondary_basic"
+        }
+      ],
+      "prices": {
+        "mainPrice": 14540800,
+        "currency": "HUF",
+        "originalPrice": 14540800,
+        "discountPrice": 12540000,
+        "discountConditions": ".",
+        "euroPrice": 34118.735
+      },
+      "pricing": [
+        {
+          "value": "14 540 800 Ft",
+          "type": "primary"
+        },
+        {
+          "value": "Akciós: 12 540 000 Ft",
+          "type": "secondary_basic"
+        },
+        {
+          "value": ".",
+          "type": "link"
+        }
+      ],
+      "category": "szemelyauto",
+      "highlightedParameters": {
+        "trunk": {
+          "label": "Csomagtartó",
+          "value": "430 liter"
+        },
+        "mileage": {
+          "label": "Km. óra állás",
+          "value": "3 km"
+        },
+        "performance": {
+          "label": "Teljesítmény",
+          "value": "103 kW, 140 LE"
+        },
+        "engineCapacity": {
+          "label": "Hengerűrtartalom",
+          "value": "2 488 cm³"
+        },
+        "fuel": {
+          "label": "Üzemanyag",
+          "value": "Benzin"
+        }
+      },
+      "condition": {
+        "label": "Állapot",
+        "value": "Kitűnő"
+      },
+      "manufactureDate": {
+        "year": 2026
+      },
+      "classification": {
+        "brand": {
+          "label": "MAZDA",
+          "id": 85
+        },
+        "model": {
+          "label": "CX-30",
+          "id": 26485
+        },
+        "type": {
+          "label": "2.5 e-Skyactive Exclusive-Line",
+          "id": 2221951
+        },
+        "lead": "140le  6AT. 2027-es modellév DECEMBERI ÉRKEZÉS"
+      },
+      "detail_photos": [
+        "https://img.hasznaltautocdn.com/2048x1536/23646378/32779583.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23646378/32779583.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23646378/32779583.jpg"
+      ],
+      "detail_photo_count": 1,
+      "detail_description": "Cegléden a Mazda Zakarnál foglalható a rendelés alatt álló Mazda CX-30-as modellünk. 6év vagy 150.000km teljeskörüli garancia vonatkozik minden újonnan vásárolt modellünkre, valamint Assitance szolgáltatással biztosítjuk a gondtalan autózás örömét. A hirdetésben szereplő tájékoztatás nem teljes körű, nem minősül ajánlattételnek, részletekért érdeklődjön telefonon vagy személyesen! Villám Zoltán értékesítő kolléga: +36 20 312 7220.",
+      "detail_color": "Homok (metál)",
+      "detail_params": {
+        "Évjárat": "2026",
+        "Km. óra állás": "3 km",
+        "Üzemanyag": "Benzin",
+        "Teljesítmény": "103 kW, 140 LE",
+        "Állapot": "Kitűnő",
+        "Csomagtartó": "430 liter",
+        "Extrákkal növelt ár": "14 540 800 Ft",
+        "Akciós ár": "12 540 000 Ft",
+        "Akció feltételei": ".",
+        "Vételár EUR": "€ 34 293",
+        "Átvehető": "2026.",
+        "Kivitel": "Városi terepjáró (crossover)",
+        "Garancia": "6 év",
+        "Átrozsdásodási garancia": "12 év",
+        "Szállítható szem. száma": "5 fő",
+        "Ajtók száma": "5",
+        "Szín": "Homok (metál)",
+        "Kárpit színe (1)": "Fekete",
+        "Kárpit színe (2)": "Fekete",
+        "Saját tömeg": "1 433 kg",
+        "Teljes tömeg": "1 950 kg",
+        "Klíma fajtája": "Digitális kétzónás klíma",
+        "Tető": "Lemeztető",
+        "Hengerűrtartalom": "2 488 cm³",
+        "Henger-elrendezés": "Soros",
+        "Hajtás": "Első kerék",
+        "Sebességváltó": "Automata (6 fokozatú)",
+        "Okmányok jellege": "Okmányok nélkül",
+        "Nyári gumi méret": "215/55 R 18"
+      },
+      "detail_equipment": [
+        "kulcsnélküli nyitórendszer",
+        "kulcs nélküli indítás",
+        "tolatókamera",
+        "távolsági fényszóró asszisztens",
+        "360 fokos kamerarendszer",
+        "első-hátsó parkolóradar",
+        "ABS (blokkolásgátló)",
+        "ASR (kipörgésgátló)",
+        "ESP (menetstabilizátor)",
+        "elektronikus rögzítőfék",
+        "automatikus segélyhívó",
+        "tempomat",
+        "sávtartó rendszer",
+        "tábla-felismerő funkció",
+        "guminyomás-ellenőrző rendszer",
+        "indításgátló (immobiliser)",
+        "fékasszisztens",
+        "fáradtságérzékelő",
+        "vészfék asszisztens",
+        "centrálzár",
+        "riasztó",
+        "szervokormány",
+        "start-stop/motormegállító rendszer",
+        "memóriás utasülés",
+        "dönthető utasülések",
+        "fűthető első ülés",
+        "ülésmagasság állítás",
+        "fűthető kormány",
+        "középső kartámasz",
+        "automatikusan sötétedő belső tükör",
+        "multifunkciós kormánykerék",
+        "elektromos ülésállítás vezetőoldal",
+        "bőrkormány",
+        "függönylégzsák",
+        "ISOFIX rendszer",
+        "oldallégzsák",
+        "utasoldali légzsák",
+        "vezetőoldali légzsák",
+        "térdlégzsák",
+        "hátsó fejtámlák",
+        "állítható kormány",
+        "HUD / Head-Up Display",
+        "elektromosan behajtható külső tükrök",
+        "automata fényszórókapcsolás",
+        "LED mátrix fényszóró",
+        "esőszenzor",
+        "LED fényszóró",
+        "fényszórómosó",
+        "elektromos ablak elöl",
+        "elektromos ablak hátul",
+        "elektromos tükör",
+        "könnyűfém felni",
+        "színezett üveg",
+        "defektjavító készlet",
+        "GPS (navigáció)",
+        "kihangosító",
+        "bluetooth-os kihangosító",
+        "iPhone/iPod csatlakozó",
+        "USB csatlakozó",
+        "érintőkijelző",
+        "12 hangszóró",
+        "mélynyomó",
+        "Android Auto",
+        "Apple CarPlay",
+        "vezeték nélküli telefontöltés",
+        "garanciális"
+      ],
+      "detail_zip": "2700",
+      "detail_city": "Cegléd",
+      "detail_address": "Külső Jászberényi út 48. (körforgalomnál, Ipari park)",
+      "detail_seller_name": "Zakar és Társa Kft.",
+      "detail_seller_url": "https://www.hasznaltauto.hu/partner/mazda_zakar_cegled-2407",
+      "detail_seller_id": "mazda_zakar_cegled-2407",
+      "detail_email": "info@zakartsa.hu",
+      "detail_phone": "207791069",
+      "detail_cylinder": "2488",
+      "detail_lat": null,
+      "detail_lon": null,
+      "enriched_at": "2026-11-14T06:12:34.524244+00:00",
+      "enriched_status": "ok",
+      "url": "https://www.hasznaltauto.hu/szemelyauto/mazda/cx-30/mazda_cx-30_2.5_e-skyactive_exclusive-line-23646378",
+      "detail_seller_website": "http://www.mazdazakar.hu",
+      "detail_seller_hq_address": "2700 Cegléd, Külső Jászberényi út 48. (körforgalomnál, Ipari park)"
+    },
+    {
+      "seoH1": "MITSUBISHI L 200 2.4 DI-D Intense Plus EURO6 FULL-FULL-EXTRA.GÖNYGYHÁZ.GAR.161e.KM.GYÖNYÖRŰ",
+      "hirkod": 23746816,
+      "vetelar": "6 499 000 Ft",
+      "kepekDb": 19,
+      "kep": {
+        "kicsi": {
+          "url": "https://img.hasznaltautocdn.com/118x88/23746816/34044259.jpg",
+          "width": 118,
+          "height": 88
+        },
+        "normal": {
+          "url": "https://img.hasznaltautocdn.com/640x480/23746816/34044259.jpg",
+          "width": 640,
+          "height": 480
+        },
+        "xl": {
+          "url": "https://img.hasznaltautocdn.com/2048x1536/23746816/34044259.jpg",
+          "width": 2048,
+          "height": 1536
+        }
+      },
+      "talalatiLogo": "https://seller.hasznaltautocdn.com/80x60/5987/logo-listing.jpg",
+      "talalatiInfoSor": [
+        "Dízel, 2017/7",
+        "2 442 cm³, 181 LE",
+        "161 239 km"
+      ],
+      "docsDb": 1,
+      "userDeclaration": {
+        "label": "Fogyasztóvédelmi nyilatkozat",
+        "hasDeclaredAsCompany": true,
+        "declaredCompanyName": "It Mobil-Car Kft"
+      },
+      "price": [
+        {
+          "value": "6 499 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "prices": {
+        "mainPrice": 6499000,
+        "currency": "HUF",
+        "originalPrice": 6499000,
+        "euroPrice": 18743.375
+      },
+      "pricing": [
+        {
+          "value": "6 499 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "category": "szemelyauto",
+      "highlightedParameters": {
+        "mileage": {
+          "label": "Km. óra állás",
+          "value": "161 239 km"
+        },
+        "performance": {
+          "label": "Teljesítmény",
+          "value": "133 kW, 181 LE"
+        },
+        "engineCapacity": {
+          "label": "Hengerűrtartalom",
+          "value": "2 442 cm³"
+        },
+        "fuel": {
+          "label": "Üzemanyag",
+          "value": "Dízel"
+        }
+      },
+      "condition": {
+        "label": "Állapot",
+        "value": "Megkímélt"
+      },
+      "manufactureDate": {
+        "year": 2017,
+        "month": 7
+      },
+      "classification": {
+        "brand": {
+          "label": "MITSUBISHI",
+          "id": 92
+        },
+        "model": {
+          "label": "L 200",
+          "id": 1031
+        },
+        "type": {
+          "label": "2.4 DI-D Intense Plus EURO6",
+          "id": 2179631
+        },
+        "lead": "FULL-FULL-EXTRA.GÖNYGYHÁZ.GAR.161e.KM.GYÖNYÖRŰ"
+      },
+      "detail_photos": [
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044259.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044270.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044279.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044286.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044297.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044307.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044320.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044328.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044341.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044350.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044358.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044368.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044375.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044378.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044388.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044399.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044405.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044410.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044416.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044259.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044270.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044279.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044286.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044297.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044307.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044320.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044328.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044341.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044350.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044358.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044368.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044375.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044378.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044388.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044399.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044405.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044410.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23746816/34044416.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23746816/34044277.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044259.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044270.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044279.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044286.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044297.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044307.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044320.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044328.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044341.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044350.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044358.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044368.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044375.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044378.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044388.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044399.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044405.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044410.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044416.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23746816/34044277.jpg"
+      ],
+      "detail_photo_count": 20,
+      "detail_description": "PÉNZ VISSZAFIZETÉSSEL GARANTÁLT FUTÁSTELJESÍTMÉNY! Eladó egy saját részre hazahozott és azóta mindvégig 1 tulajdonos által használt, garantált 161.239 kilométert futott, a létező legmagasabb Gold felszereltséggel ellátott teljesen Mistubishi alapokra gyártott Fiat Fullback pickup. Motorja a jól bevált, japán fejlesztésű 2.4-es erőforrás, ami kellő dinamikával mozgatja a kasztnit és a manuális váltójának és hajtásláncának köszönhetően pedig bárhol meg állja a helyét, legyen szó autópályás felhasználásról, vagy terep körülményekről. Minden igényt kielégítő extráin és hibátlan műszaki állapotán felül, esztétikailag sem lehet rajta hibát találni, a karosszéria nincs össze karcolva, vagy meghorpasztgatva, nem egy terepen leharcolt darab, gyönygyház fehér fényezése is egy tónusban tündököl. Ne hagyja ki ezt a páratlan lehetőséget, hívjon még ma, hogy Öné lehessen az utolsó darabok egyike az ilyen megkímélt példányok közül. A vételár gyári felszereltséget tartalmaz. Plató doboz, sport box, plató roló, plató szélesítés, csörlő, fényhíd, lakó kabin a vételárnak nem része, bemutató jelleggel kerülnek fotózásra, bármely autónkhoz egyedi igények alapján biztosított. További biztonságot adhat, hogy 12-24-36 hónapos kiterjesztett garancia köthető rá, a megvásárlás pillanatában. A feltüntett vételár, nem tartalmazza a +27%-os általános forgalmi adót. Személyesen megtekinthető hétfőtől-péntekig 8:00-18:00-ig, szombat és vasárnap 10:00 és 16:00 között várjuk kedves ügyfeleinket. Autóink ingyenesen megtekinthetőek HD minőségben! Valamint minden járművünk alvázszáma is feltüntetésre kerül hirdetéseinkben. 10.000.000Ft-ig akár 0% befizetése mellett is igényelhető finanszírozás, részletekről érdeklődjön kollégáinknál.",
+      "detail_color": "Fehér (metál)",
+      "detail_params": {
+        "Évjárat": "2017/7",
+        "Km. óra állás": "161 239 km",
+        "Üzemanyag": "Dízel",
+        "Teljesítmény": "133 kW, 181 LE",
+        "Állapot": "Megkímélt",
+        "Vételár": "6 499 000 Ft",
+        "Vételár EUR": "€ 18 839",
+        "Kivitel": "Pickup",
+        "Finanszírozás": "20%-tól elvihető",
+        "Kezdőrészlet": "1 650 746 Ft",
+        "Havi részlet": "124 829 Ft",
+        "Futamidő": "72 hónap",
+        "Szállítható szem. száma": "5 fő",
+        "Ajtók száma": "4",
+        "Szín": "Fehér (metál)",
+        "Kárpit színe (1)": "Fekete",
+        "Kárpit színe (2)": "Fekete",
+        "Saját tömeg": "1 875 kg",
+        "Teljes tömeg": "2 905 kg",
+        "Klíma fajtája": "Digitális kétzónás klíma",
+        "Tető": "Lemeztető",
+        "Hengerűrtartalom": "2 442 cm³",
+        "Henger-elrendezés": "Soros",
+        "Hajtás": "Összkerék",
+        "Sebességváltó": "Manuális (6 fokozatú)",
+        "Okmányok jellege": "Érvényes magyar okmányokkal",
+        "Műszaki vizsga érvényes": "2028/7",
+        "Nyári gumi méret": "245/65 R 17",
+        "Hátsó nyári gumi méret": "245/65 R 17"
+      },
+      "detail_equipment": [
+        "állítható hátsó ülések",
+        "bőr belső",
+        "dönthető utasülések",
+        "full extra",
+        "fűthető első ülés",
+        "ülésmagasság állítás",
+        "középső kartámasz",
+        "multifunkciós kormánykerék",
+        "műbőr-kárpit",
+        "deréktámasz",
+        "bőrkormány",
+        "digitális műszeregység",
+        "bukócső",
+        "csomag rögzítő",
+        "függönylégzsák",
+        "ISOFIX rendszer",
+        "kikapcsolható légzsák",
+        "oldallégzsák",
+        "utasoldali légzsák",
+        "vezetőoldali légzsák",
+        "térdlégzsák",
+        "hátsó fejtámlák",
+        "állítható kormány",
+        "fedélzeti komputer",
+        "sportülések",
+        "tolatóradar",
+        "tolatókamera",
+        "első-hátsó parkolóradar",
+        "ABS (blokkolásgátló)",
+        "ASR (kipörgésgátló)",
+        "ESP (menetstabilizátor)",
+        "ADS (adaptív lengéscsillapító)",
+        "EDS (elektronikus differenciálzár)",
+        "tempomat",
+        "tábla-felismerő funkció",
+        "guminyomás-ellenőrző rendszer",
+        "rablásgátló",
+        "indításgátló (immobiliser)",
+        "visszagurulás-gátló",
+        "centrálzár",
+        "riasztó",
+        "szervokormány",
+        "részecskeszűrő",
+        "sebességfüggő szervokormány",
+        "start-stop/motormegállító rendszer",
+        "vonóhorog - levehető fejjel",
+        "fűtőszálas szélvédő",
+        "fűthető ablakmosó fúvókák",
+        "ködlámpa",
+        "xenon fényszóró",
+        "automata fényszórókapcsolás",
+        "kanyarkövető fényszóró",
+        "menetfény",
+        "esőszenzor",
+        "fényszóró magasságállítás",
+        "fényszórómosó",
+        "elektromos ablak elöl",
+        "elektromos ablak hátul",
+        "elektromos tükör",
+        "fűthető tükör",
+        "könnyűfém felni",
+        "színezett üveg",
+        "vonóhorog",
+        "tetőcsomagtartó",
+        "defektjavító készlet",
+        "pótkerék",
+        "rádió",
+        "rádiós magnó",
+        "CD-s autórádió",
+        "bluetooth-os kihangosító",
+        "USB csatlakozó",
+        "AUX csatlakozó",
+        "erősítő kimenet",
+        "MP3 lejátszás",
+        "MP4 lejátszás",
+        "WMA lejátszás",
+        "erősítő",
+        "2 DIN",
+        "6 hangszóró",
+        "8 hangszóró",
+        "mélynyomó",
+        "Hi-Fi",
+        "Android Auto",
+        "Apple CarPlay",
+        "kormányról vezérelhető hifi",
+        "multifunkcionális kijelző",
+        "autóbeszámítás lehetséges",
+        "azonnal elvihető",
+        "frissen szervizelt",
+        "garantált km futás",
+        "garázsban tartott",
+        "keveset futott",
+        "második tulajdonostól",
+        "nem dohányzó",
+        "rendszeresen karbantartott",
+        "törzskönyv",
+        "végig vezetett szervizkönyv",
+        "vezetett szervizkönyv",
+        "20%-tól elvihető"
+      ],
+      "detail_zip": "2120",
+      "detail_city": "Dunakeszi",
+      "detail_address": "Fő út",
+      "detail_seller_name": "It Mobil-Car Kft",
+      "detail_seller_url": "https://www.hasznaltauto.hu/partner/fo_uti_autokereskedes-5987",
+      "detail_seller_id": "fo_uti_autokereskedes-5987",
+      "detail_email": "dunakesziauto@gmail.com",
+      "detail_phone": "704284010",
+      "detail_vin": "ZFAKVJJ20G9009091",
+      "detail_cylinder": "2442",
+      "detail_lat": null,
+      "detail_lon": null,
+      "enriched_at": "2026-11-15T04:55:00.956111+00:00",
+      "enriched_status": "ok",
+      "url": "https://www.hasznaltauto.hu/szemelyauto/mitsubishi/l_200/mitsubishi_l_200_2.4_di-d_intense_plus_euro6-23746816",
+      "detail_seller_hq_address": "2120 Dunakeszi Fő út",
+      "detail_seller_phone_secondary": "203614894"
+    },
+    {
+      "seoH1": "RENAULT CLIO 1.0 TCe Evolution Mo-i! 8e KM! Gyári Garancia! Ülésfűtés! Tolatóradar-Kamera! ÁFA-s!",
+      "hirkod": 23616436,
+      "vetelar": "6 090 000 Ft",
+      "kepekDb": 12,
+      "kep": {
+        "kicsi": {
+          "url": "https://img.hasznaltautocdn.com/118x88/23616436/32409870.jpg",
+          "width": 118,
+          "height": 88
+        },
+        "normal": {
+          "url": "https://img.hasznaltautocdn.com/640x480/23616436/32409870.jpg",
+          "width": 640,
+          "height": 480
+        },
+        "xl": {
+          "url": "https://img.hasznaltautocdn.com/2048x1536/23616436/32409870.jpg",
+          "width": 2048,
+          "height": 1536
+        }
+      },
+      "talalatiLogo": "https://seller.hasznaltautocdn.com/80x60/3548/logo-listing.jpg",
+      "talalatiInfoSor": [
+        "Benzin, 2025/10",
+        "999 cm³, 91 LE",
+        "8 598 km"
+      ],
+      "docsDb": 2,
+      "userDeclaration": {
+        "label": "Fogyasztóvédelmi nyilatkozat",
+        "hasDeclaredAsCompany": true,
+        "declaredCompanyName": "CARNET-INVEST ZRT."
+      },
+      "price": [
+        {
+          "value": "6 090 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "prices": {
+        "mainPrice": 6090000,
+        "currency": "HUF",
+        "originalPrice": 6090000,
+        "euroPrice": 14912.663
+      },
+      "pricing": [
+        {
+          "value": "6 090 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "category": "szemelyauto",
+      "highlightedParameters": {
+        "trunk": {
+          "label": "Csomagtartó",
+          "value": "382 liter"
+        },
+        "mileage": {
+          "label": "Km. óra állás",
+          "value": "8 598 km"
+        },
+        "performance": {
+          "label": "Teljesítmény",
+          "value": "67 kW, 91 LE"
+        },
+        "engineCapacity": {
+          "label": "Hengerűrtartalom",
+          "value": "999 cm³"
+        },
+        "fuel": {
+          "label": "Üzemanyag",
+          "value": "Benzin"
+        }
+      },
+      "condition": {
+        "label": "Állapot",
+        "value": "Normál"
+      },
+      "manufactureDate": {
+        "year": 2025,
+        "month": 10
+      },
+      "classification": {
+        "brand": {
+          "label": "RENAULT",
+          "id": 114
+        },
+        "model": {
+          "label": "CLIO",
+          "id": 1309
+        },
+        "type": {
+          "label": "1.0 TCe Evolution",
+          "id": 2218728
+        },
+        "lead": "Mo-i! 8e KM! Gyári Garancia! Ülésfűtés! Tolatóradar-Kamera! ÁFA-s!"
+      },
+      "detail_photos": [
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409870.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409872.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409874.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409876.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409878.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409879.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409881.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409883.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409885.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409886.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409884.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409882.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409870.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409872.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409874.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409876.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409878.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409879.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409881.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409883.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409885.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409886.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409884.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23616436/32409882.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409851.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23616436/32409854.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409870.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409872.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409874.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409876.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409878.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409879.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409881.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409883.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409885.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409886.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409884.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409882.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409851.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23616436/32409854.jpg"
+      ],
+      "detail_photo_count": 14,
+      "detail_description": "CarNet Triplex Kft- saját gépkocsija! Magyarország-i! Első tulajdonostól! Sérülésmentes gyári fényezésű karosszéria! - Gyári garancia 2031.01.15.-ig vagy 100.000 km-ig! - Márkakereskedő által szervizelt gépkocsi! (Képek alatt a dokumentáció fül alatt a szerviztörténet megtekinthető) Folyamatosan és rendszeresen karbantartott, Leinformálható ellenőrizhető előélet! - Tolatóradar és Kamera! Első ülésfűtés! - Az ár 27% ÁFA- t tartalmaz, nyílt végű pénzügyi lízingkonstrukció cégeknek és egyéni vállalkozóknak lehetséges, a részletekről érdeklődjön! -- Forgalmi rendszám: AOGK-296 - Minden gépjármű a márkaszervizben bevizsgált ellenőrzött! -- Hitelügyintézés, biztosításkötés, átírás ügyintézés és eredetvizsga helyben a nálunk vásárolt gépkocsikra! -- Nagyítsa ki a képeket és nézze meg HD minőségben ingyenesen! -- Tisztelt Érdeklődők! Gépjárműveink megtekintése előtt, nyitvatartási időben (H-P: 8:00-17:00 SZO: 9:00-13:00 VAS: ZÁRVA!) is telefonos egyeztetés szükséges! -- Jelen hirdetésben leírt tájékoztatás nem minősül a Polgári Törvényről szóló 2013. évi V. Törvény szerint ajánlattételnek, ezért nem fűződik hozzá ajánlati kötöttség sem! -- Az adatok tájékoztató jellegűek, a felszereltség változtatás jogát fenntartjuk. Kérjük, minden esetben személyesen győződjön meg a felszereltségről!",
+      "detail_color": "Narancs (metál)",
+      "detail_params": {
+        "Évjárat": "2025/10",
+        "Km. óra állás": "8 598 km",
+        "Üzemanyag": "Benzin",
+        "Teljesítmény": "67 kW, 91 LE",
+        "Állapot": "Normál",
+        "Csomagtartó": "382 liter",
+        "Vételár": "5 999 000 Ft",
+        "Vételár EUR": "€ 14 734",
+        "Kivitel": "Ferdehátú",
+        "Finanszírozás": "30%-tól elvihető",
+        "Szállítható szem. száma": "5 fő",
+        "Ajtók száma": "5",
+        "Szín": "Narancs (metál)",
+        "Kárpit színe (1)": "Szürke",
+        "Saját tömeg": "1 103 kg",
+        "Teljes tömeg": "1 580 kg",
+        "Klíma fajtája": "Manuális klíma",
+        "Tető": "Lemeztető",
+        "Hengerűrtartalom": "999 cm³",
+        "Henger-elrendezés": "Soros",
+        "Hajtás": "Első kerék",
+        "Sebességváltó": "Manuális (6 fokozatú)",
+        "Okmányok jellege": "Forgalomból ideiglenesen kivont, magyar okmányokkal",
+        "Műszaki vizsga érvényes": "2029/10",
+        "Nyári gumi méret": "195/55 R 16"
+      },
+      "detail_equipment": [
+        "kulcsnélküli nyitórendszer",
+        "kulcs nélküli indítás",
+        "tolatóradar",
+        "tolatókamera",
+        "ABS (blokkolásgátló)",
+        "ASR (kipörgésgátló)",
+        "ESP (menetstabilizátor)",
+        "tempomat",
+        "sávtartó rendszer",
+        "tábla-felismerő funkció",
+        "guminyomás-ellenőrző rendszer",
+        "indításgátló (immobiliser)",
+        "visszagurulás-gátló",
+        "fékasszisztens",
+        "fáradtságérzékelő",
+        "centrálzár",
+        "szervokormány",
+        "start-stop/motormegállító rendszer",
+        "fűthető első ülés",
+        "ülésmagasság állítás",
+        "bőrkormány",
+        "függönylégzsák",
+        "ISOFIX rendszer",
+        "oldallégzsák",
+        "utasoldali légzsák",
+        "vezetőoldali légzsák",
+        "hátsó fejtámlák",
+        "állítható kormány",
+        "fedélzeti komputer",
+        "elektromosan behajtható külső tükrök",
+        "menetfény",
+        "esőszenzor",
+        "LED fényszóró",
+        "elektromos ablak elöl",
+        "elektromos ablak hátul",
+        "elektromos tükör",
+        "fűthető tükör",
+        "színezett üveg",
+        "pótkerék",
+        "rádió",
+        "bluetooth-os kihangosító",
+        "USB csatlakozó",
+        "AUX csatlakozó",
+        "MP3 lejátszás",
+        "érintőkijelző",
+        "6 hangszóró",
+        "Android Auto",
+        "Apple CarPlay",
+        "multifunkcionális kijelző",
+        "ÁFA visszaigényelhető",
+        "autóbeszámítás lehetséges",
+        "első forgalomba helyezés Magyarországon",
+        "első tulajdonostól",
+        "garanciális",
+        "garantált km futás",
+        "keveset futott",
+        "nem dohányzó",
+        "rendszeresen karbantartott",
+        "végig vezetett szervizkönyv",
+        "30%-tól elvihető"
+      ],
+      "detail_zip": "2011",
+      "detail_city": "Budakalász",
+      "detail_address": "József Attila u. 77.",
+      "detail_seller_name": "CARNET-INVEST ZRT.",
+      "detail_seller_url": "https://www.hasznaltauto.hu/partner/carnet_triplex_budakalasz-3548",
+      "detail_seller_id": "carnet_triplex_budakalasz-3548",
+      "detail_email": "krayzell.gyorgy@renaultbudapest.hu",
+      "detail_phone": "304763594",
+      "detail_lat": null,
+      "detail_lon": null,
+      "enriched_at": "2026-10-09T03:36:50.291285+00:00",
+      "enriched_status": "ok",
+      "detail_cylinder": "999",
+      "url": "https://www.hasznaltauto.hu/szemelyauto/renault/clio/renault_clio_1.0_tce_evolution-23616436",
+      "detail_seller_website": "http://www.renaultbudapest.hu",
+      "detail_seller_hq_address": "2011 Budakalász, József Attila u. 77.",
+      "detail_seller_phone_secondary": "204894365"
+    },
+    {
+      "seoH1": "MERCEDES-BENZ GLC 300 4Matic 9G-TRONIC Mild hybrid drive 41.e.Km Coupe ÁFÁS AMG Premium LED Panorámatetö.Bőr.Kamera.Tech csomag!",
+      "hirkod": 23018361,
+      "vetelar": "20 990 000 Ft",
+      "kepekDb": 19,
+      "kep": {
+        "kicsi": {
+          "url": "https://img.hasznaltautocdn.com/118x88/23018361/25240625.jpg",
+          "width": 118,
+          "height": 88
+        },
+        "normal": {
+          "url": "https://img.hasznaltautocdn.com/640x480/23018361/25240625.jpg",
+          "width": 640,
+          "height": 480
+        },
+        "xl": {
+          "url": "https://img.hasznaltautocdn.com/2048x1536/23018361/25240625.jpg",
+          "width": 2048,
+          "height": 1536
+        }
+      },
+      "talalatiLogo": "https://seller.hasznaltautocdn.com/80x60/1609/logo-listing.jpg",
+      "talalatiInfoSor": [
+        "Benzin, 2024/2",
+        "1 999 cm³, 258 LE",
+        "41 890 km"
+      ],
+      "userDeclaration": {
+        "label": "Fogyasztóvédelmi nyilatkozat",
+        "hasDeclaredAsCompany": true,
+        "declaredCompanyName": "Autó Pulai Kft."
+      },
+      "price": [
+        {
+          "value": "20 990 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "prices": {
+        "mainPrice": 20990000,
+        "currency": "HUF",
+        "originalPrice": 20990000,
+        "euroPrice": 57109.43
+      },
+      "pricing": [
+        {
+          "value": "20 990 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "category": "szemelyauto",
+      "highlightedParameters": {
+        "trunk": {
+          "label": "Csomagtartó",
+          "value": "545 liter"
+        },
+        "mileage": {
+          "label": "Km. óra állás",
+          "value": "41 890 km"
+        },
+        "performance": {
+          "label": "Teljesítmény",
+          "value": "190 kW, 258 LE"
+        },
+        "engineCapacity": {
+          "label": "Hengerűrtartalom",
+          "value": "1 999 cm³"
+        },
+        "fuel": {
+          "label": "Üzemanyag",
+          "value": "Benzin"
+        }
+      },
+      "condition": {
+        "label": "Állapot",
+        "value": "Megkímélt"
+      },
+      "manufactureDate": {
+        "year": 2024,
+        "month": 2
+      },
+      "classification": {
+        "brand": {
+          "label": "MERCEDES-BENZ",
+          "id": 87
+        },
+        "model": {
+          "label": "GLC 300",
+          "id": 26523
+        },
+        "type": {
+          "label": "4Matic 9G-TRONIC Mild hybrid drive",
+          "id": 2217601
+        },
+        "modelGroup": "GLC-OSZTÁLY",
+        "lead": "41.e.Km Coupe ÁFÁS  AMG Premium LED Panorámatetö.Bőr.Kamera.Tech csomag!"
+      },
+      "detail_photos": [
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240625.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240646.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240655.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240662.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240674.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240699.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240708.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240718.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240725.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240730.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240733.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240734.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240737.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240740.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240744.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240748.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240762.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240774.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/23018361/25240778.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240625.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240646.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240655.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240662.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240674.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240699.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240708.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240718.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240725.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240730.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240733.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240734.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240737.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240740.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240744.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240748.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240762.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240774.jpg",
+        "https://img.hasznaltautocdn.com/640x480/23018361/25240778.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240625.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240646.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240655.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240662.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240674.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240699.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240708.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240718.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240725.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240730.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240733.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240734.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240737.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240740.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240744.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240748.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240762.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240774.jpg",
+        "https://img.hasznaltautocdn.com/118x88/23018361/25240778.jpg"
+      ],
+      "detail_photo_count": 19,
+      "detail_description": "BIZOMÁNYOS AUTÓ, ÁFÁS SZÁMLÁVAL, FONTOS! A GÉPJÁRMÜ NAPI HASZNÁLATBAN, MEGTEKINTÉSHEZ IDÖPONT EGYEZTETÉS SZÜKSÉGES!--- A GÉPJÁRMÜ NÉMET RENDSZÁMAL RENDELKEZIK NÉMET CÉG NEVÉN ÁFÁS, ÁTIRÁSI KÖLTSÉGET A VÉTELÁR TARTALMAZZA--- AMG PREMIUM PLUSZ KIVITEL SZINTEN MINDEN EXTRÁVAL FELSZERELT AUTÓ:--Motoros Panorámatetö, Opalit fehér, Bőr kárpitozás Fekete/Piros, DISTRONIC aktív követésitávolság-tartó asszisztens, Téli csomag, Ülésfűtés elöl, AMG Premium Plus Csomag: KEYLESS-GO, Fekete szövet tetőtér kárpitozás, AMG lábtér szőnyegek, Műszerfal felsőrész és ajtó felsőrészek Nappa optikás ARTICO műbőr bevonattal, AMG 20 colos könnyűfém keréktárcsák, Parkolásasszisztens PARKTRONIC-kal 360-os kamera, Automatikusan sötétedő belső visszapillantó tükör, Elektromosan behajtható külső visszapillantó tükrök Környezet megvilágítás Night csomag, DIGITAL LIGHT (nagyfelbontású fényszóró rendszer) Adaptív távfény asszisztens, Plus Mercedes me connect Navigációs szolgáltatás -Mercedes me Connect szolgáltatásokhoz Okostelefon integráció Autómegosztás szolgáltatás - előkészítés Holttér figyelő asszisztens, Elektromosan állítható vezetőülés memóriafunkcióval, Head-up display 12,3-os kombinált műszeregység, THERMOTRONIC automata többzónás klímaberendezés USB csomag Burmester 3D térhatású hangrendszer, Sötétített hővédő üvegezé, 11,9-os központi kijelző Ülésfűtés az első üléseken, Ambiente megvilágítás, Vezeték nélküli töltés okostelefonokhoz, AMG Premium Plus Táblafelismerő asszistens, Mercedes-Benz Ambiente megvilágítás, Premium belső kivitel----------------- AUTÓ PULAI AUTÓSZALON és PULAI SERVICE CENTRUM BMW MINI SZAKSZERVIZ Bosch Car Szervizünkben saját autóinkra készült állapotlappal -FÉK ÉS LENGÉSCSILLAPÍTÓ MÉRÉSI JEGYZŐKÖNYV, HIBATÁROLÓ ÉS KM LEKÉRDEZÉSSEL és teljes tájékoztatással az autó állapotáról megtekintés előtt, hogy biztosra vegye nálunk nem éri csalódás!",
+      "detail_color": "Fehér",
+      "detail_params": {
+        "Évjárat": "2024/2",
+        "Km. óra állás": "41 890 km",
+        "Üzemanyag": "Benzin",
+        "Teljesítmény": "190 kW, 258 LE",
+        "Állapot": "Megkímélt",
+        "Csomagtartó": "545 liter",
+        "Vételár": "20 990 000 Ft",
+        "Vételár EUR": "€ 57 778",
+        "Kivitel": "Városi terepjáró (crossover)",
+        "Finanszírozás": "20%-tól elvihető",
+        "Szállítható szem. száma": "5 fő",
+        "Ajtók száma": "5",
+        "Szín": "Fehér",
+        "Kárpit színe (1)": "Fekete",
+        "Kárpit színe (2)": "Piros",
+        "Saját tömeg": "1 945 kg",
+        "Teljes tömeg": "2 510 kg",
+        "Klíma fajtája": "Digitális többzónás klíma",
+        "Tető": "Nyitható panorámatető",
+        "Hengerűrtartalom": "1 999 cm³",
+        "Henger-elrendezés": "Soros",
+        "Hajtás": "Összkerék",
+        "Sebességváltó": "Automata (9 fokozatú tiptronic)",
+        "Okmányok jellege": "Érvényes külföldi okmányokkal",
+        "Műszaki vizsga érvényes": "2027/2",
+        "Nyári gumi méret": "255/45 R 20",
+        "Hátsó nyári gumi méret": "285/40 R 20"
+      },
+      "detail_equipment": [
+        "állítható hátsó ülések",
+        "memóriás utasülés",
+        "dönthető utasülések",
+        "fűthető első ülés",
+        "memóriás vezetőülés",
+        "ülésmagasság állítás",
+        "középső kartámasz",
+        "automatikusan sötétedő belső tükör",
+        "hűthető kesztyűtartó",
+        "multifunkciós kormánykerék",
+        "állítható combtámasz",
+        "deréktámasz",
+        "elektromos ülésállítás vezetőoldal",
+        "elektromos ülésállítás utasoldal",
+        "bőrkormány",
+        "digitális műszeregység",
+        "függönylégzsák",
+        "ISOFIX rendszer",
+        "kikapcsolható légzsák",
+        "oldallégzsák",
+        "utasoldali légzsák",
+        "vezetőoldali légzsák",
+        "térdlégzsák",
+        "hátsó fejtámlák",
+        "állítható kormány",
+        "fedélzeti komputer",
+        "kormányváltó",
+        "sportülések",
+        "HUD / Head-Up Display",
+        "HUD / Head-Up Display kiterjesztett valóság funkcióval",
+        "kulcsnélküli nyitórendszer",
+        "kulcs nélküli indítás",
+        "tolatóradar",
+        "tolatókamera",
+        "távolsági fényszóró asszisztens",
+        "360 fokos kamerarendszer",
+        "első-hátsó parkolóradar",
+        "ABS (blokkolásgátló)",
+        "ASR (kipörgésgátló)",
+        "elektronikus rögzítőfék",
+        "ütközés veszélyre felkészítő rendszer",
+        "EBD/EBV (elektronikus fékerő-elosztó)",
+        "EDS (elektronikus differenciálzár)",
+        "tempomat",
+        "sávtartó rendszer",
+        "ARD (automatikus távolságtartó)",
+        "tábla-felismerő funkció",
+        "holttér-figyelő rendszer",
+        "guminyomás-ellenőrző rendszer",
+        "indításgátló (immobiliser)",
+        "sávváltó asszisztens",
+        "visszagurulás-gátló",
+        "lejtmenet asszisztens",
+        "bekanyarodási asszisztens",
+        "fáradtságérzékelő",
+        "radaros fékasszisztens",
+        "hátsó keresztirányú forgalomra figyelmeztetés",
+        "távolságtartó tempomat",
+        "koccanásgátló",
+        "parkolóasszisztens",
+        "vészfék asszisztens",
+        "centrálzár",
+        "riasztó",
+        "szervokormány",
+        "állítható felfüggesztés",
+        "EDC (elektronikus lengéscsillapítás vezérlés)",
+        "sebességfüggő szervokormány",
+        "start-stop/motormegállító rendszer",
+        "automatikusan sötétedő külső tükör",
+        "elektromos csomagtérajtó-mozgatás",
+        "elektromosan behajtható külső tükrök",
+        "fűthető ablakmosó fúvókák",
+        "automata fényszórókapcsolás",
+        "automata távfény",
+        "bekanyarodási segédfény",
+        "kanyarkövető fényszóró",
+        "menetfény",
+        "esőszenzor",
+        "LED fényszóró",
+        "kiegészítő fényszóró",
+        "elektromos ablak elöl",
+        "elektromos ablak hátul",
+        "elektromos tükör",
+        "fűthető tükör",
+        "könnyűfém felni",
+        "színezett üveg",
+        "tolótető (napfénytető)",
+        "tolótető - elektromos",
+        "GPS (navigáció)",
+        "kihangosító",
+        "bluetooth-os kihangosító",
+        "USB csatlakozó",
+        "MP3 lejátszás",
+        "MP4 lejátszás",
+        "érintőkijelző",
+        "erősítő",
+        "12 hangszóró",
+        "autótelefon",
+        "Hi-Fi",
+        "Android Auto",
+        "Apple CarPlay",
+        "kormányról vezérelhető hifi",
+        "multifunkcionális kijelző",
+        "vezeték nélküli telefontöltés",
+        "ÁFA visszaigényelhető",
+        "garázsban tartott",
+        "hölgy tulajdonostól",
+        "keveset futott",
+        "második tulajdonostól",
+        "nem dohányzó",
+        "rendszeresen karbantartott",
+        "törzskönyv",
+        "végig vezetett szervizkönyv",
+        "vezetett szervizkönyv",
+        "20%-tól elvihető"
+      ],
+      "detail_seller_name": "Autó Pulai Kft.",
+      "detail_seller_url": "https://www.hasznaltauto.hu/partner/auto_pulai_kft-1609",
+      "detail_seller_id": "auto_pulai_kft-1609",
+      "detail_email": "autoszalon@autopulai.hu",
+      "detail_phone": "302687928",
+      "detail_cylinder": "1999",
+      "detail_lat": null,
+      "detail_lon": null,
+      "enriched_at": "2026-10-17T03:52:59.687595+00:00",
+      "enriched_status": "ok",
+      "url": "https://www.hasznaltauto.hu/szemelyauto/mercedes-benz/glc_300/mercedes-benz_glc_300_4matic_9g-tronic_mild_hybrid_drive-23018361",
+      "detail_seller_website": "http://www.autopulai.hu",
+      "detail_seller_hq_address": "Győr, Orgona u 12 /821 sz. Főútvonal régi Gerence",
+      "detail_seller_phone_secondary": "302162255"
+    },
+    {
+      "seoH1": "RENAULT CLIO 1.0 TCe LPG Zen Mo.-i. 1 Tul.. ÁFA-s!",
+      "hirkod": 22318586,
+      "vetelar": "3 590 000 Ft",
+      "kepekDb": 12,
+      "kep": {
+        "kicsi": {
+          "url": "https://img.hasznaltautocdn.com/118x88/22318586/16860881.jpg",
+          "width": 118,
+          "height": 88
+        },
+        "normal": {
+          "url": "https://img.hasznaltautocdn.com/640x480/22318586/16860881.jpg",
+          "width": 640,
+          "height": 480
+        },
+        "xl": {
+          "url": "https://img.hasznaltautocdn.com/2048x1536/22318586/16860881.jpg",
+          "width": 2048,
+          "height": 1536
+        }
+      },
+      "talalatiLogo": "https://seller.hasznaltautocdn.com/80x60/3559/logo-listing.jpg",
+      "talalatiInfoSor": [
+        "Benzin, 2021/12",
+        "999 cm³, 91 LE",
+        "98 402 km"
+      ],
+      "userDeclaration": {
+        "label": "Fogyasztóvédelmi nyilatkozat",
+        "hasDeclaredAsCompany": true,
+        "declaredCompanyName": "Car-Éra Kft."
+      },
+      "price": [
+        {
+          "value": "3 590 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "prices": {
+        "mainPrice": 3590000,
+        "currency": "HUF",
+        "originalPrice": 3590000,
+        "euroPrice": 9767.644
+      },
+      "pricing": [
+        {
+          "value": "3 590 000 Ft",
+          "type": "primary"
+        }
+      ],
+      "category": "szemelyauto",
+      "highlightedParameters": {
+        "trunk": {
+          "label": "Csomagtartó",
+          "value": "391 liter"
+        },
+        "mileage": {
+          "label": "Km. óra állás",
+          "value": "98 402 km"
+        },
+        "performance": {
+          "label": "Teljesítmény",
+          "value": "67 kW, 91 LE"
+        },
+        "engineCapacity": {
+          "label": "Hengerűrtartalom",
+          "value": "999 cm³"
+        },
+        "fuel": {
+          "label": "Üzemanyag",
+          "value": "Benzin"
+        }
+      },
+      "condition": {
+        "label": "Állapot",
+        "value": "Kitűnő"
+      },
+      "manufactureDate": {
+        "year": 2021,
+        "month": 12
+      },
+      "classification": {
+        "brand": {
+          "label": "RENAULT",
+          "id": 114
+        },
+        "model": {
+          "label": "CLIO",
+          "id": 1309
+        },
+        "type": {
+          "label": "1.0 TCe LPG Zen",
+          "id": 2208448
+        },
+        "lead": "Mo.-i. 1 Tul.. ÁFA-s!"
+      },
+      "detail_photos": [
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860881.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860886.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860893.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860899.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860906.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860911.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860913.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860925.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860936.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860944.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860953.jpg",
+        "https://img.hasznaltautocdn.com/2048x1536/22318586/16860961.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860881.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860886.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860893.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860899.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860906.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860911.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860913.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860925.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860936.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860944.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860953.jpg",
+        "https://img.hasznaltautocdn.com/640x480/22318586/16860961.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860881.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860886.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860893.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860899.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860906.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860911.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860913.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860925.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860936.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860944.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860953.jpg",
+        "https://img.hasznaltautocdn.com/118x88/22318586/16860961.jpg"
+      ],
+      "detail_photo_count": 12,
+      "detail_description": "MAGYARORSZÁGI AUTÓ, ELSŐ TULAJDONOSTÓL, VÉGIG VEZETETT SZERVIZKÖNYV, összes gyári kulcs. Az autó benzinnel és LPG gázzal is használható. LPG-vel történő használat esetén kb fele az üzemeltetés! Az ár bruttó és Áfa-s! Nyílt végű pénzügyi lízing igénybe vétele esetén az Áfa vissza igényelhető! Pénzügyi és biztosítási partnereink: Merkantil Bank, Euroleasing, Netrisk. Opcionálisan minden nálunk vásárolt autóhoz 89.990 Ft-ért az olajat és a szűrőket saját Bosch szervizünkben lecseréljük. Alvázszám: VF1RJA00368198723 A fenti tájékoztatás nem minősül a Polgári Törvénykönyvről szóló 2013. évi V. törvény szerinti ajánlatnak. A gépjármű feltüntetett felszereltsége tájékoztató jellegű, a pontos felszereltségről kérjük tájékozódjon személyesen.",
+      "detail_color": "Bordó (metál)",
+      "detail_params": {
+        "Évjárat": "2021/12",
+        "Km. óra állás": "98 402 km",
+        "Üzemanyag": "Benzin",
+        "Teljesítmény": "67 kW, 91 LE",
+        "Állapot": "Kitűnő",
+        "Csomagtartó": "391 liter",
+        "Vételár": "3 590 000 Ft",
+        "Vételár EUR": "€ 9 818",
+        "Kivitel": "Ferdehátú",
+        "Finanszírozás": "20%-tól elvihető",
+        "Szállítható szem. száma": "5 fő",
+        "Ajtók száma": "5",
+        "Szín": "Bordó (metál)",
+        "Kárpit színe (1)": "Fekete",
+        "Saját tömeg": "1 216 kg",
+        "Teljes tömeg": "1 641 kg",
+        "Klíma fajtája": "Manuális klíma",
+        "Hengerűrtartalom": "999 cm³",
+        "Henger-elrendezés": "Soros",
+        "Hajtás": "Első kerék",
+        "Sebességváltó": "Manuális (6 fokozatú)",
+        "Okmányok jellege": "Lejárt magyar okmányokkal",
+        "Műszaki vizsga érvényes": "2025/12",
+        "Nyári gumi méret": "195/55 R 16"
+      },
+      "detail_equipment": [
+        "tolatóradar",
+        "ABS (blokkolásgátló)",
+        "ASR (kipörgésgátló)",
+        "ESP (menetstabilizátor)",
+        "EBD/EBV (elektronikus fékerő-elosztó)",
+        "tempomat",
+        "sávtartó rendszer",
+        "guminyomás-ellenőrző rendszer",
+        "indításgátló (immobiliser)",
+        "visszagurulás-gátló",
+        "centrálzár",
+        "szervokormány",
+        "start-stop/motormegállító rendszer",
+        "ülésmagasság állítás",
+        "középső kartámasz",
+        "hűthető kesztyűtartó",
+        "multifunkciós kormánykerék",
+        "deréktámasz",
+        "bőrkormány",
+        "függönylégzsák",
+        "ISOFIX rendszer",
+        "kikapcsolható légzsák",
+        "oldallégzsák",
+        "utasoldali légzsák",
+        "vezetőoldali légzsák",
+        "térdlégzsák",
+        "hátsó fejtámlák",
+        "állítható kormány",
+        "fedélzeti komputer",
+        "ködlámpa",
+        "automata fényszórókapcsolás",
+        "menetfény",
+        "LED fényszóró",
+        "elektromos ablak elöl",
+        "elektromos ablak hátul",
+        "elektromos tükör",
+        "fűthető tükör",
+        "könnyűfém felni",
+        "színezett üveg",
+        "rádió",
+        "bluetooth-os kihangosító",
+        "USB csatlakozó",
+        "MP3 lejátszás",
+        "érintőkijelző",
+        "8 hangszóró",
+        "Android Auto",
+        "Apple CarPlay",
+        "ÁFA visszaigényelhető",
+        "autóbeszámítás lehetséges",
+        "első forgalomba helyezés Magyarországon",
+        "első tulajdonostól",
+        "garantált km futás",
+        "keveset futott",
+        "nem dohányzó",
+        "rendszeresen karbantartott",
+        "törzskönyv",
+        "20%-tól elvihető"
+      ],
+      "detail_zip": "1223",
+      "detail_city": "Budapest",
+      "detail_address": "Nagytétényi út 57.",
+      "detail_seller_name": "Car-Éra Kft.",
+      "detail_seller_url": "https://www.hasznaltauto.hu/partner/car_era_kft-3559",
+      "detail_seller_id": "car_era_kft-3559",
+      "detail_email": "ertekesites@car-era.hu",
+      "detail_phone": "307548909",
+      "detail_cylinder": "999",
+      "detail_lat": null,
+      "detail_lon": null,
+      "enriched_at": "2026-11-16T04:15:07.698522+00:00",
+      "enriched_status": "ok",
+      "url": "https://www.hasznaltauto.hu/szemelyauto/renault/clio/renault_clio_1.0_tce_lpg_zen-22318586",
+      "detail_seller_website": "http://www.carera.hu",
+      "detail_seller_hq_address": "1223 Budapest, Nagytétényi út 57.",
+      "detail_seller_phone_secondary": "302686390"
+    }
+  ]
+}

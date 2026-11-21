@@ -1,0 +1,297 @@
+/* ==========================================================================
+   Data Feeds catalog page
+   ========================================================================== */
+
+.feeds-page { padding-top: 72px; }
+
+/* --- Hero --- */
+.feeds-hero {
+  padding: clamp(60px, 10vw, 140px) 0 clamp(40px, 6vw, 80px);
+  text-align: center;
+}
+.feeds-hero .eyebrow {
+  font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--violet); margin-bottom: 16px;
+}
+.feeds-hero h1 {
+  font-size: clamp(36px, 5vw, 64px); font-weight: 700; letter-spacing: -.04em;
+  line-height: 1.05; margin-bottom: 20px;
+}
+.feeds-hero__sub {
+  font-size: clamp(16px, 1.3vw, 20px); color: var(--muted);
+  max-width: 600px; margin: 0 auto; line-height: 1.6;
+}
+
+/* --- Vertical tabs --- */
+.feeds-tabs {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.feeds-tabs button {
+  padding: 8px 20px; border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: transparent; font-size: 14px; font-weight: 500;
+  color: var(--muted); transition: all .2s var(--ease);
+}
+.feeds-tabs button:hover { border-color: var(--ink); color: var(--ink); }
+.feeds-tabs button[aria-selected="true"] {
+  background: var(--ink); color: var(--page); border-color: var(--ink);
+}
+
+/* --- Feed grid --- */
+.feeds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px; margin-bottom: 60px;
+}
+.feeds-loading { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 40px; }
+
+/* --- Feed card --- */
+.feed-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: 28px; display: flex; flex-direction: column; gap: 16px;
+  transition: box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.feed-card:hover { border-color: var(--violet); box-shadow: var(--shadow-card); }
+.feed-card--coming { opacity: .65; }
+.feed-card__top { display: flex; align-items: center; gap: 12px; }
+.feed-card__flag { font-size: 28px; line-height: 1; }
+.feed-card__info { flex: 1; }
+.feed-card__name { font-size: 18px; font-weight: 600; line-height: 1.2; }
+.feed-card__domain { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
+
+.feed-card__meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.feed-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 500; background: #f4f3f0; color: var(--muted);
+}
+.feed-chip--active { background: #E8F5E9; color: #1B5E20; }
+.feed-chip--coming { background: var(--violet-bg); color: var(--violet); }
+.feed-chip--vol { font-family: var(--font-mono); }
+
+.feed-card__desc {
+  font-size: 14px; color: var(--muted); line-height: 1.5; flex: 1;
+}
+.feed-card__fields {
+  font-size: 12px; font-family: var(--font-mono); color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.feed-card__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 16px; border-top: 1px solid var(--line);
+}
+.feed-card__price { font-size: 22px; font-weight: 700; }
+.feed-card__price small { font-size: 13px; font-weight: 400; color: var(--muted); }
+.feed-card__actions { display: flex; gap: 8px; align-items: center; }
+.feed-card__foot .btn { font-size: 14px; }
+
+/* --- Custom section --- */
+.feeds-custom {
+  background: var(--ink); color: var(--page); border-radius: var(--r-panel);
+  margin: 0 var(--inset); padding: clamp(48px, 6vw, 80px) var(--gutter);
+  text-align: center;
+}
+.feeds-custom h2 {
+  font-size: clamp(28px, 3.5vw, 44px); font-weight: 700; letter-spacing: -.03em;
+  margin-bottom: 16px;
+}
+.feeds-custom p {
+  font-size: clamp(15px, 1.2vw, 18px); color: var(--muted-dark);
+  max-width: 560px; margin: 0 auto 32px; line-height: 1.6;
+}
+.feeds-custom .btn { background: var(--yellow); color: var(--ink); border: none; }
+.feeds-custom .btn:hover { background: var(--yellow-hover); }
+
+/* --- How it works --- */
+.feeds-how {
+  padding: clamp(60px, 8vw, 100px) 0;
+}
+.feeds-how h2 {
+  font-size: clamp(28px, 3.5vw, 44px); font-weight: 700; letter-spacing: -.03em;
+  text-align: center; margin-bottom: 48px;
+}
+.feeds-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px; counter-reset: step;
+}
+.feeds-steps li {
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.feeds-step__num {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--violet-bg); color: var(--violet);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px;
+}
+.feeds-steps h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.feeds-steps p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+/* --- Footer (match home) --- */
+.feeds-page .foot {
+  padding: 32px 0; text-align: center; font-size: 13px; color: var(--muted);
+}
+.feeds-page .foot a { margin: 0 12px; text-decoration: none; }
+.feeds-page .foot a:hover { color: var(--ink); }
+
+/* --- Buttons (re-use existing .btn) --- */
+.btn--lg { padding: 14px 32px; font-size: 16px; }
+
+/* ==========================================================================
+   Data Preview Modal — Raw JSON viewer
+   ========================================================================== */
+
+.preview-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0, 0, 0, .65); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s var(--ease);
+}
+.preview-overlay--open { opacity: 1; pointer-events: auto; }
+.preview-overlay--open .preview-modal {
+  transform: translateY(0) scale(1); opacity: 1;
+}
+
+.preview-modal {
+  background: var(--page); border-radius: var(--r-panel);
+  width: min(96vw, 960px); max-height: 92vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+  transform: translateY(16px) scale(.98); opacity: 0;
+  transition: transform .3s var(--ease), opacity .3s var(--ease);
+}
+
+/* Head */
+.preview-modal__head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 28px 16px;
+}
+.preview-modal__title { display: flex; align-items: center; gap: 12px; }
+.preview-title__feed {
+  font-size: 18px; font-weight: 700; letter-spacing: -.01em;
+  font-family: var(--font-mono); text-transform: uppercase;
+}
+.preview-modal__close {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; font-size: 20px; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.preview-modal__close:hover { background: var(--ink); color: var(--page); border-color: var(--ink); }
+
+/* Stats strip */
+.preview-stats {
+  display: flex; gap: 0; padding: 16px 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+.preview-stat {
+  flex: 1; text-align: center;
+  border-right: 1px solid var(--line);
+  padding: 4px 0;
+}
+.preview-stat:last-child { border-right: none; }
+.preview-stat__val {
+  display: block; font-size: 22px; font-weight: 700;
+  font-family: var(--font-mono); letter-spacing: -.02em;
+  color: var(--violet);
+}
+.preview-stat__label {
+  display: block; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--muted); margin-top: 2px;
+}
+
+/* Record nav bar */
+.preview-modal__nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--line);
+}
+.preview-nav__label {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--violet);
+}
+.preview-nav__controls {
+  display: flex; align-items: center; gap: 12px;
+}
+.preview-nav__btn {
+  width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid var(--line); background: transparent;
+  font-size: 16px; color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.preview-nav__btn:hover:not(:disabled) { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.preview-nav__btn:disabled { opacity: .3; }
+.preview-nav__pos {
+  font-size: 13px; font-weight: 600; font-family: var(--font-mono);
+  color: var(--muted); min-width: 40px; text-align: center;
+}
+.preview-nav__hint {
+  font-size: 11px; color: var(--muted); font-style: italic;
+}
+
+/* Body */
+.preview-modal__body {
+  flex: 1; overflow: auto; padding: 0;
+  min-height: 200px;
+}
+
+/* Loading */
+.preview-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px;
+  padding: 60px 28px; color: var(--muted); font-size: 14px;
+}
+.preview-spinner {
+  width: 28px; height: 28px; border: 3px solid var(--line);
+  border-top-color: var(--violet); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* JSON viewer */
+.preview-json-wrap { padding: 0; }
+.preview-json {
+  background: #1a1a2e; color: #e0e0e0;
+  padding: 24px 28px; margin: 0;
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.65;
+  overflow: auto; max-height: calc(92vh - 300px);
+  white-space: pre; tab-size: 2;
+  border-radius: 0;
+}
+@media (prefers-color-scheme: light) {
+  .preview-json { background: #1a1a2e; color: #e0e0e0; }
+}
+
+/* Syntax highlighting */
+.json-key { color: #82aaff; }
+.json-str { color: #c3e88d; }
+.json-num { color: #f78c6c; }
+.json-bool { color: #c792ea; }
+
+/* Footer */
+.preview-modal__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 28px; border-top: 1px solid var(--line);
+}
+.preview-foot__format {
+  font-size: 12px; color: var(--muted); font-family: var(--font-mono);
+}
+.preview-modal__foot .btn { font-size: 14px; padding: 10px 28px; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .preview-modal { width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; }
+  .preview-stats { flex-wrap: wrap; }
+  .preview-stat { flex: 1 0 50%; padding: 8px 0; }
+  .preview-stat:nth-child(2) { border-right: none; }
+  .preview-modal__head, .preview-modal__nav { padding-left: 16px; padding-right: 16px; }
+  .preview-json { padding: 16px; font-size: 11px; }
+  .preview-modal__foot { flex-direction: column; gap: 12px; text-align: center; }
+  .preview-nav__hint { display: none; }
+}

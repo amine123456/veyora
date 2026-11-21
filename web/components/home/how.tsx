@@ -34,7 +34,7 @@ export function HomeHow() {
           <ol className="steps">
             <li className="step card" data-reveal="">
               <span className="num">1</span> <h3>Create your user</h3>
-              <p>Generate credentials in the dashboard or through the API. Top up with USDT — prepaid from $10.</p>
+              <p>Generate credentials in the dashboard or through the API. Top up with card or USDT — prepaid from $10.</p>
               <div className="well">
                 <p className="well__h">
                   <span>Live top-ups</span>
@@ -53,7 +53,7 @@ export function HomeHow() {
                 </ul>
                 <p className="field">
                   <span className="dot" />
-                  USDT on BNB Smart Chain (BEP-20)
+                  Card or USDT on BNB Smart Chain (BEP-20)
                 </p>
               </div>
             </li>
@@ -93,7 +93,7 @@ export function HomeHow() {
               </div>
             </li>
           </ol>
-          <p className="how__note">No contract. Cryptocurrency only. All sales final.</p>
+          <p className="how__note">No contract. Card or USDT. See <a href="/refund-policy">refund policy</a>.</p>
         </div>
       </section>
     </>

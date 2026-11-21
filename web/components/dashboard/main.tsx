@@ -25,7 +25,7 @@ export function DashboardMain() {
             </h2>{' '}
             <span className="status">
               <i className="dot" />
-              Prepaid in USDT
+              Prepaid balance
             </span>
           </div>
           <p className="balance" data-field="wallet">
@@ -89,8 +89,8 @@ export function DashboardMain() {
             <div>
               <h2 id="funds-title">Add funds</h2>
               <p>
-                Pay with USDT on BNB Smart Chain (BEP-20). The amount is added to your balance automatically once the
-                payment is confirmed, usually within a few minutes. Larger top-ups include a bonus.
+                Choose an amount and pay with card or USDT. Your balance updates automatically once payment is confirmed.
+                Larger top-ups include a bonus.
               </p>
             </div>
           </header>
@@ -98,8 +98,12 @@ export function DashboardMain() {
             <svg className="ic" aria-hidden="true">
               <use href="#i-ok" />
             </svg>
-            Payment received. Your balance updates as soon as the network confirms it. You can refresh this page.
+            Payment received! Your balance has been updated.
           </p>
+          <div className="pay-methods" data-pay-methods="">
+            <button type="button" className="pay-tab pay-tab--active" data-pay-method="stripe">Card</button>
+            <button type="button" className="pay-tab" data-pay-method="crypto">USDT</button>
+          </div>
           <div className="packs" data-packs="" aria-busy="true">
             <i className="sk" />
             <i className="sk" />
@@ -113,7 +117,7 @@ export function DashboardMain() {
               <use href="#i-info" />
             </svg>
             One balance pays for everything: residential and mobile traffic by the GB, and unlocker requests by the
-            request. Want to pay another way? Ask us and we'll credit your account manually.
+            request.
           </p>
         </section>{' '}
         <section className="card" id="connection" aria-labelledby="connect-title">
@@ -555,6 +559,116 @@ export function DashboardMain() {
           </form>
           <p className="notice notice--err form__error" data-key-error="" role="alert" hidden />
         </section>
+        {/* Data Feeds */}
+        <section className="card" id="data-feeds" aria-labelledby="feeds-title">
+          <header className="card__head">
+            <span className="chip-ic chip-ic--accent">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-database" />
+              </svg>
+            </span>{' '}
+            <div>
+              <h2 id="feeds-title">Data Feeds</h2>
+              <p>
+                Structured data from hard-to-scrape sites, delivered to your endpoint on schedule.
+                Subscribe to a feed, configure your SFTP or webhook, and receive fresh data automatically.
+              </p>
+            </div>
+          </header>
+          <p className="notice notice--ok" data-feed-sub-ok="" hidden role="status">
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-ok" />
+            </svg>
+            Subscription activated! Set up your delivery method below to start receiving data.
+          </p>
+          <div className="feeds-subs" data-feeds-subs="">
+            <p className="muted" style={{ fontSize: '14px' }}>Loading...</p>
+          </div>
+          <p className="empty-state" data-no-feeds="" hidden>
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-database" />
+            </svg>
+            No active subscriptions.{' '}
+            <a href="/data-feeds">Browse the catalog</a> to get started.
+          </p>
+          <div className="delivery-panel" data-delivery-panel="" hidden>
+            <div className="divider" />
+            <header className="card__head card__head--sub">
+              <span className="chip-ic chip-ic--accent">
+                <svg className="ic" aria-hidden="true">
+                  <use href="#i-info" />
+                </svg>
+              </span>{' '}
+              <div>
+                <h3>Configure delivery — <span data-delivery-feed-name="" /></h3>
+                <p>Choose how you want to receive your data.</p>
+              </div>
+              <button className="btn btn--ghost btn--sm" type="button" data-delivery-close="" aria-label="Close" style={{ marginLeft: 'auto' }}>&times;</button>
+            </header>
+            <div className="pay-methods" data-delivery-tabs="">
+              <button className="pay-tab pay-tab--active" type="button" data-delivery-tab="sftp">SFTP</button>
+              <button className="pay-tab" type="button" data-delivery-tab="webhook">Webhook</button>
+            </div>
+            <form className="delivery-form" data-delivery-form="" noValidate>
+              <input type="hidden" name="subscription_id" />
+              <input type="hidden" name="delivery_method" value="sftp" />
+              <div data-delivery-fields-sftp="">
+                <label className="field">
+                  <span className="field__label">SFTP Host</span>
+                  <input type="text" name="sftp_host" maxLength={255} autoComplete="off" placeholder="sftp.example.com" />
+                </label>{' '}
+                <label className="field">
+                  <span className="field__label">Port</span>
+                  <input type="number" name="sftp_port" defaultValue={22} min={1} max={65535} />
+                </label>{' '}
+                <label className="field">
+                  <span className="field__label">Username</span>
+                  <input type="text" name="sftp_username" maxLength={128} autoComplete="off" />
+                </label>{' '}
+                <label className="field">
+                  <span className="field__label">Password</span>
+                  <input type="password" name="sftp_password" maxLength={256} autoComplete="off" />
+                </label>{' '}
+                <label className="field">
+                  <span className="field__label">Remote path</span>
+                  <input type="text" name="sftp_path" maxLength={512} autoComplete="off" placeholder="/data/feeds/" />
+                </label>
+              </div>
+              <div data-delivery-fields-webhook="" hidden>
+                <label className="field">
+                  <span className="field__label">Webhook URL</span>
+                  <input type="url" name="webhook_url" maxLength={512} autoComplete="off" placeholder="https://api.example.com/feeds/ingest" />
+                </label>{' '}
+                <label className="field">
+                  <span className="field__label">Signing secret <span className="muted">(optional)</span></span>
+                  <input type="text" name="webhook_secret" maxLength={256} autoComplete="off" placeholder="whsec_..." />
+                </label>
+                <p className="muted" style={{ fontSize: '12px', marginTop: '4px' }}>
+                  We&rsquo;ll POST a JSON payload to this URL on each delivery. The signing secret lets you verify requests come from Veyora.
+                </p>
+              </div>
+              <button className="btn btn--primary" type="submit" style={{ marginTop: '12px' }}>
+                Save delivery settings
+              </button>
+            </form>
+            <p className="notice notice--ok" data-delivery-ok="" hidden role="status">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-ok" />
+              </svg>
+              Delivery configuration saved. Data will be delivered on the next scheduled run.
+            </p>
+            <p className="notice notice--err form__error" data-delivery-error="" role="alert" hidden />
+          </div>
+          <div className="card__actions">
+            <a className="btn btn--secondary" href="/data-feeds">
+              <svg className="ic" aria-hidden="true">
+                <use href="#i-database" />
+              </svg>
+              <span className="lbl">Browse catalog</span>
+            </a>
+          </div>
+        </section>{' '}
+
         {/* Usage */}
         <section className="card" id="usage" aria-labelledby="usage-title">
           <header className="card__head">

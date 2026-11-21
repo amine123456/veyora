@@ -453,14 +453,41 @@ export async function fetchWithCamoufox({ url, proxy, timeoutMs, maxBytes, cooki
       signal.addEventListener("abort", onAbort, { once: true });
     }
 
-    child.stdout.on("data", (d) => { stdout += d; });
-    child.stderr.on("data", (d) => { stderr += d; });
+    child.stdout.on("data", (d) => {
+      stdout += d;
+      // Resolve as soon as we have a complete JSON object — don't wait for the child
+      // process to exit (browser/Xvfb teardown can add seconds of latency).
+      if (!settled && stdout.includes("}")) {
+        try {
+          const result = JSON.parse(stdout);
+          console.log(`[camoufox-node] early resolve at ${Date.now() - cfStart}ms`);
+          if (result.error) {
+            finish(() => reject(new FetchError(result.error, result.message || result.error)));
+          } else {
+            const body = Buffer.from(result.body, "base64");
+            finish(() => resolve({
+              status: result.status,
+              headers: result.headers,
+              body,
+              wireBytes: result.wireBytes || body.length,
+              protocol: "camoufox",
+              url: new URL(result.finalUrl),
+            }));
+          }
+          killGroup("SIGTERM");
+          setTimeout(() => killGroup("SIGKILL"), 2_000);
+        } catch {}
+      }
+    });
+    child.stderr.on("data", (d) => { stderr += d; if (d.toString().includes("[camoufox]")) console.log(d.toString().trim()); });
 
     child.stdin.write(input);
     child.stdin.end();
 
+    const cfStart = Date.now();
     child.on("close", (code) => {
       clearTimeout(timer);
+      console.log(`[camoufox-node] child close code=${code} elapsed=${Date.now() - cfStart}ms`);
       // Safety net: kill anything left in the group (browser, Xvfb, driver).
       killGroup("SIGKILL");
       cleaned = true;

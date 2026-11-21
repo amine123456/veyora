@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           <div className="container">
             <p className="eyebrow">Legal</p>
             <h1>Privacy Policy</h1>
-            <p className="meta">Effective October 29, 2026</p>
+            <p className="meta">Effective November 20, 2026</p>
             <p className="lead">
               This policy explains what information Veyora collects, why we use it, and the choices available to you.
             </p>
@@ -32,9 +32,11 @@ export default function PrivacyPage() {
             </p>
             <h2>Payments and service providers</h2>
             <p>
-              Payments may be processed by third-party payment providers. They handle payment information under their
-              own privacy terms; Veyora receives transaction status and identifiers needed to fulfill purchases. We may
-              use infrastructure and security providers that process limited information on our behalf.
+              Card payments are processed by <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer">Stripe</a>,
+              which handles card details under its own privacy policy; Veyora never receives or stores card numbers.
+              Cryptocurrency payments are processed by NOWPayments. We receive transaction status and identifiers
+              needed to fulfill purchases. We may use infrastructure and security providers that process limited
+              information on our behalf.
             </p>
             <h2>Retention and security</h2>
             <p>

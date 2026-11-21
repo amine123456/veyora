@@ -247,13 +247,36 @@ if (dash) {
     })
     .catch(() => set('remaining', 'Could not load'));
 
-  // Add funds: USD top-ups paid with USDT through a hosted invoice.
+  // Add funds: USD top-ups paid with card (Stripe) or USDT (NOWPayments).
   const packs = $('[data-packs]');
   const buyError = $('[data-buy-error]');
+  const payMethodTabs = document.querySelectorAll('[data-pay-method]');
+  let activePayMethod = 'stripe';
+  let payMethods = { crypto: false, stripe: false };
   if (new URLSearchParams(location.search).has('paid')) $('[data-paid]').hidden = false;
+
+  payMethodTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      activePayMethod = tab.dataset.payMethod;
+      payMethodTabs.forEach(t => t.classList.toggle('pay-tab--active', t.dataset.payMethod === activePayMethod));
+    });
+  });
+
   fetch('/packages')
     .then(response => response.json())
-    .then(list => {
+    .then(result => {
+      const list = result.topups || result;
+      payMethods = result.methods || { crypto: true, stripe: false };
+      payMethodTabs.forEach(tab => {
+        if (!payMethods[tab.dataset.payMethod]) tab.hidden = true;
+      });
+      if (!payMethods.stripe && payMethods.crypto) {
+        activePayMethod = 'crypto';
+        payMethodTabs.forEach(t => t.classList.toggle('pay-tab--active', t.dataset.payMethod === 'crypto'));
+      }
+      if (payMethods.stripe && !payMethods.crypto) {
+        document.querySelector('[data-pay-methods]').hidden = true;
+      }
       packs.replaceChildren();
       packs.removeAttribute('aria-busy');
       list.forEach(topup => {
@@ -264,8 +287,8 @@ if (dash) {
         button.innerHTML = '<i class="pack__ic"><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg></i><b></b><span></span>';
         button.querySelector('b').textContent = `$${(topup.cents / 100).toFixed(0)}`;
         button.querySelector('span').textContent = topup.bonusPercent
-          ? `+${topup.bonusPercent}% · ${usd(topup.creditMicros)}`
-          : 'Pay with USDT';
+          ? `+${topup.bonusPercent}% bonus`
+          : 'Top up';
         packs.append(button);
       });
     })
@@ -278,14 +301,13 @@ if (dash) {
     packs.querySelectorAll('button').forEach(b => { b.disabled = true; });
     const label = button.querySelector('span').textContent;
     button.querySelector('span').textContent = 'Opening…';
+    const endpoint = activePayMethod === 'stripe' ? '/api/checkout/stripe' : '/api/checkout';
     try {
-      const { ok, data } = await post('/api/checkout', { topupId: button.dataset.pack });
+      const { ok, data } = await post(endpoint, { topupId: button.dataset.pack });
       if (ok && data.checkoutUrl) { location.assign(data.checkoutUrl); return; }
       throw new Error(data.error || 'Could not start the payment. Try again.');
     } catch (error) {
-      buyError.textContent = error.message === 'Online payment is not set up yet'
-        ? 'Online payment is not available yet. Ask us and we will credit your account manually.'
-        : error.message;
+      buyError.textContent = error.message;
       buyError.hidden = false;
     } finally {
       button.querySelector('span').textContent = label;
@@ -564,6 +586,17 @@ if (dash) {
         if (!data) throw new Error(response.status === 504 ? 'The request took too long for the dashboard. Hard sites can take a few minutes: run it from your code with a sandbox key instead.' : 'The server returned an unexpected answer. Try again.');
         sbxLast = { data, status: response.status, ms: Date.now() - started };
         renderResult();
+        // Suggest data feeds when the unlocker is blocked
+        const oldBanner = sbx.querySelector('.feeds-suggestion');
+        if (oldBanner) oldBanner.remove();
+        if (!data.success && data.suggestion?.type === 'data_feed') {
+          const banner = document.createElement('div');
+          banner.className = 'notice notice--warn feeds-suggestion';
+          banner.style.marginTop = '12px';
+          banner.innerHTML = '<b>This site uses advanced bot protection.</b> We crawl it daily with custom infrastructure. '
+            + '<a href="/data-feeds" style="font-weight:600">Get structured data delivered instead &rarr;</a>';
+          sbx.querySelector('[data-sbx-result]').after(banner);
+        }
         if (data.sandbox?.mode === 'live') sbxQuota(data.sandbox.liveDailyLimit - data.sandbox.liveRemaining, data.sandbox.liveDailyLimit);
       } catch (error) {
         sbxError.textContent = error.message || 'Could not reach the server. Check your connection and try again.';
@@ -789,4 +822,251 @@ if (logout) {
     location.assign('/login');
   });
 }
+
+// --- Data Feeds dashboard section ---
+const feedsSubs = document.querySelector('[data-feeds-subs]');
+const noFeeds = document.querySelector('[data-no-feeds]');
+const deliveryPanel = document.querySelector('[data-delivery-panel]');
+const deliveryForm = document.querySelector('[data-delivery-form]');
+const deliveryOk = document.querySelector('[data-delivery-ok]');
+const deliveryError = document.querySelector('[data-delivery-error]');
+const deliveryFeedName = document.querySelector('[data-delivery-feed-name]');
+var activeDeliveryTab = 'sftp';
+
+function formatDate(d) { return d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
+
+if (new URLSearchParams(location.search).has('feed_sub')) {
+  var banner = document.querySelector('[data-feed-sub-ok]');
+  if (banner) banner.hidden = false;
+}
+
+function formatEur(cents) { return '€' + (cents / 100).toFixed(0); }
+
+function openDeliveryPanel(subId, feedName, method) {
+  if (!deliveryPanel || !deliveryForm) return;
+  deliveryPanel.hidden = false;
+  deliveryForm.subscription_id.value = subId;
+  deliveryForm.delivery_method.value = method || 'sftp';
+  if (deliveryFeedName) deliveryFeedName.textContent = feedName;
+  deliveryOk.hidden = true;
+  deliveryError.hidden = true;
+  setDeliveryTab(method || 'sftp');
+  deliveryPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function setDeliveryTab(tab) {
+  activeDeliveryTab = tab;
+  if (!deliveryPanel) return;
+  deliveryPanel.querySelectorAll('[data-delivery-tab]').forEach(function (t) {
+    t.classList.toggle('pay-tab--active', t.dataset.deliveryTab === tab);
+  });
+  var sftpFields = deliveryPanel.querySelector('[data-delivery-fields-sftp]');
+  var webhookFields = deliveryPanel.querySelector('[data-delivery-fields-webhook]');
+  if (sftpFields) sftpFields.hidden = tab !== 'sftp';
+  if (webhookFields) webhookFields.hidden = tab !== 'webhook';
+  if (deliveryForm) deliveryForm.delivery_method.value = tab;
+}
+
+function renderSubscriptions(subs) {
+  if (!feedsSubs) return;
+  if (!subs.length) {
+    feedsSubs.innerHTML = '';
+    if (noFeeds) noFeeds.hidden = false;
+    if (deliveryPanel) deliveryPanel.hidden = true;
+    return;
+  }
+  if (noFeeds) noFeeds.hidden = true;
+  var html = '<table class="usage-table" style="width:100%"><thead><tr>'
+    + '<th>Feed</th><th>Status</th><th>Price</th><th>Frequency</th><th>Delivery</th><th>Paid until</th><th>Last delivery</th><th></th>'
+    + '</tr></thead><tbody>';
+  subs.forEach(function (s) {
+    var ld = s.last_delivery;
+    var statusClass = s.status === 'active' ? 'feed-chip--active' : s.status === 'paused' ? '' : 'feed-chip--coming';
+    var paidUntil = s.current_period_end ? formatDate(s.current_period_end) : (s.stripe_subscription_id ? 'Active' : '—');
+    var dc = s.delivery_config;
+    var deliveryHtml;
+    if (dc && (dc.sftp_host || dc.webhook_url)) {
+      var label = dc.method === 'webhook' ? 'Webhook' : 'SFTP: ' + esc(dc.sftp_host);
+      deliveryHtml = '<span class="feed-chip feed-chip--active" style="font-size:11px">' + label + '</span>';
+    } else if (s.status === 'active') {
+      deliveryHtml = '<button class="btn btn--sm btn--warn" data-configure-delivery="' + s.id + '" data-feed-label="' + esc(s.site_name) + '" data-method="' + esc(s.delivery_method) + '">Setup needed</button>';
+    } else {
+      deliveryHtml = '<span class="muted" style="font-size:12px">—</span>';
+    }
+    var actions = '';
+    if (s.status === 'pending' && !s.stripe_subscription_id) {
+      actions += '<button class="btn btn--sm" data-feed-checkout="' + s.id + '">Complete payment</button> ';
+    }
+    if (s.status === 'active') {
+      actions += '<button class="btn btn--ghost btn--sm" data-configure-delivery="' + s.id + '" data-feed-label="' + esc(s.site_name) + '" data-method="' + esc(s.delivery_method) + '">' + (dc && (dc.sftp_host || dc.webhook_url) ? 'Edit delivery' : 'Configure') + '</button> ';
+      actions += '<button class="btn btn--ghost btn--sm" data-feed-pause="' + s.id + '">Pause</button> ';
+    }
+    if (s.status === 'paused') {
+      actions += '<button class="btn btn--sm" data-feed-resume="' + s.id + '">Resume</button> ';
+    }
+    if (s.status !== 'cancelled') {
+      actions += '<button class="btn btn--ghost btn--sm" style="color:var(--red,#e53935)" data-feed-cancel="' + s.id + '">Cancel</button>';
+    }
+    html += '<tr>'
+      + '<td><b>' + esc(s.site_name) + '</b><br><small style="color:var(--muted)">' + esc(s.site_domain) + '</small></td>'
+      + '<td><span class="feed-chip ' + statusClass + '">' + esc(s.status) + '</span></td>'
+      + '<td>' + formatEur(s.price_cents) + '/mo</td>'
+      + '<td>' + esc(s.frequency) + '</td>'
+      + '<td>' + deliveryHtml + '</td>'
+      + '<td>' + paidUntil + '</td>'
+      + '<td>' + (ld ? formatDate(ld.completed_at) + ' (' + (ld.delivered_count || '—') + ' rows)' : '—') + '</td>'
+      + '<td>' + actions + '</td>'
+      + '</tr>';
+  });
+  html += '</tbody></table>';
+  feedsSubs.innerHTML = html;
+
+  feedsSubs.querySelectorAll('[data-configure-delivery]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openDeliveryPanel(btn.dataset.configureDelivery, btn.dataset.feedLabel, btn.dataset.method);
+    });
+  });
+
+  feedsSubs.querySelectorAll('[data-feed-checkout]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      btn.disabled = true;
+      btn.textContent = 'Redirecting...';
+      try {
+        var r = await fetch('/api/subscriptions/' + btn.dataset.feedCheckout + '/checkout', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' }, body: '{}',
+        });
+        var data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Checkout failed');
+        if (data.checkoutUrl) location.assign(data.checkoutUrl);
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Complete payment';
+        alert(e.message);
+      }
+    });
+  });
+
+  feedsSubs.querySelectorAll('[data-feed-pause]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      if (!confirm('Pause this subscription? Data deliveries will stop.')) return;
+      btn.disabled = true;
+      try {
+        var r = await fetch('/api/subscriptions/' + btn.dataset.feedPause, {
+          method: 'PATCH', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paused' }),
+        });
+        if (!r.ok) { var d = await r.json(); throw new Error(d.error || 'Failed'); }
+        loadSubscriptions();
+      } catch (e) { btn.disabled = false; alert(e.message); }
+    });
+  });
+
+  feedsSubs.querySelectorAll('[data-feed-resume]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      btn.disabled = true;
+      try {
+        var r = await fetch('/api/subscriptions/' + btn.dataset.feedResume, {
+          method: 'PATCH', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'active' }),
+        });
+        if (!r.ok) { var d = await r.json(); throw new Error(d.error || 'Failed'); }
+        loadSubscriptions();
+      } catch (e) { btn.disabled = false; alert(e.message); }
+    });
+  });
+
+  feedsSubs.querySelectorAll('[data-feed-cancel]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      if (!confirm('Cancel this subscription? This cannot be undone.')) return;
+      btn.disabled = true;
+      try {
+        var r = await fetch('/api/subscriptions/' + btn.dataset.feedCancel, {
+          method: 'DELETE', credentials: 'same-origin',
+        });
+        if (!r.ok) { var d = await r.json(); throw new Error(d.error || 'Failed'); }
+        loadSubscriptions();
+      } catch (e) { btn.disabled = false; alert(e.message); }
+    });
+  });
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function loadSubscriptions() {
+  if (!feedsSubs) return;
+  fetch('/api/subscriptions', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) { if (data) renderSubscriptions(data.subscriptions || []); })
+    .catch(function () {});
+}
+
+if (deliveryPanel) {
+  deliveryPanel.querySelectorAll('[data-delivery-tab]').forEach(function (tab) {
+    tab.addEventListener('click', function () { setDeliveryTab(tab.dataset.deliveryTab); });
+  });
+  var closeBtn = deliveryPanel.querySelector('[data-delivery-close]');
+  if (closeBtn) closeBtn.addEventListener('click', function () { deliveryPanel.hidden = true; });
+}
+
+if (deliveryForm) {
+  deliveryForm.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    deliveryOk.hidden = true;
+    deliveryError.hidden = true;
+    var subId = deliveryForm.subscription_id.value;
+    if (!subId) return;
+    var method = deliveryForm.delivery_method.value;
+    var payload;
+    if (method === 'webhook') {
+      payload = {
+        webhook_url: deliveryForm.webhook_url.value.trim(),
+        webhook_secret: deliveryForm.webhook_secret.value.trim() || null,
+      };
+    } else {
+      payload = {
+        sftp_host: deliveryForm.sftp_host.value.trim(),
+        sftp_port: parseInt(deliveryForm.sftp_port.value) || 22,
+        sftp_username: deliveryForm.sftp_username.value.trim(),
+        sftp_password: deliveryForm.sftp_password.value,
+        sftp_path: deliveryForm.sftp_path.value.trim() || '/',
+      };
+    }
+    var submitBtn = deliveryForm.querySelector('[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    try {
+      var response = await fetch('/api/subscriptions/' + subId + '/delivery-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'same-origin',
+      });
+      var data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Save failed');
+      deliveryOk.hidden = false;
+      loadSubscriptions();
+    } catch (error) {
+      deliveryError.textContent = error.message;
+      deliveryError.hidden = false;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save delivery settings';
+    }
+  });
+}
+
+loadSubscriptions();
+
+if (new URLSearchParams(location.search).has('feed_sub') && feedsSubs) {
+  setTimeout(function () {
+    var setupBtn = feedsSubs.querySelector('[data-configure-delivery]');
+    if (setupBtn) setupBtn.click();
+  }, 500);
+}
+
 })();

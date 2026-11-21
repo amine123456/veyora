@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
 import { MICROS_PER_USD, createClient, credit, creditWallet, findUsername, listClients, regenerateProxyPassword, setEnabled } from './store.js';
+import { listFeeds, upsertFeed, listAllSubscriptions, getSubscriptionAdmin, activateSubscription, getActiveDeliveries } from './feeds-store.js';
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -61,8 +62,40 @@ export function createAdminServer({ token }, { unlocker = null } = {}) {
         const entry = await unlocker.siteKnowledge.get(site);
         return entry ? send(response, 200, entry) : send(response, 404, { error: 'No knowledge for this site' });
       }
+      // --- Data Feeds admin ---
+      if (request.method === 'GET' && pathname === '/feeds') {
+        return send(response, 200, { feeds: await listFeeds() });
+      }
+      if (request.method === 'GET' && pathname === '/subscriptions') {
+        const params = new URL(request.url, 'http://admin').searchParams;
+        const filters = {};
+        if (params.has('status')) filters.status = params.get('status');
+        if (params.has('feedId')) filters.feedId = params.get('feedId');
+        return send(response, 200, { subscriptions: await listAllSubscriptions(filters) });
+      }
+
       if (request.method !== 'POST') return send(response, 404, { error: 'Not found' });
       const body = await readJson(request);
+
+      // Admin feed management
+      if (pathname === '/feeds') {
+        if (!body.feed_id) return send(response, 400, { error: 'Missing feed_id' });
+        return send(response, 200, await upsertFeed(body.feed_id, body));
+      }
+      const subAction = /^\/subscriptions\/([0-9a-f-]{36})\/(activate|deliver)$/.exec(pathname);
+      if (subAction) {
+        const subId = subAction[1];
+        if (subAction[2] === 'activate') {
+          const activated = await activateSubscription(subId);
+          if (!activated) return send(response, 404, { error: 'Subscription not found or not pending' });
+          return send(response, 200, activated);
+        }
+        if (subAction[2] === 'deliver') {
+          const sub = await getSubscriptionAdmin(subId);
+          if (!sub) return send(response, 404, { error: 'Subscription not found' });
+          return send(response, 200, { message: 'Manual delivery trigger not yet implemented. Use deliver-feeds.py script.' });
+        }
+      }
 
       if (pathname === '/clients') {
         const password = crypto.randomBytes(24).toString('base64url');

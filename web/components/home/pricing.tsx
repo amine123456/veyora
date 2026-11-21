@@ -281,10 +281,10 @@ export function HomePricing() {
           <p>
             These three plans are copied from the public marketing page: Starter <b>$29/mo · 8 GB · about $3.63/GB</b>,
             Pro <b>$99/mo · 40 GB · about $2.48/GB</b>, Enterprise custom. Annual billing is offered as <b>Save 20%</b>{' '}
-            (Starter $23/mo, Pro $79/mo). The live product dashboard also sells <b>prepaid USDT top-ups</b> on BNB Smart
-            Chain: $10, $25, $50, $100 (+5% credit), $500 (+10% credit). Signup copy says residential proxies from{' '}
-            <b>$2 per GB</b>. Cryptocurrency payments are final. Which of those two models is the source of truth is not
-            resolved here — both are shown as they appear in source.
+            (Starter $23/mo, Pro $79/mo). The live product dashboard also sells <b>prepaid top-ups</b> via card or
+            USDT: $10, $25, $50, $100 (+5% credit), $500 (+10% credit). Signup copy says residential proxies from{' '}
+            <b>$2 per GB</b>. See our <a href="/refund-policy">refund policy</a> for details. Which of those two models
+            is the source of truth is not resolved here — both are shown as they appear in source.
           </p>
         </aside>
       </section>

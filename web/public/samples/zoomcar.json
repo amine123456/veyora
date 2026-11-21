@@ -1,0 +1,412 @@
+{
+  "feed_id": "zoomcar",
+  "total_records": 174076,
+  "file_size_mb": 932.7,
+  "sample_count": 10,
+  "fields": [
+    "id",
+    "url",
+    "title",
+    "make",
+    "model",
+    "version",
+    "price_eur",
+    "mileage_km",
+    "year",
+    "first_registration",
+    "fuel",
+    "transmission",
+    "body_type",
+    "color",
+    "power_hp",
+    "doors",
+    "seats",
+    "location",
+    "seller",
+    "images",
+    "created_at"
+  ],
+  "field_count": 21,
+  "records": [
+    {
+      "id": "37450090",
+      "url": "https://zoomcar.fr/peugeot-3008-hybrid-145-e-dcs6-allure-37450090.html",
+      "title": "Peugeot 3008 3008 Hybrid 145 e-DCS6 Allure",
+      "make": "Peugeot",
+      "model": "3008",
+      "version": "3008 Hybrid 145 e-DCS6 Allure",
+      "price_eur": 24790,
+      "mileage_km": 87450,
+      "year": 2025,
+      "first_registration": "2025-06-30",
+      "fuel": "essence",
+      "transmission": "automatique",
+      "body_type": "SUV",
+      "color": "Bleu",
+      "power_hp": 136,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Brive-la-Gaillarde",
+        "department": 19,
+        "region": "Nouvelle-Aquitaine",
+        "coordinates": {
+          "lat": 45.1435,
+          "lng": 1.51912
+        }
+      },
+      "seller": {
+        "id": 104830,
+        "name": "PEUGEOT BRIVE",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/peugeot-brive-brive-la-gaillarde-v104830.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/1061867_AA131841_1__beef9e4a652d7840710fdcd706b9c4c622aad074.jpg"
+      ],
+      "created_at": "2026-10-10 04:09:16"
+    },
+    {
+      "id": "37062919",
+      "url": "https://zoomcar.fr/mercedes-gla-200-d-8g-dct-amg-line-37062919.html",
+      "title": "Mercedes GLA GLA 200 d 8G-DCT AMG Line",
+      "make": "Mercedes",
+      "model": "GLA",
+      "version": "GLA 200 d 8G-DCT AMG Line",
+      "price_eur": 44490,
+      "mileage_km": 7392,
+      "year": 2025,
+      "first_registration": "2025-09-29",
+      "fuel": "diesel",
+      "transmission": "automatique",
+      "body_type": "4x4 - S.U.V",
+      "color": "Blanc",
+      "power_hp": 150,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Bourg-en-Bresse",
+        "department": 1,
+        "region": "Auvergne-Rhône-Alpes",
+        "coordinates": {
+          "lat": 46.205,
+          "lng": 5.24559
+        }
+      },
+      "seller": {
+        "id": 104616,
+        "name": "MERCEDES-BENZ BOURG EN BRESSE",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/mercedes-benz-bourg-en-bresse-bourg-en-bresse-v104616.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/1222151_AA126279_1__ad2a099854817b4cf1742999a1b59e36cebd741b.jpg"
+      ],
+      "created_at": "2026-06-09 01:54:31"
+    },
+    {
+      "id": "37521679",
+      "url": "https://zoomcar.fr/toyota-c-hr-hybrid-dynamic-business-1-8-122-ch-37521679.html",
+      "title": "Toyota C-HR Hybrid Dynamic Business 1.8 122 ch",
+      "make": "Toyota",
+      "model": "C-hr",
+      "version": "Hybrid Dynamic Business 1.8 122 ch",
+      "price_eur": 21490,
+      "mileage_km": 83183,
+      "year": 2020,
+      "first_registration": "2020-12-09",
+      "fuel": "hybride",
+      "transmission": "automatique",
+      "body_type": "4x4 - S.U.V",
+      "color": "Bleu",
+      "power_hp": 122,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Mulhouse",
+        "department": 68,
+        "region": "Grand Est",
+        "coordinates": {
+          "lat": 47.749,
+          "lng": 7.32547
+        }
+      },
+      "seller": {
+        "id": 7726,
+        "name": "TOYOTA MULHOUSE",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/toyota-mulhouse-mulhouse-v7726.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/S99V619581I681689_ZPHPOA_1__ba29d61785a5e993c6871ca7508dc38085c4f4f9.jpg"
+      ],
+      "created_at": "2026-10-31 05:27:34"
+    },
+    {
+      "id": "37339275",
+      "url": "https://zoomcar.fr/renault-clio-5-clio-tce-90-equilibre-37339275.html",
+      "title": "Renault Clio 5 Clio TCe 90 Equilibre",
+      "make": "Renault",
+      "model": "Clio",
+      "version": "Clio TCe 90 Equilibre",
+      "price_eur": 12990,
+      "mileage_km": 64704,
+      "year": 2023,
+      "first_registration": "2023-07-24",
+      "fuel": "essence",
+      "transmission": "manuelle",
+      "body_type": "Citadine",
+      "color": "Blanc",
+      "power_hp": 91,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Gap",
+        "department": 5,
+        "region": "Provence-Alpes-Côte d'Azur",
+        "coordinates": {
+          "lat": 44.5802,
+          "lng": 6.06485
+        }
+      },
+      "seller": {
+        "id": 106737,
+        "name": "RENAULT GAP",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/renault-gap-gap-v106737.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/VO609605_AD000792_1__547ba499b206cb6395f07e05d058a58b.jpg"
+      ],
+      "created_at": "2026-09-04 16:25:16"
+    },
+    {
+      "id": "37414936",
+      "url": "https://zoomcar.fr/land-rover-range-rover-sport-3-0-d350-350ch-hse-dynamic-mark-ix-37414936.html",
+      "title": "Land Rover Range Rover Sport 3.0 D350 350ch HSE Dynamic Mark IX",
+      "make": "Land Rover",
+      "model": "Range Rover Sport",
+      "version": "3.0 D350 350ch HSE Dynamic Mark IX",
+      "price_eur": 34900,
+      "mileage_km": 122112,
+      "year": 2021,
+      "first_registration": "2021-10-22",
+      "fuel": "",
+      "transmission": "automatique",
+      "body_type": "4x4 - S.U.V",
+      "color": "Gris",
+      "power_hp": 350,
+      "doors": "5",
+      "seats": "2",
+      "location": {
+        "city": "Crolles",
+        "department": 38,
+        "region": "Auvergne-Rhône-Alpes",
+        "coordinates": {
+          "lat": 45.282,
+          "lng": 5.88916
+        }
+      },
+      "seller": {
+        "id": 104571,
+        "name": "LAND ROVER Pautric Grenoble",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/land-rover-pautric-grenoble-crolles-v104571.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/PO45338524_AA125113_1__ac7c19af6870d28302c3b702f92eb7ebb129db68.jpg"
+      ],
+      "created_at": "2026-09-30 08:23:04"
+    },
+    {
+      "id": "37433641",
+      "url": "https://zoomcar.fr/hyundai-tucson-1-6-t-gdi-215-hybrid-bva6-n-line-executive-37433641.html",
+      "title": "Hyundai Tucson Tucson 1.6 T-GDI 215 Hybrid BVA6 N Line Executive",
+      "make": "Hyundai",
+      "model": "Tucson",
+      "version": "Tucson 1.6 T-GDI 215 Hybrid BVA6 N Line Executive",
+      "price_eur": 37990,
+      "mileage_km": 1940,
+      "year": 2025,
+      "first_registration": "2025-02-26",
+      "fuel": "hybride",
+      "transmission": "automatique",
+      "body_type": "4x4 - S.U.V",
+      "color": "Blanc",
+      "power_hp": 160,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Saintes",
+        "department": 17,
+        "region": "Nouvelle-Aquitaine",
+        "coordinates": {
+          "lat": 45.7421,
+          "lng": -0.64983
+        }
+      },
+      "seller": {
+        "id": 105033,
+        "name": "LCV AUTOMOBILES SAINTES",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/lcv-automobiles-saintes-saintes-v105033.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/A776_AA139475_1__978e6b500053fce6a0bad01f705d26484355a11f.jpg"
+      ],
+      "created_at": "2026-10-06 04:26:09"
+    },
+    {
+      "id": "37457803",
+      "url": "https://zoomcar.fr/ford-puma-1-0-ecoboost-hybrid-125ch-st-line-x-sets-37457803.html",
+      "title": "Ford Puma 1.0 EcoBoost Hybrid 125ch ST-Line X S&S",
+      "make": "Ford",
+      "model": "Puma",
+      "version": "1.0 EcoBoost Hybrid 125ch ST-Line X S&S",
+      "price_eur": 22290,
+      "mileage_km": 23639,
+      "year": 2024,
+      "first_registration": "2024-07-23",
+      "fuel": "essence",
+      "transmission": "manuelle",
+      "body_type": "SUV",
+      "color": "Gris",
+      "power_hp": 126,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Villeneuve-d'Ascq",
+        "department": 59,
+        "region": "Hauts-de-France",
+        "coordinates": {
+          "lat": 50.6325,
+          "lng": 3.15312
+        }
+      },
+      "seller": {
+        "id": 106954,
+        "name": "FORD VILLENEUVE D&#039;ASCQ AUTOMOBILES",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/ford-villeneuve-d-ascq-automobiles-villeneuve-d-ascq-v106954.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/FV523241604_AD001152_1__1e1e0d06c3763739f154a34df7c601f14dfab5f2.jpg"
+      ],
+      "created_at": "2026-10-13 12:16:41"
+    },
+    {
+      "id": "37575994",
+      "url": "https://zoomcar.fr/audi-a1-sportback-30-tfsi-110-ch-s-tronic-7-design-luxe-37575994.html",
+      "title": "Audi A1 Sportback A1 Sportback 30 TFSI 110 ch S tronic 7 Design Luxe",
+      "make": "Audi",
+      "model": "A1 Sportback",
+      "version": "A1 Sportback 30 TFSI 110 ch S tronic 7 Design Luxe",
+      "price_eur": 23990,
+      "mileage_km": 62282,
+      "year": 2023,
+      "first_registration": "2023-07-22",
+      "fuel": "essence",
+      "transmission": "automatique",
+      "body_type": "Citadine",
+      "color": "Noir",
+      "power_hp": 110,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Chambéry",
+        "department": 73,
+        "region": "Auvergne-Rhône-Alpes",
+        "coordinates": {
+          "lat": 45.5646,
+          "lng": 5.91778
+        }
+      },
+      "seller": {
+        "id": 7604,
+        "name": "JEAN LAIN CENTRE OCCASIONS AUTOSPORT CHAMBERY",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/jean-lain-centre-occasions-autosport-chambery-chambery-v7604.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/2131983_ZJLAUTOS_1__cabd51149de56b259f2e0b29f08b1f08914c3141.jpg"
+      ],
+      "created_at": "2026-11-18 04:28:55"
+    },
+    {
+      "id": "37549287",
+      "url": "https://zoomcar.fr/autres-volkswagen-177-at8-l3h3-attel-cam-appc-37549287.html",
+      "title": "Autres Volkswagen 177 AT8 L3H3 Attel. Cam AppC",
+      "make": "Volkswagen",
+      "model": "Crafter",
+      "version": "177 AT8 L3H3 Attel. Cam AppC",
+      "price_eur": 42744,
+      "mileage_km": 10,
+      "year": 2026,
+      "first_registration": "2026-10-31",
+      "fuel": "diesel",
+      "transmission": "automatique",
+      "body_type": "Berline",
+      "color": "Blanc",
+      "power_hp": 177,
+      "doors": "4",
+      "seats": "3",
+      "location": {
+        "city": "Strasbourg",
+        "department": 67,
+        "region": "Grand Est",
+        "coordinates": {
+          "lat": 48.5713,
+          "lng": 7.76776
+        }
+      },
+      "seller": {
+        "id": 105314,
+        "name": "TABOR AUTOMOBILES STRASBOURG",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/tabor-automobiles-strasbourg-strasbourg-v105314.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/GWV2453179aa96f6ec85_AA149149_1__ff04f27d438ab744541e07d49c3bac4733800431.jpg"
+      ],
+      "created_at": "2026-11-07 04:35:26"
+    },
+    {
+      "id": "37493097",
+      "url": "https://zoomcar.fr/autres-geely-29-8-kwh-maxplus-37493097.html",
+      "title": "Autres Geely 29.8 KWH MAX+",
+      "make": "Geely",
+      "model": "Starray Em-i",
+      "version": "29.8 KWH MAX+",
+      "price_eur": 32490,
+      "mileage_km": 10,
+      "year": 2026,
+      "first_registration": "2026-10-20",
+      "fuel": "hybride rechargeable",
+      "transmission": "automatique",
+      "body_type": "SUV",
+      "color": "",
+      "power_hp": 99,
+      "doors": "5",
+      "seats": "5",
+      "location": {
+        "city": "Le Creusot",
+        "department": 71,
+        "region": "Bourgogne-Franche-Comté",
+        "coordinates": {
+          "lat": 46.8067,
+          "lng": 4.42677
+        }
+      },
+      "seller": {
+        "id": 107180,
+        "name": "GARAGE LECAT - LE CREUSOT",
+        "professional": true,
+        "url": "https://zoomcar.fr/pro/garage-lecat-le-creusot-le-creusot-v107180.html"
+      },
+      "images": [
+        "https://img.zoomcar.fr/yahooto/03100018251_AM000278_1__1d92587c86889950eb2c887ff086cbcd27f2a67e.jpg"
+      ],
+      "created_at": "2026-10-23 20:13:00"
+    }
+  ]
+}

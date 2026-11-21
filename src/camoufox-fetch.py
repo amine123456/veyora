@@ -17,6 +17,7 @@ warnings.filterwarnings("ignore")
 signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))
 
 def main():
+    t0 = time.time()
     conf = json.loads(sys.stdin.read())
     url = conf["url"]
     proxy_conf = conf.get("proxy")
@@ -56,20 +57,16 @@ def main():
     kwargs = dict(
         humanize=True,
         geoip=True,
-        block_webrtc=True,
-        os=["windows", "macos"],
         i_know_what_im_doing=True,
         headless=False,
         virtual_display=display,
-        exclude_addons=[DefaultAddons.UBO],
     )
     if proxy_conf:
         kwargs["proxy"] = proxy_conf
-    if addons:
-        kwargs["addons"] = addons
 
     timeout_s = timeout_ms / 1000
 
+    sys.stderr.write(f"[camoufox] imports+setup done {time.time()-t0:.1f}s\n")
     try:
         with Camoufox(**kwargs) as browser:
             context = browser.new_context(
@@ -106,8 +103,35 @@ def main():
 
             nav_referer = "https://www.google.com/" if use_referer else (referer or None)
 
-            resp = page.goto(url, wait_until="domcontentloaded",
+            sys.stderr.write(f"[camoufox] browser+context ready {time.time()-t0:.1f}s\n")
+
+            # DataDome warmup: some DD-protected sites block deep URLs but let the
+            # homepage solve the JS challenge. Visit the site root first, let DD set
+            # its cookies, then navigate to the actual URL.
+            from urllib.parse import urlparse
+            parsed_url = urlparse(url)
+            site_root = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+            if site_root != url and site_root.rstrip("/") != url.rstrip("/"):
+                try:
+                    page.goto(site_root, wait_until="load",
+                              timeout=min(30000, timeout_ms // 2), referer=nav_referer)
+                    sys.stderr.write(f"[camoufox] warmup goto root done {time.time()-t0:.1f}s\n")
+                    # Wait for DD challenge to solve
+                    warmup_end = time.time() + 20
+                    while time.time() < warmup_end:
+                        page.wait_for_timeout(2000)
+                        content = page.content()
+                        if len(content) > 10000:
+                            sys.stderr.write(f"[camoufox] warmup solved {len(content)} bytes {time.time()-t0:.1f}s\n")
+                            break
+                    else:
+                        sys.stderr.write(f"[camoufox] warmup still small, proceeding anyway {time.time()-t0:.1f}s\n")
+                except Exception as e:
+                    sys.stderr.write(f"[camoufox] warmup failed: {e} {time.time()-t0:.1f}s\n")
+
+            resp = page.goto(url, wait_until="load",
                              timeout=timeout_ms, referer=nav_referer)
+            sys.stderr.write(f"[camoufox] goto done {time.time()-t0:.1f}s\n")
 
             _simulate_human(page)
 
@@ -127,9 +151,14 @@ def main():
                     if (frames.length || /captcha-delivery|datadome/i.test(html)) return 'block';
                     return 'none';
                 }""")
+                sys.stderr.write(f"[camoufox] dd={dd} dd_seen={dd_block_seen} t={time.time()-t0:.1f}s\n")
                 if dd == "block":
                     dd_block_seen += 1
-                    if dd_block_seen >= 2:
+                    # Give the browser time to solve the DD JS challenge. The reference
+                    # lacentrale scraper takes ~30s. Bail only after 10 consecutive checks
+                    # (20s) with no progress.
+                    if dd_block_seen >= 10:
+                        sys.stderr.write(f"[camoufox] DD bail after {dd_block_seen} checks {time.time()-t0:.1f}s\n")
                         break
                     continue
                 if dd == "none":
