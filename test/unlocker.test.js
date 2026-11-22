@@ -935,3 +935,44 @@ test('with no country given, the exit country follows the site', async () => {
   });
   assert.deepEqual(logins, ['CZ', 'DE'], 'default from the site, but the caller\'s choice wins');
 });
+
+test('a caller that hangs up frees its account slot right away, and the limit answer says when to retry', async () => {
+  let served = 0;
+  await harness((req, res) => {
+    served += 1;
+    // The first page is very slow; later ones answer at once.
+    const delay = served === 1 ? 4_000 : 0;
+    setTimeout(() => { res.writeHead(200, { 'content-type': 'text/html' }); res.end(PAGE); }, delay);
+  }, { config: { maxConcurrentPerAccount: 1, totalTimeoutMs: 15_000 } }, async ({ call, port }) => {
+    const { key } = await customer();
+    const slow = http.request({
+      host: '127.0.0.1', port, method: 'POST', path: '/v1/unlock',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
+    });
+    slow.on('error', () => {});
+    slow.end(JSON.stringify({ url: 'https://shop.example/slow' }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const busy = await call({ url: 'https://shop.example/next' }, { key });
+    assert.equal(busy.status, 429);
+    assert.equal(busy.headers['retry-after'], '2');
+    assert.match(busy.json.error, /At most 1 requests at a time/);
+
+    slow.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const resumed = await call({ url: 'https://shop.example/next' }, { key });
+    assert.equal(resumed.status, 200, JSON.stringify(resumed.json));
+    assert.equal(resumed.json.success, true);
+  });
+});
+
+test('the default limit is 20 requests at a time per account', async () => {
+  const { unlockerConfig } = await import('../src/config.js');
+  const before = process.env.UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT;
+  delete process.env.UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT;
+  try {
+    assert.equal(unlockerConfig().maxConcurrentPerAccount, 20);
+  } finally {
+    if (before !== undefined) process.env.UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT = before;
+  }
+});

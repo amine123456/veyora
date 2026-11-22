@@ -629,7 +629,7 @@ export function createUnlocker({
     return `${endpoint.host}:${endpoint.port}:${proxyUser}:${proxyPass}`;
   }
 
-  async function solverFetchOnExit(exit, username, country, startUrl, originalDeadline) {
+  async function solverFetchOnExit(exit, username, country, startUrl, originalDeadline, aborted = () => false) {
     // The solver rung needs at least 200s total: ~40s FlareSolverr + ~120s Solverify
     // + headroom for retries. Extend the deadline if earlier rungs ate the budget.
     const deadline = Math.max(originalDeadline, Date.now() + 200_000);
@@ -637,7 +637,9 @@ export function createUnlocker({
     let totalWireBytes = 0;
     let currentExit = exit;
 
-    for (let ipTry = 0; ipTry < SOLVER_IP_TRIES && Date.now() < deadline - 2000; ipTry++) {
+    // A caller that hung up stops the solver at the next fresh-IP try instead of letting it
+    // run for minutes on its extended deadline.
+    for (let ipTry = 0; ipTry < SOLVER_IP_TRIES && Date.now() < deadline - 2000 && !aborted(); ipTry++) {
       if (ipTry > 0) currentExit = newExit(currentExit.pool);
 
       // When FlareSolverr is available, use it for the initial fetch: it passes
@@ -786,7 +788,7 @@ export function createUnlocker({
       log.info?.(`Solver: no solution for ${startUrl.hostname}, trying fresh exit (${ipTry + 1}/${SOLVER_IP_TRIES})`);
     }
 
-    const error = new Error("Solver exhausted all IP tries");
+    const error = new Error(aborted() ? "Caller disconnected; solver stopped" : "Solver exhausted all IP tries");
     error.code = "PROXY";
     error.wireBytes = totalWireBytes;
     throw error;
@@ -934,7 +936,7 @@ export function createUnlocker({
         let result;
         const exitCountry = countryForPool(exit.pool);
         if (isSolverRung(rung)) {
-          result = await solverFetchOnExit(exit, username, exitCountry, url, deadline);
+          result = await solverFetchOnExit(exit, username, exitCountry, url, deadline, aborted);
         } else if (isFlareSolverrRung(rung)) {
           result = await flareSolverrFetchOnExit(exit, exitCountry, url, deadline);
         } else if (isBrowserRung(rung)) {
@@ -1158,18 +1160,31 @@ export function createUnlocker({
       throw new PublicError(503, "Unlocker busy, retry shortly", { headers: { "Retry-After": "5" } });
     }
     if (mine >= perAccount) {
-      throw new PublicError(429, `At most ${perAccount} requests at a time per account`);
+      throw new PublicError(429, `At most ${perAccount} requests at a time per account`, { headers: { "Retry-After": "2" } });
     }
     active += 1;
     bookedBytes += bytesPerRequest;
     activeByAccount.set(username, mine + 1);
-    return () => {
-      active -= 1;
-      bookedBytes -= bytesPerRequest;
+    let accountHeld = true;
+    let serverHeld = true;
+    // The account slot can be given back early (the caller hung up) while the work winds
+    // down; the server-wide slot and memory booking stay until the work really stops.
+    const releaseAccount = () => {
+      if (!accountHeld) return;
+      accountHeld = false;
       const left = (activeByAccount.get(username) ?? 1) - 1;
       if (left > 0) activeByAccount.set(username, left);
       else activeByAccount.delete(username);
     };
+    const release = () => {
+      releaseAccount();
+      if (!serverHeld) return;
+      serverHeld = false;
+      active -= 1;
+      bookedBytes -= bytesPerRequest;
+    };
+    release.account = releaseAccount;
+    return release;
   }
 
   // In-flight /v1 requests, so shutdown can wait for them to settle their holds.
@@ -1285,6 +1300,10 @@ export function createUnlocker({
     const priceMicros = priceFor(url.hostname);
 
     const release = acquire(client.username, testMode ? (config.sandboxMaxConcurrentPerAccount ?? 2) : config.maxConcurrentPerAccount);
+    // A caller that stops its script must be able to start again right away: its abandoned
+    // requests no longer count against the account once the connection is gone.
+    const onHangUp = () => { if (!response.writableFinished) release.account(); };
+    response.once("close", onHangUp);
     try {
       let allowance = null;
       if (testMode) {
@@ -1402,6 +1421,7 @@ export function createUnlocker({
         ...summary,
       });
     } finally {
+      response.off("close", onHangUp);
       release();
     }
   }

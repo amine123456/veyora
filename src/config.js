@@ -208,7 +208,7 @@ export function unlockerConfig() {
     maxResponseBytes,
     minBodyBytes: integer('UNLOCKER_MIN_BODY_BYTES', 512, { min: 0, max: 64 * 1024 }),
     requestsPerMinutePerKey: integer('UNLOCKER_REQUESTS_PER_MINUTE', 300, { max: 100_000 }),
-    maxConcurrentPerAccount: integer('UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT', 10, { max: 1_000 }),
+    maxConcurrentPerAccount: integer('UNLOCKER_MAX_CONCURRENT_PER_ACCOUNT', 20, { max: 1_000 }),
     maxConcurrent: integer('UNLOCKER_MAX_CONCURRENT', 30, { max: 10_000 }),
     memoryBudgetBytes,
     flagMinRequests: integer('UNLOCKER_FLAG_MIN_REQUESTS', 20, { max: 1_000_000 }),
