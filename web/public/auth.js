@@ -162,9 +162,28 @@ if (form) {
 
 /* ================= dashboard ================= */
 const dash = document.querySelector('[data-dashboard]');
-if (dash) {
+// The dashboard used to be one page with #sections; old links and payment return URLs
+// (/account?paid=1, ?feed_sub=1) are sent to the page that now holds that content.
+const MOVED = {
+  '#funds': '/account/billing', '#payments': '/account/billing', '#connection': '/account/proxies',
+  '#targeting': '/account/proxies', '#test': '/account/proxies', '#sandbox': '/account/playground',
+  '#unlocker': '/account/api-keys', '#keys': '/account/api-keys', '#data-feeds': '/account/feeds',
+  '#usage': '/account/usage',
+};
+const movedTo = dash && location.pathname === '/account'
+  ? (MOVED[location.hash] || (new URLSearchParams(location.search).has('paid') ? '/account/billing'
+    : new URLSearchParams(location.search).has('feed_sub') ? '/account/feeds' : null))
+  : null;
+if (movedTo) location.replace(movedTo + location.search);
+if (dash && !movedTo) {
   const $ = selector => dash.querySelector(selector);
   const set = (name, value) => { const el = $(`[data-field="${name}"]`); if (el) el.textContent = value; };
+  const hide = (selector, hidden) => { const el = $(selector); if (el) el.hidden = hidden; };
+  // On phones the nav is a scrolling row of pills: keep the current page's pill in view.
+  if (matchMedia('(max-width: 900px)').matches) {
+    const current = dash.querySelector('.snav__a.is-active');
+    if (current) current.parentElement.closest('.snav').scrollLeft = current.offsetLeft - 16;
+  }
   // Buttons carry an icon plus a .lbl span; only the label text changes so the icon survives.
   const lbl = (button, text) => { (button.querySelector('.lbl') || button).textContent = text; };
   const icon = id => {
@@ -205,28 +224,29 @@ if (dash) {
         set('price-res', `${usd(res)}/GB`);
         set('price-mob', `${usd(mob)}/GB`);
         set('price-unl', `${usd(unl * 1000)} per 1,000`);
-        $('[data-chip-mobile]').hidden = !me.mobile;
-        $('[data-chip-unlocker]').hidden = !me.unlocker;
+        hide('[data-chip-mobile]', !me.mobile);
+        hide('[data-chip-unlocker]', !me.unlocker);
         set('mobile-price', `${usd(mob)}/GB`);
         set('unlocker-price', `${usd(unl * 1000)} per 1,000 successful requests.`);
       }
       // Prepaid GB bought before the balance existed are still used first.
-      $('[data-prepaid]').hidden = me.quotaBytes === 0;
-      if (me.quotaBytes > 0) {
+      hide('[data-prepaid]', me.quotaBytes === 0);
+      if (me.quotaBytes > 0 && $('[data-meter]')) {
         set('remaining', traffic(me.remainingBytes));
         const percent = Math.min(100, Math.max(0, (me.usedBytes / me.quotaBytes) * 100));
         $('[data-meter-fill]').style.width = `${percent}%`;
         $('[data-meter]').setAttribute('aria-valuenow', String(Math.round(percent)));
         set('usage', `${traffic(me.usedBytes)} used of ${traffic(me.quotaBytes)}`);
       }
-      $('[data-empty]').hidden = (me.balanceMicros ?? 0) > 0 || me.remainingBytes > 0;
-      $('[data-mobile-option]').hidden = !me.mobile;
+      hide('[data-empty]', (me.balanceMicros ?? 0) > 0 || me.remainingBytes > 0);
+      hide('[data-mobile-option]', !me.mobile);
+      hide('[data-unlocker-off]', Boolean(me.unlocker));
       if (me.unlocker) {
-        $('[data-unlocker]').hidden = false;
+        hide('[data-unlocker]', false);
         dash.querySelectorAll('[data-unlocker-nav]').forEach(link => { link.hidden = false; });
         values['unlock-curl'] = `curl -X POST ${location.origin}/v1/unlock \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url": "https://example.com/"}'`;
         set('unlock-curl', values['unlock-curl']);
-        loadKeys();
+        if (keyList || $('[data-field="ov-keys"]')) loadKeys();
         loadSandbox();
       }
 
@@ -239,6 +259,7 @@ if (dash) {
         const { host, port } = me.proxy;
         values.endpoint = `${host.includes(':') ? `[${host}]` : host}:${port}`;
         set('endpoint', `${me.proxy.scheme}://${values.endpoint}`);
+        set('ov-proxy', `Gateway ${values.endpoint} · user ${me.username}`);
         renderCurl('YOUR_PASSWORD');
       } else {
         set('endpoint', 'Not configured');
@@ -249,11 +270,12 @@ if (dash) {
 
   // Add funds: USD top-ups paid with card (Stripe) or USDT (NOWPayments).
   const packs = $('[data-packs]');
+  if (packs) {
   const buyError = $('[data-buy-error]');
   const payMethodTabs = document.querySelectorAll('[data-pay-method]');
   let activePayMethod = 'stripe';
   let payMethods = { crypto: false, stripe: false };
-  if (new URLSearchParams(location.search).has('paid')) $('[data-paid]').hidden = false;
+  if (new URLSearchParams(location.search).has('paid')) hide('[data-paid]', false);
 
   payMethodTabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -314,12 +336,15 @@ if (dash) {
       packs.querySelectorAll('button').forEach(b => { b.disabled = false; });
     }
   });
+  }
 
   // API keys for the Web Unlocker: list, create (shown once), revoke (click twice).
   const keyList = $('[data-keys]');
   const keyError = $('[data-key-error]');
-  const showKeyError = message => { keyError.textContent = message; keyError.hidden = false; };
+  const showKeyError = message => { if (keyError) { keyError.textContent = message; keyError.hidden = false; } };
   function renderKeys(keys) {
+    set('ov-keys', keys.length === 1 ? '1 API key' : `${keys.length} API keys`);
+    if (!keyList) return;
     keyList.replaceChildren();
     $('[data-no-keys]').hidden = keys.length > 0;
     keyList.hidden = keys.length === 0;
@@ -352,6 +377,7 @@ if (dash) {
       .then(data => renderKeys(data.keys ?? []))
       .catch(() => showKeyError('Could not load your API keys. Refresh the page.'));
   }
+  if (keyList) {
   $('[data-key-form]').addEventListener('submit', async event => {
     event.preventDefault();
     keyError.hidden = true;
@@ -386,6 +412,7 @@ if (dash) {
     if (!ok) showKeyError(data.error || 'Could not revoke the key. Try again.');
     loadKeys();
   });
+  }
 
 
   /* ================= sandbox playground ================= */
@@ -648,7 +675,7 @@ if (dash) {
   const regenerate = $('[data-regenerate]');
   const errorBox = $('[data-password-error]');
   let armed = false, disarmTimer;
-  regenerate.addEventListener('click', async () => {
+  regenerate?.addEventListener('click', async () => {
     errorBox.hidden = true;
     if (!armed) {
       armed = true;
@@ -680,7 +707,7 @@ if (dash) {
   });
   // Usage chart + recent requests + payment history
   function loadUsage() {
-    fetch('/api/usage/summary?days=30', { credentials: 'same-origin' })
+    if ($('[data-usage-chart]')) fetch('/api/usage/summary?days=30', { credentials: 'same-origin' })
       .then(r => r.json())
       .then(({ summary: days }) => {
         const wrap = $('[data-usage-chart]');
@@ -762,11 +789,11 @@ if (dash) {
           $('[data-usage-events]').innerHTML = '<p class="muted" style="font-size:14px">Could not load requests.</p>';
         });
     }
-    loadEvents(1);
+    if ($('[data-usage-events]')) loadEvents(1);
     $('[data-usage-prev]')?.addEventListener('click', () => { if (usagePage > 1) loadEvents(usagePage - 1); });
     $('[data-usage-next]')?.addEventListener('click', () => loadEvents(usagePage + 1));
 
-    fetch('/api/payments?limit=20', { credentials: 'same-origin' })
+    if ($('[data-payment-list]')) fetch('/api/payments?limit=20', { credentials: 'same-origin' })
       .then(r => r.json())
       .then(({ payments }) => {
         payments = payments || [];
@@ -794,25 +821,6 @@ if (dash) {
       });
   }
   loadUsage();
-
-  // Sidebar: highlight the section being read.
-  const links = [...dash.querySelectorAll('.snav__a[href^="#"]')];
-  const sections = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
-  const mark = id => links.forEach(a => {
-    const on = a.getAttribute('href') === `#${id}`;
-    a.classList.toggle('is-active', on);
-    if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
-  });
-  if ('IntersectionObserver' in window && sections.length) {
-    const visible = new Map();
-    const spy = new IntersectionObserver(entries => {
-      entries.forEach(e => visible.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0));
-      const top = [...visible].filter(([, r]) => r > 0).sort((a, b) => sections.findIndex(x => x.id === a[0]) - sections.findIndex(x => x.id === b[0]))[0];
-      if (top) mark(top[0]);
-    }, { rootMargin: '-15% 0px -55% 0px', threshold: [0, .1, .5] });
-    sections.forEach(sec => spy.observe(sec));
-  }
-
 }
 
 const logout = document.querySelector('[data-logout]');
@@ -843,16 +851,8 @@ if (new URLSearchParams(location.search).has('feed_sub')) {
 
 function formatEur(cents) { return '€' + (cents / 100).toFixed(0); }
 
-function openDeliveryPanel(subId, feedName, method) {
-  if (!deliveryPanel || !deliveryForm) return;
-  deliveryPanel.hidden = false;
-  deliveryForm.subscription_id.value = subId;
-  deliveryForm.delivery_method.value = method || 'sftp';
-  if (deliveryFeedName) deliveryFeedName.textContent = feedName;
-  deliveryOk.hidden = true;
-  deliveryError.hidden = true;
-  setDeliveryTab(method || 'sftp');
-  deliveryPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function deliveryLink(subId, label, cls) {
+  return '<a class="' + cls + '" href="/account/feeds/delivery?sub=' + encodeURIComponent(subId) + '" data-configure-delivery="">' + label + '</a>';
 }
 
 function setDeliveryTab(tab) {
@@ -890,7 +890,7 @@ function renderSubscriptions(subs) {
       var label = dc.method === 'webhook' ? 'Webhook' : 'SFTP: ' + esc(dc.sftp_host);
       deliveryHtml = '<span class="feed-chip feed-chip--active" style="font-size:11px">' + label + '</span>';
     } else if (s.status === 'active') {
-      deliveryHtml = '<button class="btn btn--sm btn--warn" data-configure-delivery="' + s.id + '" data-feed-label="' + esc(s.site_name) + '" data-method="' + esc(s.delivery_method) + '">Setup needed</button>';
+      deliveryHtml = deliveryLink(s.id, 'Setup needed', 'btn btn--sm btn--warn');
     } else {
       deliveryHtml = '<span class="muted" style="font-size:12px">—</span>';
     }
@@ -899,7 +899,7 @@ function renderSubscriptions(subs) {
       actions += '<button class="btn btn--sm" data-feed-checkout="' + s.id + '">Complete payment</button> ';
     }
     if (s.status === 'active') {
-      actions += '<button class="btn btn--ghost btn--sm" data-configure-delivery="' + s.id + '" data-feed-label="' + esc(s.site_name) + '" data-method="' + esc(s.delivery_method) + '">' + (dc && (dc.sftp_host || dc.webhook_url) ? 'Edit delivery' : 'Configure') + '</button> ';
+      actions += deliveryLink(s.id, dc && (dc.sftp_host || dc.webhook_url) ? 'Edit delivery' : 'Configure delivery', 'btn btn--ghost btn--sm') + ' ';
       actions += '<button class="btn btn--ghost btn--sm" data-feed-pause="' + s.id + '">Pause</button> ';
     }
     if (s.status === 'paused') {
@@ -921,12 +921,6 @@ function renderSubscriptions(subs) {
   });
   html += '</tbody></table></div>';
   feedsSubs.innerHTML = html;
-
-  feedsSubs.querySelectorAll('[data-configure-delivery]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      openDeliveryPanel(btn.dataset.configureDelivery, btn.dataset.feedLabel, btn.dataset.method);
-    });
-  });
 
   feedsSubs.querySelectorAll('[data-feed-checkout]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
@@ -1010,8 +1004,105 @@ if (deliveryPanel) {
   deliveryPanel.querySelectorAll('[data-delivery-tab]').forEach(function (tab) {
     tab.addEventListener('click', function () { setDeliveryTab(tab.dataset.deliveryTab); });
   });
-  var closeBtn = deliveryPanel.querySelector('[data-delivery-close]');
-  if (closeBtn) closeBtn.addEventListener('click', function () { deliveryPanel.hidden = true; });
+}
+
+// Delivery setup page: /account/feeds/delivery?sub=<id> edits one subscription's delivery.
+if (deliveryForm) {
+  var subParam = new URLSearchParams(location.search).get('sub') || '';
+  var missing = document.querySelector('[data-delivery-missing]');
+  var showMissing = function () { if (missing) missing.hidden = false; if (deliveryPanel) deliveryPanel.hidden = true; };
+  if (!/^[0-9a-f-]{36}$/.test(subParam)) {
+    showMissing();
+  } else {
+    fetch('/api/subscriptions', { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) { location.assign('/login'); return null; }
+        return r.ok ? r.json() : null;
+      })
+      .then(function (data) {
+        var sub = data && (data.subscriptions || []).find(function (s) { return s.id === subParam; });
+        if (!sub) { showMissing(); return; }
+        if (missing) missing.hidden = true;
+        if (deliveryPanel) deliveryPanel.hidden = false;
+        deliveryForm.subscription_id.value = sub.id;
+        if (deliveryFeedName) deliveryFeedName.textContent = sub.site_name;
+        document.title = 'Delivery setup: ' + sub.site_name + ' | Veyora';
+        var dc = sub.delivery_config;
+        var method = (dc && dc.method) || (sub.delivery_method === 'webhook' ? 'webhook' : 'sftp');
+        setDeliveryTab(method === 'webhook' ? 'webhook' : 'sftp');
+        if (dc && dc.sftp_host) deliveryForm.sftp_host.value = dc.sftp_host;
+        if (dc && dc.webhook_url) deliveryForm.webhook_url.value = dc.webhook_url;
+        var current = document.querySelector('[data-delivery-current]');
+        if (current && dc && (dc.sftp_host || dc.webhook_url)) {
+          current.textContent = 'Currently delivering by ' + (dc.method === 'webhook' ? 'webhook to ' + dc.webhook_url : 'SFTP to ' + dc.sftp_host)
+            + '. Saving replaces these settings; re-enter the password or secret when you change them.';
+          current.hidden = false;
+        }
+      })
+      .catch(showMissing);
+  }
+}
+
+// Delivery history: every log of every subscription, newest first.
+var deliveriesWrap = document.querySelector('[data-deliveries]');
+if (deliveriesWrap) {
+  var bytes = function (n) { return n == null ? '—' : n >= 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1e3)) + ' KB'; };
+  var statusChip = function (s) {
+    var tone = s === 'delivered' ? 'badge--ok' : s === 'failed' ? 'badge--err' : s === 'skipped' ? 'badge--muted' : 'badge--warn';
+    return '<span class="badge ' + tone + '">' + esc(s) + '</span>';
+  };
+  fetch('/api/subscriptions', { credentials: 'same-origin' })
+    .then(function (r) {
+      if (r.status === 401) { location.assign('/login'); return null; }
+      return r.ok ? r.json() : null;
+    })
+    .then(function (data) {
+      var subs = (data && data.subscriptions) || [];
+      return Promise.all(subs.map(function (s) {
+        return fetch('/api/subscriptions/' + s.id + '/deliveries', { credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : { deliveries: [] }; })
+          .then(function (d) { return (d.deliveries || []).map(function (row) { row.site_name = s.site_name; return row; }); })
+          .catch(function () { return []; });
+      }));
+    })
+    .then(function (lists) {
+      var rows = [].concat.apply([], lists || []).sort(function (a, b) {
+        return String(b.snapshot_date).localeCompare(String(a.snapshot_date)) || String(b.started_at).localeCompare(String(a.started_at));
+      });
+      deliveriesWrap.removeAttribute('aria-busy');
+      var none = document.querySelector('[data-no-deliveries]');
+      if (none) none.hidden = rows.length > 0;
+      if (!rows.length) { deliveriesWrap.innerHTML = ''; return; }
+      var html = '<table class="usage-table"><thead><tr><th>Snapshot</th><th>Feed</th><th>Status</th>'
+        + '<th class="right">Records</th><th class="right">Size</th><th>Delivered</th><th>Details</th></tr></thead><tbody>';
+      rows.forEach(function (d) {
+        html += '<tr><td class="mono">' + formatDate(d.snapshot_date) + '</td><td>' + esc(d.site_name) + '</td>'
+          + '<td>' + statusChip(d.status) + '</td>'
+          + '<td class="right mono">' + (d.record_count != null ? Number(d.record_count).toLocaleString('en') : '—') + '</td>'
+          + '<td class="right mono">' + bytes(d.file_size_bytes) + '</td>'
+          + '<td class="mono">' + (d.completed_at ? new Date(d.completed_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—') + '</td>'
+          + '<td>' + (d.error ? '<small class="muted">' + esc(String(d.error).slice(0, 140)) + '</small>' : '') + '</td></tr>';
+      });
+      deliveriesWrap.innerHTML = html + '</tbody></table>';
+    })
+    .catch(function () {
+      deliveriesWrap.removeAttribute('aria-busy');
+      deliveriesWrap.innerHTML = '<p class="muted" style="font-size:14px">Could not load your deliveries. Refresh the page.</p>';
+    });
+}
+
+// Overview: one line summarising the feed subscriptions.
+var ovFeeds = document.querySelector('[data-field="ov-feeds"]');
+if (ovFeeds) {
+  fetch('/api/subscriptions', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) {
+      var subs = ((data && data.subscriptions) || []).filter(function (s) { return s.status !== 'cancelled'; });
+      if (!subs.length) { ovFeeds.textContent = 'No feeds yet: browse the catalog to add one'; return; }
+      var needSetup = subs.filter(function (s) { var dc = s.delivery_config; return s.status === 'active' && !(dc && (dc.sftp_host || dc.webhook_url)); }).length;
+      ovFeeds.textContent = subs.length + (subs.length === 1 ? ' feed' : ' feeds') + (needSetup ? ' · ' + needSetup + ' need delivery setup' : ' · all delivering');
+    })
+    .catch(function () {});
 }
 
 if (deliveryForm) {
@@ -1063,11 +1154,5 @@ if (deliveryForm) {
 
 loadSubscriptions();
 
-if (new URLSearchParams(location.search).has('feed_sub') && feedsSubs) {
-  setTimeout(function () {
-    var setupBtn = feedsSubs.querySelector('[data-configure-delivery]');
-    if (setupBtn) setupBtn.click();
-  }, 500);
-}
 
 })();

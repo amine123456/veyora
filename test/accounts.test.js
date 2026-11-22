@@ -111,6 +111,12 @@ test('account pages redirect by session state', async () => {
     const guestAccount = await request(port, { path: '/account', method: 'GET' });
     assert.equal(guestAccount.status, 302);
     assert.equal(guestAccount.headers.location, '/login');
+    for (const page of ['/account/feeds', '/account/feeds/delivery?sub=x', '/account/feeds/deliveries', '/account/api-keys',
+      '/account/playground', '/account/proxies', '/account/usage', '/account/billing']) {
+      const guest = await request(port, { path: page, method: 'GET' });
+      assert.equal(guest.status, 302, page);
+      assert.equal(guest.headers.location, '/login', page);
+    }
     assert.equal((await request(port, { path: '/login', method: 'GET' })).status, 200);
     assert.equal((await request(port, { path: '/signup', method: 'GET' })).status, 200);
 
