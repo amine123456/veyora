@@ -1,5 +1,6 @@
 import net from 'node:net';
 import path from 'node:path';
+import { parseSecretKey } from './secret-box.js';
 
 function required(name) {
   const value = process.env[name]?.trim();
@@ -314,6 +315,10 @@ export function paymentConfig() {
     siteUrl: process.env.SITE_URL?.trim() || '',
     // A Next.js export (web/out) to serve instead of the static pages in public/.
     siteDirectory: process.env.SITE_DIR?.trim() ? path.resolve(process.env.SITE_DIR.trim()) : null,
+    // Encrypts customers' delivery credentials at rest; scripts/deliver-feeds.py reads the same key.
+    deliverySecretKey: parseSecretKey(process.env.DELIVERY_SECRET_KEY),
+    // Converted snapshots for API pull and webhook download links, written by deliver-feeds.py.
+    deliveryExportDir: path.resolve(process.env.DELIVERY_EXPORT_DIR?.trim() || './data/exports'),
   };
 }
 

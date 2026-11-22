@@ -105,7 +105,15 @@ export async function listSubscriptions(username) {
               WHERE dl.subscription_id = s.id ORDER BY dl.snapshot_date DESC LIMIT 1
             ) d) AS last_delivery,
             (SELECT row_to_json(dc) FROM (
-              SELECT dc.method, dc.sftp_host, dc.webhook_url
+              SELECT dc.method, dc.format, dc.sftp_host, dc.sftp_port, dc.sftp_username, dc.sftp_path,
+                     dc.bucket, dc.bucket_region, dc.bucket_prefix, dc.access_key_id,
+                     dc.snowflake_account, dc.snowflake_user, dc.snowflake_warehouse, dc.snowflake_database,
+                     dc.snowflake_schema, dc.snowflake_table, dc.snowflake_role, dc.webhook_url,
+                     dc.last_test_at, dc.last_test_ok, dc.last_test_error,
+                     dc.sftp_password IS NOT NULL AS has_sftp_password,
+                     dc.secret_access_key IS NOT NULL AS has_secret_access_key,
+                     dc.snowflake_password IS NOT NULL AS has_snowflake_password,
+                     dc.webhook_secret IS NOT NULL AS has_webhook_secret
               FROM delivery_configs dc WHERE dc.subscription_id = s.id
             ) dc) AS delivery_config
      FROM feed_subscriptions s
@@ -181,29 +189,38 @@ export async function cancelSubscription(id, username) {
 
 // --- Delivery Configs ---
 
+const DELIVERY_COLUMNS = [
+  'method', 'format', 'sftp_host', 'sftp_port', 'sftp_username', 'sftp_password', 'sftp_path',
+  'bucket', 'bucket_region', 'bucket_prefix', 'access_key_id', 'secret_access_key',
+  'snowflake_account', 'snowflake_user', 'snowflake_password', 'snowflake_warehouse',
+  'snowflake_database', 'snowflake_schema', 'snowflake_table', 'snowflake_role',
+  'webhook_url', 'webhook_secret', 'notes',
+];
+
+// Replaces the whole row: columns a method does not use are cleared, and the last
+// connection test result is reset because the settings it tested may have changed.
 export async function setDeliveryConfig(subscriptionId, config) {
+  const values = DELIVERY_COLUMNS.map((column) => (column === 'sftp_port' ? config.sftp_port ?? 22 : config[column] ?? null));
+  if (!values[1]) values[1] = 'jsonl';
+  const placeholders = DELIVERY_COLUMNS.map((_, i) => `$${i + 2}`).join(', ');
+  const updates = DELIVERY_COLUMNS.map((column) => `${column} = EXCLUDED.${column}`).join(', ');
   const { rows } = await query(
-    `INSERT INTO delivery_configs (subscription_id, method, sftp_host, sftp_port, sftp_username,
-       sftp_password, sftp_path, snowflake_account, snowflake_warehouse, snowflake_database,
-       snowflake_schema, webhook_url, webhook_secret, notes)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-     ON CONFLICT (subscription_id) DO UPDATE SET
-       method = EXCLUDED.method, sftp_host = EXCLUDED.sftp_host, sftp_port = EXCLUDED.sftp_port,
-       sftp_username = EXCLUDED.sftp_username, sftp_password = EXCLUDED.sftp_password,
-       sftp_path = EXCLUDED.sftp_path, snowflake_account = EXCLUDED.snowflake_account,
-       snowflake_warehouse = EXCLUDED.snowflake_warehouse, snowflake_database = EXCLUDED.snowflake_database,
-       snowflake_schema = EXCLUDED.snowflake_schema, webhook_url = EXCLUDED.webhook_url,
-       webhook_secret = EXCLUDED.webhook_secret, notes = EXCLUDED.notes, updated_at = now()
+    `INSERT INTO delivery_configs (subscription_id, ${DELIVERY_COLUMNS.join(', ')})
+     VALUES ($1, ${placeholders})
+     ON CONFLICT (subscription_id) DO UPDATE SET ${updates},
+       last_test_at = NULL, last_test_ok = NULL, last_test_error = NULL, updated_at = now()
      RETURNING *`,
-    [subscriptionId, config.method,
-     config.sftp_host ?? null, config.sftp_port ?? 22, config.sftp_username ?? null,
-     config.sftp_password ?? null, config.sftp_path ?? null,
-     config.snowflake_account ?? null, config.snowflake_warehouse ?? null,
-     config.snowflake_database ?? null, config.snowflake_schema ?? null,
-     config.webhook_url ?? null, config.webhook_secret ?? null,
-     config.notes ?? null],
+    [subscriptionId, ...values],
   );
   return rows[0];
+}
+
+export async function recordDeliveryTest(subscriptionId, { ok, error }) {
+  await query(
+    `UPDATE delivery_configs SET last_test_at = now(), last_test_ok = $2, last_test_error = $3
+     WHERE subscription_id = $1`,
+    [subscriptionId, ok, ok ? null : String(error ?? '').slice(0, 500)],
+  );
 }
 
 export async function getDeliveryConfig(subscriptionId) {

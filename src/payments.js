@@ -51,7 +51,10 @@ import {
   updatePeriodEnd,
   findSubscriptionByStripe,
   recordStripeEvent,
+  recordDeliveryTest,
 } from './feeds-store.js';
+import { DeliveryConfigError, SECRET_FIELDS, keepSavedSecrets, missingSecret, validateDeliveryInput } from './delivery-config.js';
+import { sealSecret } from './secret-box.js';
 import {
   createCustomer as createStripeCustomer,
   createProduct as createStripeProduct,
@@ -1080,32 +1083,26 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
             const sub = await getSubscription(subId, client.username);
             if (!sub) return json(response, 404, { error: 'Subscription not found' });
             const input = parseJson(await readBody(request, config.maxBodyBytes));
-            const method = input?.webhook_url ? 'webhook' : input?.sftp_host ? 'sftp' : sub.delivery_method;
-            const cfg = { method };
-            if (method === 'sftp') {
-              if (!input?.sftp_host || !input?.sftp_username) throw new PublicError(400, 'SFTP host and username are required');
-              const sftpHost = String(input.sftp_host).trim().slice(0, 255);
-              await assertPublicHost(sftpHost);
-              cfg.sftp_host = sftpHost;
-              cfg.sftp_port = Math.max(1, Math.min(65535, parseInt(input.sftp_port) || 22));
-              cfg.sftp_username = String(input.sftp_username).trim().slice(0, 128);
-              cfg.sftp_password = String(input.sftp_password ?? '').slice(0, 256);
-              cfg.sftp_path = String(input.sftp_path ?? '/').trim().slice(0, 512);
-            } else if (method === 'webhook') {
-              if (!input?.webhook_url) throw new PublicError(400, 'Webhook URL is required');
-              const webhookUrl = String(input.webhook_url).trim().slice(0, 512);
-              let parsed;
-              try { parsed = new URL(webhookUrl); } catch { throw new PublicError(400, 'Invalid webhook URL'); }
-              if (parsed.protocol !== 'https:') throw new PublicError(400, 'Webhook URL must use HTTPS');
-              await assertPublicHost(parsed.hostname);
-              cfg.webhook_url = webhookUrl;
-              cfg.webhook_secret = input.webhook_secret ? String(input.webhook_secret).slice(0, 256) : null;
-            } else {
-              cfg.notes = String(input?.notes ?? '').trim().slice(0, 500);
+            // Older dashboards sent no method: infer it from the fields they did send.
+            if (input && !input.method) input.method = input.webhook_url ? 'webhook' : 'sftp';
+            let cfg;
+            try {
+              cfg = keepSavedSecrets(await validateDeliveryInput(input, { assertPublicHost }), await getDeliveryConfig(subId));
+            } catch (error) {
+              if (error instanceof DeliveryConfigError) throw new PublicError(400, error.message);
+              throw error;
             }
-            if (method !== sub.delivery_method) await updateSubscription(subId, client.username, { deliveryMethod: method });
+            const needed = missingSecret(cfg);
+            if (needed) throw new PublicError(400, needed);
+            const fresh = SECRET_FIELDS.filter((field) => cfg[`${field}__new`]);
+            if (fresh.length && !config.deliverySecretKey) throw new PublicError(503, 'Saving credentials is not available right now. Contact support.');
+            for (const field of fresh) {
+              cfg[field] = sealSecret(config.deliverySecretKey, cfg[field]);
+              delete cfg[`${field}__new`];
+            }
+            if (cfg.method !== sub.delivery_method) await updateSubscription(subId, client.username, { deliveryMethod: cfg.method });
             const saved = await setDeliveryConfig(subId, cfg);
-            return json(response, 200, { method: saved.method, configured: true });
+            return json(response, 200, { method: saved.method, format: saved.format, configured: true });
           }
 
           if (request.method === 'POST' && subPath === '/checkout') {
