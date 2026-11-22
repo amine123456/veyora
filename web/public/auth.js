@@ -840,7 +840,7 @@ const deliveryForm = document.querySelector('[data-delivery-form]');
 const deliveryOk = document.querySelector('[data-delivery-ok]');
 const deliveryError = document.querySelector('[data-delivery-error]');
 const deliveryFeedName = document.querySelector('[data-delivery-feed-name]');
-var activeDeliveryTab = 'sftp';
+
 
 function formatDate(d) { return d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
 
@@ -855,17 +855,16 @@ function deliveryLink(subId, label, cls) {
   return '<a class="' + cls + '" href="/account/feeds/delivery?sub=' + encodeURIComponent(subId) + '" data-configure-delivery="">' + label + '</a>';
 }
 
-function setDeliveryTab(tab) {
-  activeDeliveryTab = tab;
-  if (!deliveryPanel) return;
-  deliveryPanel.querySelectorAll('[data-delivery-tab]').forEach(function (t) {
-    t.classList.toggle('pay-tab--active', t.dataset.deliveryTab === tab);
-  });
-  var sftpFields = deliveryPanel.querySelector('[data-delivery-fields-sftp]');
-  var webhookFields = deliveryPanel.querySelector('[data-delivery-fields-webhook]');
-  if (sftpFields) sftpFields.hidden = tab !== 'sftp';
-  if (webhookFields) webhookFields.hidden = tab !== 'webhook';
-  if (deliveryForm) deliveryForm.delivery_method.value = tab;
+var METHOD_LABELS = { sftp: 'SFTP', s3: 'Amazon S3', gcs: 'Google Cloud Storage', snowflake: 'Snowflake', webhook: 'Webhook', api: 'API pull' };
+
+function deliveryConfigured(dc) { return Boolean(dc && dc.method && dc.method !== 'manual'); }
+
+function deliveryTarget(dc) {
+  if (dc.method === 'sftp') return 'SFTP: ' + (dc.sftp_host || '');
+  if (dc.method === 's3') return 'S3: ' + (dc.bucket || '');
+  if (dc.method === 'gcs') return 'GCS: ' + (dc.bucket || '');
+  if (dc.method === 'snowflake') return 'Snowflake: ' + (dc.snowflake_table || '');
+  return METHOD_LABELS[dc.method] || dc.method;
 }
 
 function renderSubscriptions(subs) {
@@ -886,9 +885,10 @@ function renderSubscriptions(subs) {
     var paidUntil = s.current_period_end ? formatDate(s.current_period_end) : (s.stripe_subscription_id ? 'Active' : '—');
     var dc = s.delivery_config;
     var deliveryHtml;
-    if (dc && (dc.sftp_host || dc.webhook_url)) {
-      var label = dc.method === 'webhook' ? 'Webhook' : 'SFTP: ' + esc(dc.sftp_host);
-      deliveryHtml = '<span class="feed-chip feed-chip--active" style="font-size:11px">' + label + '</span>';
+    if (deliveryConfigured(dc)) {
+      var tested = dc.last_test_ok === false ? ' feed-chip--coming' : ' feed-chip--active';
+      deliveryHtml = '<span class="feed-chip' + tested + '" style="font-size:11px" title="' + esc(dc.last_test_ok === false ? 'Last connection test failed: ' + (dc.last_test_error || '') : '') + '">'
+        + esc(deliveryTarget(dc)) + ' · ' + esc((dc.format || 'jsonl').toUpperCase()) + '</span>';
     } else if (s.status === 'active') {
       deliveryHtml = deliveryLink(s.id, 'Setup needed', 'btn btn--sm btn--warn');
     } else {
@@ -899,7 +899,7 @@ function renderSubscriptions(subs) {
       actions += '<button class="btn btn--sm" data-feed-checkout="' + s.id + '">Complete payment</button> ';
     }
     if (s.status === 'active') {
-      actions += deliveryLink(s.id, dc && (dc.sftp_host || dc.webhook_url) ? 'Edit delivery' : 'Configure delivery', 'btn btn--ghost btn--sm') + ' ';
+      actions += deliveryLink(s.id, deliveryConfigured(dc) ? 'Edit delivery' : 'Configure delivery', 'btn btn--ghost btn--sm') + ' ';
       actions += '<button class="btn btn--ghost btn--sm" data-feed-pause="' + s.id + '">Pause</button> ';
     }
     if (s.status === 'paused') {
@@ -1000,21 +1000,77 @@ function loadSubscriptions() {
     .catch(function () {});
 }
 
-if (deliveryPanel) {
-  deliveryPanel.querySelectorAll('[data-delivery-tab]').forEach(function (tab) {
-    tab.addEventListener('click', function () { setDeliveryTab(tab.dataset.deliveryTab); });
-  });
-}
-
 // Delivery setup page: /account/feeds/delivery?sub=<id> edits one subscription's delivery.
 if (deliveryForm) {
   var subParam = new URLSearchParams(location.search).get('sub') || '';
   var missing = document.querySelector('[data-delivery-missing]');
+  var testBtn = deliveryForm.querySelector('[data-delivery-test]');
+  var saveBtn = deliveryForm.querySelector('[data-delivery-save]');
+  var testOk = document.querySelector('[data-test-ok]');
+  var savedConfig = null;
+  var btnLabel = function (btn, text) { (btn.querySelector('.lbl') || btn).textContent = text; };
   var showMissing = function () { if (missing) missing.hidden = false; if (deliveryPanel) deliveryPanel.hidden = true; };
-  if (!/^[0-9a-f-]{36}$/.test(subParam)) {
-    showMissing();
-  } else {
-    fetch('/api/subscriptions', { credentials: 'same-origin' })
+  var showError = function (message) { deliveryError.textContent = message; deliveryError.hidden = false; };
+  var clearNotices = function () { deliveryOk.hidden = true; deliveryError.hidden = true; testOk.hidden = true; };
+  var currentMethod = function () { var c = deliveryForm.querySelector('input[name="method"]:checked'); return c ? c.value : 'sftp'; };
+  var groupFor = function (method) { return deliveryForm.querySelector('[data-method-fields="' + method + '"]'); };
+
+  var setMethod = function (method) {
+    var radio = deliveryForm.querySelector('input[name="method"][value="' + method + '"]');
+    if (radio) radio.checked = true;
+    deliveryForm.querySelectorAll('[data-method-fields]').forEach(function (group) { group.hidden = group.dataset.methodFields !== method; });
+    deliveryForm.querySelector('[data-format-row]').hidden = method === 'snowflake';
+    deliveryForm.querySelector('[data-format-snowflake]').hidden = method !== 'snowflake';
+    var group = groupFor(method);
+    group.querySelectorAll('input[data-secret]').forEach(function (input) {
+      var saved = savedConfig && savedConfig.method === method && savedConfig[input.dataset.secret];
+      input.placeholder = saved ? 'Saved · leave blank to keep it' : (method === 'webhook' ? 'Optional' : '');
+    });
+    testBtn.disabled = !(savedConfig && savedConfig.method === method);
+  };
+
+  var fill = function (dc) {
+    if (!dc) return;
+    deliveryForm.format.value = dc.format || 'jsonl';
+    var group = groupFor(dc.method);
+    if (!group) return;
+    group.querySelectorAll('input:not([data-secret]), select').forEach(function (input) {
+      if (dc[input.name] !== null && dc[input.name] !== undefined) input.value = dc[input.name];
+    });
+  };
+
+  var describe = function (dc) {
+    var current = document.querySelector('[data-delivery-current]');
+    if (!current) return;
+    if (!deliveryConfigured(dc)) { current.hidden = true; return; }
+    var test = dc.last_test_at
+      ? (dc.last_test_ok ? ' Last connection test passed.' : ' Last connection test failed: ' + (dc.last_test_error || 'unknown error') + '.')
+      : ' Not tested yet.';
+    current.textContent = 'Currently delivering by ' + METHOD_LABELS[dc.method] + (dc.method === 'snowflake' ? '' : ' as ' + (dc.format || 'jsonl').toUpperCase())
+      + ' (' + deliveryTarget(dc) + ').' + test;
+    current.hidden = false;
+  };
+
+  var renderApiSnippet = function (subId) {
+    var code = document.querySelector('[data-field="api-curl"]');
+    if (code) code.textContent = 'curl -fL -H "Authorization: Bearer YOUR_API_KEY" \\\n  -o latest-snapshot \\\n  ' + location.origin + '/v1/feeds/' + subId + '/latest';
+  };
+
+  deliveryForm.addEventListener('change', function (event) {
+    if (event.target.name === 'method') { clearNotices(); setMethod(event.target.value); }
+  });
+
+  var copyApi = deliveryForm.querySelector('[data-copy="api-curl"]');
+  if (copyApi) copyApi.addEventListener('click', function () {
+    var code = document.querySelector('[data-field="api-curl"]');
+    if (code && navigator.clipboard) navigator.clipboard.writeText(code.textContent).then(function () {
+      btnLabel(copyApi, 'Copied');
+      setTimeout(function () { btnLabel(copyApi, 'Copy'); }, 1600);
+    }).catch(function () {});
+  });
+
+  var load = function () {
+    return fetch('/api/subscriptions', { credentials: 'same-origin' })
       .then(function (r) {
         if (r.status === 401) { location.assign('/login'); return null; }
         return r.ok ? r.json() : null;
@@ -1027,20 +1083,76 @@ if (deliveryForm) {
         deliveryForm.subscription_id.value = sub.id;
         if (deliveryFeedName) deliveryFeedName.textContent = sub.site_name;
         document.title = 'Delivery setup: ' + sub.site_name + ' | Veyora';
-        var dc = sub.delivery_config;
-        var method = (dc && dc.method) || (sub.delivery_method === 'webhook' ? 'webhook' : 'sftp');
-        setDeliveryTab(method === 'webhook' ? 'webhook' : 'sftp');
-        if (dc && dc.sftp_host) deliveryForm.sftp_host.value = dc.sftp_host;
-        if (dc && dc.webhook_url) deliveryForm.webhook_url.value = dc.webhook_url;
-        var current = document.querySelector('[data-delivery-current]');
-        if (current && dc && (dc.sftp_host || dc.webhook_url)) {
-          current.textContent = 'Currently delivering by ' + (dc.method === 'webhook' ? 'webhook to ' + dc.webhook_url : 'SFTP to ' + dc.sftp_host)
-            + '. Saving replaces these settings; re-enter the password or secret when you change them.';
-          current.hidden = false;
-        }
-      })
-      .catch(showMissing);
-  }
+        savedConfig = deliveryConfigured(sub.delivery_config) ? sub.delivery_config : null;
+        fill(savedConfig);
+        setMethod(savedConfig ? savedConfig.method : 'sftp');
+        describe(savedConfig);
+        renderApiSnippet(sub.id);
+      });
+  };
+
+  if (!/^[0-9a-f-]{36}$/.test(subParam)) showMissing();
+  else load().catch(showMissing);
+
+  deliveryForm.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    clearNotices();
+    var subId = deliveryForm.subscription_id.value;
+    if (!subId) return;
+    var method = currentMethod();
+    var payload = { method: method, format: deliveryForm.format.value };
+    groupFor(method).querySelectorAll('input[name], select[name]').forEach(function (input) { payload[input.name] = input.value; });
+    saveBtn.disabled = true;
+    btnLabel(saveBtn, 'Saving…');
+    try {
+      var response = await fetch('/api/subscriptions/' + subId + '/delivery-config', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), credentials: 'same-origin',
+      });
+      var data = await response.json().catch(function () { return {}; });
+      if (!response.ok) throw new Error(data.error || 'Could not save the delivery settings. Try again.');
+      groupFor(method).querySelectorAll('input[data-secret]').forEach(function (input) { input.value = ''; });
+      await load();
+      deliveryOk.hidden = false;
+    } catch (error) {
+      showError(error.message);
+    } finally {
+      saveBtn.disabled = false;
+      btnLabel(saveBtn, 'Save delivery settings');
+    }
+  });
+
+  testBtn.addEventListener('click', async function () {
+    clearNotices();
+    var subId = deliveryForm.subscription_id.value;
+    testBtn.disabled = true;
+    var started = Date.now();
+    var tick = function () { btnLabel(testBtn, 'Testing… ' + Math.round((Date.now() - started) / 1000) + ' s'); };
+    tick();
+    var timer = setInterval(tick, 1000);
+    try {
+      var response = await fetch('/api/subscriptions/' + subId + '/delivery-test', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', credentials: 'same-origin',
+      });
+      var data = await response.json().catch(function () { return {}; });
+      if (!response.ok) throw new Error(data.error || 'The test could not run. Try again.');
+      if (!data.ok) throw new Error('Connection test failed: ' + data.error);
+      var method = currentMethod();
+      document.querySelector('[data-test-ok-text]').textContent = method === 'api'
+        ? 'API pull is ready. The file appears at the address above after the next delivery.'
+        : method === 'webhook' ? 'Your endpoint accepted a signed test event (delivery.test).'
+        : method === 'snowflake' ? 'Signed in to Snowflake and the table is ready.'
+        : 'Connected and wrote a small test file (then removed it).';
+      testOk.hidden = false;
+      await load();
+    } catch (error) {
+      showError(error.message);
+      load().catch(function () {});
+    } finally {
+      clearInterval(timer);
+      btnLabel(testBtn, 'Test connection');
+      testBtn.disabled = !(savedConfig && savedConfig.method === currentMethod());
+    }
+  });
 }
 
 // Delivery history: every log of every subscription, newest first.
@@ -1099,57 +1211,10 @@ if (ovFeeds) {
     .then(function (data) {
       var subs = ((data && data.subscriptions) || []).filter(function (s) { return s.status !== 'cancelled'; });
       if (!subs.length) { ovFeeds.textContent = 'No feeds yet: browse the catalog to add one'; return; }
-      var needSetup = subs.filter(function (s) { var dc = s.delivery_config; return s.status === 'active' && !(dc && (dc.sftp_host || dc.webhook_url)); }).length;
+      var needSetup = subs.filter(function (s) { return s.status === 'active' && !deliveryConfigured(s.delivery_config); }).length;
       ovFeeds.textContent = subs.length + (subs.length === 1 ? ' feed' : ' feeds') + (needSetup ? ' · ' + needSetup + ' need delivery setup' : ' · all delivering');
     })
     .catch(function () {});
-}
-
-if (deliveryForm) {
-  deliveryForm.addEventListener('submit', async function (event) {
-    event.preventDefault();
-    deliveryOk.hidden = true;
-    deliveryError.hidden = true;
-    var subId = deliveryForm.subscription_id.value;
-    if (!subId) return;
-    var method = deliveryForm.delivery_method.value;
-    var payload;
-    if (method === 'webhook') {
-      payload = {
-        webhook_url: deliveryForm.webhook_url.value.trim(),
-        webhook_secret: deliveryForm.webhook_secret.value.trim() || null,
-      };
-    } else {
-      payload = {
-        sftp_host: deliveryForm.sftp_host.value.trim(),
-        sftp_port: parseInt(deliveryForm.sftp_port.value) || 22,
-        sftp_username: deliveryForm.sftp_username.value.trim(),
-        sftp_password: deliveryForm.sftp_password.value,
-        sftp_path: deliveryForm.sftp_path.value.trim() || '/',
-      };
-    }
-    var submitBtn = deliveryForm.querySelector('[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving...';
-    try {
-      var response = await fetch('/api/subscriptions/' + subId + '/delivery-config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        credentials: 'same-origin',
-      });
-      var data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Save failed');
-      deliveryOk.hidden = false;
-      loadSubscriptions();
-    } catch (error) {
-      deliveryError.textContent = error.message;
-      deliveryError.hidden = false;
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Save delivery settings';
-    }
-  });
 }
 
 loadSubscriptions();

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { DashboardShell } from '@/components/dashboard/shell';
-import { DeliveryFormSection } from '@/components/dashboard/sections';
+import { DeliveryFormSection } from '@/components/dashboard/delivery-form';
 
 export const metadata: Metadata = { title: 'Delivery setup | Veyora', robots: 'noindex' };
 

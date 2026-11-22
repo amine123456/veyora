@@ -428,3 +428,35 @@ code, pre { font-family: var(--font-mono); }
   .snav__group[hidden] { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .ov-card { transition: none; } .ov-card:hover { transform: none; } }
+
+/* ---------- Delivery setup: method cards, field grid ---------- */
+.delivery-panel .delivery-form { max-width: none; display: grid; gap: 20px; }
+.dmethods { margin: 0; padding: 0; border: 0; display: grid; gap: 10px; }
+.dmethods__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.dmethod { position: relative; display: grid; gap: 4px; align-content: start; padding: 14px 14px 14px 52px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2); cursor: pointer; transition: border-color .2s, background-color .2s, box-shadow .2s; }
+.dmethod:hover { border-color: var(--faint); }
+.dmethod input { position: absolute; opacity: 0; pointer-events: none; }
+.dmethod__ic { position: absolute; left: 14px; top: 14px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); }
+.dmethod__ic .ic { font-size: 16px; color: var(--muted); }
+.dmethod b { font-size: 14.5px; font-weight: 600; }
+.dmethod > span:last-child { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.dmethod:has(input:checked) { border-color: var(--ink); background: var(--surface); box-shadow: inset 0 0 0 1px var(--ink); }
+.dmethod:has(input:checked) .dmethod__ic { background: var(--accent); border-color: var(--accent); }
+.dmethod:has(input:checked) .dmethod__ic .ic { color: var(--ink); }
+.dmethod:has(input:focus-visible) { box-shadow: inset 0 0 0 1px var(--ink), var(--ring); }
+.dformat { max-width: 420px; }
+.dformat[hidden], .dfields[hidden], .dnote[hidden] { display: none; }
+.dfields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.dfields .field { min-width: 0; }
+.dfields .dnote, .dfields .code { grid-column: 1 / -1; }
+.dnote { padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.5; }
+.dnote code { font-size: 12px; }
+.dactions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 640px) {
+  .dfields { grid-template-columns: minmax(0, 1fr); }
+  .dmethods__grid { grid-template-columns: 1fr 1fr; }
+  .dmethod { padding: 12px 12px 12px 46px; }
+  .dmethod__ic { left: 10px; top: 12px; }
+  .dactions .btn { flex: 1 1 100%; }
+}
