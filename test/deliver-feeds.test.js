@@ -81,6 +81,14 @@ print(json.dumps([df.deliver_snowflake(cfg, None, "/tmp/x/listings.jsonl", "done
   assert.equal(statements[2], `COPY INTO "DONEDEAL" (record, feed_id, snapshot_date) FROM (SELECT $1, 'donedeal', '2026-11-22' FROM @%"DONEDEAL"/listings.jsonl.gz) FILE_FORMAT = (TYPE = JSON) PURGE = TRUE`);
 });
 
+test('external delivery folders map to a feed and snapshot date', { skip }, () => {
+  const parse = (remote) => JSON.parse(py(`print(json.dumps(df.parse_external_folder(${JSON.stringify(remote)})))`));
+  assert.deepEqual(parse('/upload/CARS/IE/Donedeal/donedeal_20261122'), ['donedeal', '2026-11-22']);
+  assert.deepEqual(parse('/upload/CARS/RO/Olx/olx_ro_20261122/'), ['olx_ro', '2026-11-22']);
+  assert.deepEqual(parse('/upload/CARS/HU/Hasnaltauto/hasnaltauto_20261117'), ['hasnalauto', '2026-11-17']);
+  assert.equal(parse('/upload/CARS/IE/Donedeal/latest'), null);
+});
+
 test('download links signed by the script verify in Node', { skip }, () => {
   const key = crypto.randomBytes(32);
   const link = py(`u, e = df.download_link("https://veyora.pro/", bytes.fromhex(${JSON.stringify(key.toString('hex'))}), "sub-1", "log-2")\nprint(u)`);

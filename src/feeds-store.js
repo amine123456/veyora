@@ -108,7 +108,7 @@ export async function listSubscriptions(username) {
               SELECT dc.method, dc.format, dc.sftp_host, dc.sftp_port, dc.sftp_username, dc.sftp_path,
                      dc.bucket, dc.bucket_region, dc.bucket_prefix, dc.access_key_id,
                      dc.snowflake_account, dc.snowflake_user, dc.snowflake_warehouse, dc.snowflake_database,
-                     dc.snowflake_schema, dc.snowflake_table, dc.snowflake_role, dc.webhook_url,
+                     dc.snowflake_schema, dc.snowflake_table, dc.snowflake_role, dc.webhook_url, dc.notes,
                      dc.last_test_at, dc.last_test_ok, dc.last_test_error,
                      dc.sftp_password IS NOT NULL AS has_sftp_password,
                      dc.secret_access_key IS NOT NULL AS has_secret_access_key,

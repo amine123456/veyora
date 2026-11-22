@@ -496,12 +496,15 @@ def run_delivery(env, key, args):
         print(f"  {len(subs)} active subscription(s)")
         for sub in subs:
             sub_id = sub["subscription_id"]
-            cur.execute("SELECT 1 FROM delivery_logs WHERE subscription_id = %s AND snapshot_date = %s AND status = 'delivered' LIMIT 1",
-                        (sub_id, snap_date))
+            method = sub["method"]
+            if method == "manual":
+                print(f"  [{sub['username']}] delivered outside Veyora, nothing to send")
+                continue
+            cur.execute("SELECT 1 FROM delivery_logs WHERE subscription_id = %s AND snapshot_date = %s AND status = 'delivered' "
+                        "AND source = 'veyora' LIMIT 1", (sub_id, snap_date))
             if cur.fetchone():
                 print(f"  [{sub['username']}] already delivered for {snap_date}")
                 continue
-            method = sub["method"]
             fmt = sub["format"] or "jsonl"
             cur.execute("INSERT INTO delivery_logs (subscription_id, feed_id, snapshot_date, status, record_count, format, started_at) "
                         "VALUES (%s, %s, %s, 'uploading', %s, %s, now()) RETURNING id", (sub_id, args.feed, snap_date, record_count, fmt))
@@ -549,6 +552,57 @@ def run_delivery(env, key, args):
     print("Done.")
 
 
+# Folder names used by the crawl jobs' own pushes, where they differ from the feed id.
+FOLDER_ALIASES = {"hasnaltauto": "hasnalauto"}
+
+
+def parse_external_folder(remote_path):
+    """'/upload/CARS/IE/Donedeal/donedeal_20261122' -> ('donedeal', '2026-11-22'), or None."""
+    m = re.fullmatch(r"([a-z0-9_]+?)_(\d{4})(\d{2})(\d{2})", os.path.basename(remote_path.rstrip("/")))
+    if not m:
+        return None
+    return FOLDER_ALIASES.get(m.group(1), m.group(1)), f"{m.group(2)}-{m.group(3)}-{m.group(4)}"
+
+
+def record_external(env, args):
+    """Records a delivery made outside Veyora on the account's subscription to that feed."""
+    parsed = parse_external_folder(args.remote)
+    if not parsed:
+        print(f"record-external: cannot read a feed and date from {args.remote}")
+        return
+    feed, snap_date = parsed
+    source = args.file if args.file and os.path.isfile(args.file) else None
+    records = count_records(source) if source else args.records
+    size = os.path.getsize(source) if source else None
+    digest = sha256_file(source) if source else None
+    delivered_to = f"sftp://{args.host}{args.remote}" if args.host else args.remote
+    conn, cur = connect_db(env)
+    try:
+        cur.execute("SELECT s.id FROM feed_subscriptions s JOIN clients c ON c.username = s.username "
+                    "WHERE lower(c.email) = lower(%s) AND s.feed_id = %s AND s.status IN ('active', 'paused')", (args.account, feed))
+        row = cur.fetchone()
+        if not row:
+            print(f"record-external: {args.account} has no active {feed} subscription, nothing recorded")
+            return
+        cur.execute("SELECT id FROM delivery_logs WHERE subscription_id = %s AND snapshot_date = %s AND source = 'external' "
+                    "AND delivered_to = %s ORDER BY started_at DESC LIMIT 1", (row["id"], snap_date, delivered_to))
+        existing = cur.fetchone()
+        values = (args.status, records, size, digest, "jsonl", delivered_to, (args.error or None) and args.error[:500])
+        if existing:
+            cur.execute("UPDATE delivery_logs SET status = %s, record_count = %s, file_size_bytes = %s, sha256 = %s, format = %s, "
+                        "delivered_to = %s, error = %s, completed_at = now() WHERE id = %s", values + (existing["id"],))
+        else:
+            cur.execute("INSERT INTO delivery_logs (subscription_id, feed_id, snapshot_date, status, record_count, file_size_bytes, "
+                        "sha256, format, delivered_to, error, source, started_at, completed_at) "
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'external', now(), now())",
+                        (row["id"], feed, snap_date) + values)
+        conn.commit()
+        print(f"record-external: {feed} {snap_date} {args.status} -> {delivered_to}")
+    finally:
+        cur.close()
+        conn.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Deliver a feed snapshot to subscribers, or test one subscription's delivery")
     parser.add_argument("--feed", help="Feed ID (e.g. mobilede)")
@@ -557,9 +611,21 @@ def main():
     parser.add_argument("--date", default=None, help="Snapshot date (YYYY-MM-DD), read from the directory name by default")
     parser.add_argument("--test", action="store_true", help="Test the delivery settings of --subscription")
     parser.add_argument("--subscription", help="Subscription id for --test")
+    parser.add_argument("--record-external", action="store_true", help="Record a delivery made outside Veyora")
+    parser.add_argument("--account", help="Account email for --record-external")
+    parser.add_argument("--remote", help="Remote folder of the external delivery, ending in <feed>_<YYYYMMDD>")
+    parser.add_argument("--host", help="Host the external delivery went to")
+    parser.add_argument("--status", choices=["delivered", "failed"], default="delivered")
+    parser.add_argument("--error", default="", help="Failure reason for --status failed")
+    parser.add_argument("--records", type=int, default=None, help="Record count when the file is no longer available")
     args = parser.parse_args()
 
     env = load_env()
+    if args.record_external:
+        if not args.account or not args.remote:
+            parser.error("--record-external needs --account and --remote")
+        record_external(env, args)
+        return
     key = parse_key(env.get("DELIVERY_SECRET_KEY"))
     if args.test:
         if not args.subscription or not re.fullmatch(r"[0-9a-f-]{36}", args.subscription):

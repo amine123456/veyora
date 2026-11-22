@@ -857,9 +857,10 @@ function deliveryLink(subId, label, cls) {
 
 var METHOD_LABELS = { sftp: 'SFTP', s3: 'Amazon S3', gcs: 'Google Cloud Storage', snowflake: 'Snowflake', webhook: 'Webhook', api: 'API pull' };
 
-function deliveryConfigured(dc) { return Boolean(dc && dc.method && dc.method !== 'manual'); }
+function deliveryConfigured(dc) { return Boolean(dc && dc.method); }
 
 function deliveryTarget(dc) {
+  if (dc.method === 'manual') return dc.notes || 'Delivered outside Veyora';
   if (dc.method === 'sftp') return 'SFTP: ' + (dc.sftp_host || '');
   if (dc.method === 's3') return 'S3: ' + (dc.bucket || '');
   if (dc.method === 'gcs') return 'GCS: ' + (dc.bucket || '');
@@ -888,7 +889,7 @@ function renderSubscriptions(subs) {
     if (deliveryConfigured(dc)) {
       var tested = dc.last_test_ok === false ? ' feed-chip--coming' : ' feed-chip--active';
       deliveryHtml = '<span class="feed-chip' + tested + '" style="font-size:11px" title="' + esc(dc.last_test_ok === false ? 'Last connection test failed: ' + (dc.last_test_error || '') : '') + '">'
-        + esc(deliveryTarget(dc)) + ' · ' + esc((dc.format || 'jsonl').toUpperCase()) + '</span>';
+        + esc(deliveryTarget(dc)) + (dc.method === 'manual' ? ' · external' : ' · ' + esc((dc.format || 'jsonl').toUpperCase())) + '</span>';
     } else if (s.status === 'active') {
       deliveryHtml = deliveryLink(s.id, 'Setup needed', 'btn btn--sm btn--warn');
     } else {
@@ -1043,6 +1044,11 @@ if (deliveryForm) {
     var current = document.querySelector('[data-delivery-current]');
     if (!current) return;
     if (!deliveryConfigured(dc)) { current.hidden = true; return; }
+    if (dc.method === 'manual') {
+      current.textContent = 'This feed is currently delivered outside Veyora (' + deliveryTarget(dc) + '), and those deliveries appear in your history. Save a method below to have Veyora deliver it instead.';
+      current.hidden = false;
+      return;
+    }
     var test = dc.last_test_at
       ? (dc.last_test_ok ? ' Last connection test passed.' : ' Last connection test failed: ' + (dc.last_test_error || 'unknown error') + '.')
       : ' Not tested yet.';
@@ -1083,10 +1089,11 @@ if (deliveryForm) {
         deliveryForm.subscription_id.value = sub.id;
         if (deliveryFeedName) deliveryFeedName.textContent = sub.site_name;
         document.title = 'Delivery setup: ' + sub.site_name + ' | Veyora';
-        savedConfig = deliveryConfigured(sub.delivery_config) ? sub.delivery_config : null;
+        var dcNow = deliveryConfigured(sub.delivery_config) ? sub.delivery_config : null;
+        savedConfig = dcNow && dcNow.method !== 'manual' ? dcNow : null;
         fill(savedConfig);
         setMethod(savedConfig ? savedConfig.method : 'sftp');
-        describe(savedConfig);
+        describe(dcNow);
         renderApiSnippet(sub.id);
       });
   };
@@ -1185,11 +1192,19 @@ if (deliveriesWrap) {
       var none = document.querySelector('[data-no-deliveries]');
       if (none) none.hidden = rows.length > 0;
       if (!rows.length) { deliveriesWrap.innerHTML = ''; return; }
-      var html = '<table class="usage-table"><thead><tr><th>Snapshot</th><th>Feed</th><th>Status</th>'
+      var html = '<table class="usage-table"><thead><tr><th>Snapshot</th><th>Feed</th><th>Status</th><th>Destination</th>'
         + '<th class="right">Records</th><th class="right">Size</th><th>Delivered</th><th>Details</th></tr></thead><tbody>';
+      var destination = function (d) {
+        var to = String(d.delivered_to || '').replace(/^(sftp|s3|gs|snowflake):\/\//, function (m, scheme) {
+          return { sftp: 'SFTP ', s3: 'S3 ', gs: 'GCS ', snowflake: 'Snowflake ' }[scheme];
+        });
+        var label = to ? esc(to.length > 48 ? to.slice(0, 46) + '…' : to) : '—';
+        var tag = d.source === 'external' ? ' <span class="badge badge--muted" title="Sent by the crawl job, outside Veyora">external</span>' : '';
+        return '<span title="' + esc(d.delivered_to || '') + '">' + label + '</span>' + tag;
+      };
       rows.forEach(function (d) {
         html += '<tr><td class="mono">' + formatDate(d.snapshot_date) + '</td><td>' + esc(d.site_name) + '</td>'
-          + '<td>' + statusChip(d.status) + '</td>'
+          + '<td>' + statusChip(d.status) + '</td><td>' + destination(d) + '</td>'
           + '<td class="right mono">' + (d.record_count != null ? Number(d.record_count).toLocaleString('en') : '—') + '</td>'
           + '<td class="right mono">' + bytes(d.file_size_bytes) + '</td>'
           + '<td class="mono">' + (d.completed_at ? new Date(d.completed_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—') + '</td>'
