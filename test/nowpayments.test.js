@@ -166,19 +166,22 @@ test('an invoice link pointing anywhere but NOWPayments is refused', async () =>
     const response = await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } });
     assert.equal(response.status, 502);
     // The failed checkout does not leave a pending purchase behind.
-    for (let index = 0; index < 10; index += 1) {
+    for (let index = 0; index < 4; index += 1) {
       assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } })).status, 502);
     }
+    // Checkouts are capped at five a minute per visitor.
+    assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'usd10' }, headers: { cookie } })).status, 429);
   });
 });
 
 test('top-ups are listed with their bonus, and a bonus top-up credits the extra', async () => {
   await withServer({}, async (port, invoices) => {
     const listed = await request(port, { path: '/packages', method: 'GET' });
-    assert.deepEqual(listed.json, [
+    assert.deepEqual(listed.json.topups, [
       { id: 'usd10', cents: 1000, currency: 'usd', bonusPercent: 0, creditMicros: 10_000_000 },
       { id: 'usd100', cents: 10000, currency: 'usd', bonusPercent: 5, creditMicros: 105_000_000 },
     ]);
+    assert.deepEqual(listed.json.methods, { crypto: true, stripe: false });
     const { cookie, username } = await signedUp(port, 'bonus@example.com');
     assert.equal((await request(port, { path: '/api/checkout', body: { topupId: 'usd100' }, headers: { cookie } })).status, 200);
     const sent = invoices.at(-1);

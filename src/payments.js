@@ -55,6 +55,22 @@ import {
 } from './feeds-store.js';
 import { DeliveryConfigError, SECRET_FIELDS, keepSavedSecrets, missingSecret, validateDeliveryInput } from './delivery-config.js';
 import { sealSecret } from './secret-box.js';
+import { createFeedDownloads } from './feed-downloads.js';
+import { execFile } from 'node:child_process';
+
+const deliveryScript = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'deliver-feeds.py');
+
+// Runs the delivery script's connection test for one subscription. It prints one JSON line.
+function runDeliveryTest(subscriptionId) {
+  return new Promise((resolve) => {
+    execFile('python3', [deliveryScript, '--test', '--subscription', subscriptionId],
+      { timeout: 90_000, maxBuffer: 64 * 1024, env: process.env }, (error, stdout) => {
+        const line = String(stdout ?? '').trim().split('\n').pop();
+        try { return resolve(JSON.parse(line)); } catch { /* fall through */ }
+        resolve({ ok: false, error: error?.killed ? 'The test timed out after 90 seconds' : 'The test could not run. Contact support.' });
+      });
+  });
+}
 import {
   createCustomer as createStripeCustomer,
   createProduct as createStripeProduct,
@@ -496,10 +512,18 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
   const signupAttempts = authLimiter(SIGNUPS_PER_MINUTE);
   const supportAttempts = authLimiter(5);
   const checkoutAttempts = authLimiter(5);
+  const deliveryTests = authLimiter(6);
+  const feedDownloads = createFeedDownloads({
+    exportDir: config.deliveryExportDir ?? './data/exports',
+    secretKey: config.deliverySecretKey ?? null,
+    limiter: authLimiter(20),
+  });
+  const testDelivery = config.deliveryTester ?? runDeliveryTest;
   const hashing = concurrencyLimit(config.maxConcurrentAuth);
   const server = http.createServer(async (request, response) => {
     try {
       // The unlocker API lives under /v1/ on the same host; it authenticates by API key.
+      if (request.url.startsWith('/v1/feeds/')) return await feedDownloads.handle(request, response, clientAddress(request));
       if (unlocker && request.url.startsWith('/v1/')) return await unlocker.handle(request, response, clientAddress(request));
 
       // Pages are looked up by path alone, so /account?paid=1 and /?utm_source=x still resolve.
@@ -1103,6 +1127,18 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
             if (cfg.method !== sub.delivery_method) await updateSubscription(subId, client.username, { deliveryMethod: cfg.method });
             const saved = await setDeliveryConfig(subId, cfg);
             return json(response, 200, { method: saved.method, format: saved.format, configured: true });
+          }
+
+          if (request.method === 'POST' && subPath === '/delivery-test') {
+            assertSameOrigin(request);
+            const sub = await getSubscription(subId, client.username);
+            if (!sub) return json(response, 404, { error: 'Subscription not found' });
+            if (!deliveryTests.allowed(client.username)) return json(response, 429, { error: 'Too many tests. Wait a minute and try again.' });
+            deliveryTests.fail(client.username);
+            if (!(await getDeliveryConfig(subId))) throw new PublicError(400, 'Save the delivery settings before testing them');
+            const result = await testDelivery(subId);
+            await recordDeliveryTest(subId, result);
+            return json(response, 200, { ok: Boolean(result.ok), error: result.ok ? null : String(result.error ?? 'The test failed') });
           }
 
           if (request.method === 'POST' && subPath === '/checkout') {

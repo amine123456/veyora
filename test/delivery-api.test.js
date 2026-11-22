@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import http from 'node:http';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -12,6 +12,8 @@ process.env.DATA_FILE = path.join(directory, 'state.json');
 const { createPaymentServer } = await import('../src/payments.js');
 const { createSubscription, activateSubscription } = await import('../src/feeds-store.js');
 const { openSecret } = await import('../src/secret-box.js');
+const { downloadSignature } = await import('../src/feed-downloads.js');
+const { createApiKey } = await import('../src/store.js');
 
 const key = crypto.randomBytes(32);
 
@@ -123,6 +125,78 @@ test('delivery settings are validated and need the encryption key for secrets', 
     const { rows } = await query('SELECT 1 FROM delivery_configs WHERE subscription_id = $1', [sub.id]);
     assert.equal(rows.length, 0);
   }, { deliverySecretKey: null });
+});
+
+async function deliveredExport(sub, contents, { exportPath } = {}) {
+  const file = exportPath ?? path.join(directory, 'exports', 'mobilede', '2026-11-21', 'mobilede_20261121.csv');
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, contents);
+  const { rows } = await query(
+    `INSERT INTO delivery_logs (subscription_id, feed_id, snapshot_date, status, format, export_path, sha256, completed_at)
+     VALUES ($1, 'mobilede', '2026-11-21', 'delivered', 'csv', $2, 'abc123', now()) RETURNING id`,
+    [sub.id, file],
+  );
+  return rows[0].id;
+}
+
+test('API pull serves the latest export only to the subscription owner\'s keys', async () => {
+  await withServer(async (port) => {
+    const { sub } = await signedInWithFeed(port, 'puller@example.com');
+    const [{ username }] = (await query("SELECT username FROM clients WHERE email = 'puller@example.com'")).rows;
+    const { key } = await createApiKey(username, 'pull');
+    const latest = (headers = {}) => request(port, { path: `/v1/feeds/${sub.id}/latest`, method: 'GET', headers });
+
+    assert.equal((await latest()).status, 401);
+    assert.equal((await latest({ authorization: 'Bearer vy_live_not-a-real-key' })).status, 401);
+    assert.equal((await latest({ authorization: `Bearer ${key}` })).status, 404);
+
+    await deliveredExport(sub, 'id,make\n1,BMW\n');
+    const ok = await latest({ authorization: `Bearer ${key}` });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.text, 'id,make\n1,BMW\n');
+
+    await request(port, { path: '/api/signup', body: { email: 'stranger@example.com', password: 'long enough password' } });
+    const [{ username: stranger }] = (await query("SELECT username FROM clients WHERE email = 'stranger@example.com'")).rows;
+    const { key: strangerKey } = await createApiKey(stranger, 'other');
+    assert.equal((await latest({ authorization: `Bearer ${strangerKey}` })).status, 404);
+  });
+});
+
+test('signed download links work until they expire and refuse tampering or stray paths', async () => {
+  await withServer(async (port) => {
+    const { sub } = await signedInWithFeed(port, 'hooked@example.com');
+    const logId = await deliveredExport(sub, 'records');
+    const link = (expires, sig = downloadSignature(key, sub.id, logId, expires)) =>
+      request(port, { path: `/v1/feeds/${sub.id}/deliveries/${logId}/file?expires=${expires}&sig=${sig}`, method: 'GET' });
+    const future = Math.floor(Date.now() / 1000) + 3600;
+    const ok = await link(future);
+    assert.equal(ok.status, 200);
+    assert.equal(ok.text, 'records');
+    assert.equal((await link(future, '0'.repeat(64))).status, 403);
+    assert.equal((await link(future + 1, downloadSignature(key, sub.id, logId, future))).status, 403);
+    assert.equal((await link(Math.floor(Date.now() / 1000) - 60)).status, 410);
+
+    const outside = await deliveredExport(sub, 'secret', { exportPath: path.join(directory, 'not-exports.txt') });
+    const sig = downloadSignature(key, sub.id, outside, future);
+    const stray = await request(port, { path: `/v1/feeds/${sub.id}/deliveries/${outside}/file?expires=${future}&sig=${sig}`, method: 'GET' });
+    assert.equal(stray.status, 404);
+  });
+});
+
+test('Test connection runs the tester and records its result', async () => {
+  const calls = [];
+  await withServer(async (port) => {
+    const { sub } = await signedInWithFeed(port, 'tester@example.com');
+    const cookie = await sessionCookie(port, 'tester@example.com');
+    const run = () => request(port, { path: `/api/subscriptions/${sub.id}/delivery-test`, headers: { cookie }, body: {} });
+    assert.equal((await run()).status, 400);
+    await request(port, { path: `/api/subscriptions/${sub.id}/delivery-config`, headers: { cookie }, body: { method: 'api' } });
+    const result = await run();
+    assert.deepEqual(result.json, { ok: false, error: 'The bucket refused these keys (access denied)' });
+    assert.deepEqual(calls, [sub.id]);
+    const { rows } = await query('SELECT last_test_ok, last_test_error FROM delivery_configs WHERE subscription_id = $1', [sub.id]);
+    assert.deepEqual(rows[0], { last_test_ok: false, last_test_error: 'The bucket refused these keys (access denied)' });
+  }, { deliveryTester: async (id) => { calls.push(id); return { ok: false, error: 'The bucket refused these keys (access denied)' }; } });
 });
 
 test('another account cannot read or change a subscription\'s delivery', async () => {

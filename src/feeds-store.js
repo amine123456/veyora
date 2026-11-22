@@ -215,6 +215,30 @@ export async function setDeliveryConfig(subscriptionId, config) {
   return rows[0];
 }
 
+// Newest delivered snapshot of one customer's subscription that has a downloadable export.
+export async function latestExport(subscriptionId, username) {
+  const { rows } = await query(
+    `SELECT dl.id, dl.feed_id, dl.snapshot_date, dl.format, dl.export_path, dl.record_count, dl.sha256
+     FROM delivery_logs dl JOIN feed_subscriptions s ON s.id = dl.subscription_id
+     WHERE dl.subscription_id = $1 AND s.username = $2 AND s.status IN ('active', 'paused')
+       AND dl.status = 'delivered' AND dl.export_path IS NOT NULL
+     ORDER BY dl.snapshot_date DESC, dl.completed_at DESC LIMIT 1`,
+    [subscriptionId, username],
+  );
+  return rows[0] ?? null;
+}
+
+export async function deliveryExport(subscriptionId, logId) {
+  const { rows } = await query(
+    `SELECT dl.id, dl.feed_id, dl.snapshot_date, dl.format, dl.export_path, dl.sha256
+     FROM delivery_logs dl JOIN feed_subscriptions s ON s.id = dl.subscription_id
+     WHERE dl.id = $2 AND dl.subscription_id = $1 AND s.status IN ('active', 'paused')
+       AND dl.status = 'delivered' AND dl.export_path IS NOT NULL`,
+    [subscriptionId, logId],
+  );
+  return rows[0] ?? null;
+}
+
 export async function recordDeliveryTest(subscriptionId, { ok, error }) {
   await query(
     `UPDATE delivery_configs SET last_test_at = now(), last_test_ok = $2, last_test_error = $3
