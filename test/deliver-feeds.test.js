@@ -51,6 +51,14 @@ test('JSON and CSV exports keep every record and every column', { skip }, async 
   }
 });
 
+test('provider errors are turned into plain sentences', { skip }, () => {
+  const said = (message) => py(`print(df.friendly(Exception(${JSON.stringify(message)})))`);
+  assert.match(said('250001 (08001): Failed to login: Invalid Snowflake response. 404 Not Found'), /account identifier/);
+  assert.equal(said('390100 (08004): Incorrect username or password was specified.'), 'Snowflake refused the user or password');
+  assert.match(said("002003 (02000): Database 'RAW' does not exist or not authorized."), /warehouse, database or schema/);
+  assert.equal(said('Webhook answered HTTP 404'), 'Webhook answered HTTP 404');
+});
+
 test('download links signed by the script verify in Node', { skip }, () => {
   const key = crypto.randomBytes(32);
   const link = py(`u, e = df.download_link("https://veyora.pro/", bytes.fromhex(${JSON.stringify(key.toString('hex'))}), "sub-1", "log-2")\nprint(u)`);

@@ -453,6 +453,12 @@ def run_test(env, key, sub_id):
 def friendly(error):
     text = str(error) or error.__class__.__name__
     name = error.__class__.__name__
+    if "250001" in text or "Failed to connect to DB" in text:
+        return "Could not sign in to that Snowflake account. Check the account identifier (for example myorg-myaccount)"
+    if "Incorrect username or password" in text or "390100" in text:
+        return "Snowflake refused the user or password"
+    if "002003" in text or "does not exist or not authorized" in text:
+        return "Snowflake could not find the warehouse, database or schema, or this user's role cannot use it"
     if name == "AuthenticationException":
         return "The SFTP server refused the username or password"
     if name in ("NoValidConnectionsError", "SSHException") or isinstance(error, (socket.timeout, ConnectionError)):
