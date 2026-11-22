@@ -366,8 +366,9 @@ def deliver_snowflake(cfg, key, source, feed, snap_date):
         snowflake_table(cur, table)
         cur.execute(f'PUT \'file://{source}\' @%"{table}" AUTO_COMPRESS=TRUE OVERWRITE=TRUE')
         staged = os.path.basename(source) + ".gz"
+        # The connector fills %s with Python %-formatting, so the table stage's own % is written %%.
         cur.execute(f'COPY INTO "{table}" (record, feed_id, snapshot_date) FROM '
-                    f'(SELECT $1, %s, %s FROM @%"{table}"/{staged}) FILE_FORMAT = (TYPE = JSON) PURGE = TRUE',
+                    f'(SELECT $1, %s, %s FROM @%%"{table}"/{staged}) FILE_FORMAT = (TYPE = JSON) PURGE = TRUE',
                     (feed, snap_date))
         return f"snowflake://{cfg['snowflake_account']}/{cfg['snowflake_database']}.{cfg['snowflake_schema']}.{table}"
     finally:

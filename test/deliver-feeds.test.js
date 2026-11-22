@@ -59,6 +59,28 @@ test('provider errors are turned into plain sentences', { skip }, () => {
   assert.equal(said('Webhook answered HTTP 404'), 'Webhook answered HTTP 404');
 });
 
+test('Snowflake loads stage the file and copy it with the feed and date bound', { skip }, () => {
+  // A fake connection that formats parameters the way snowflake-connector-python does (pyformat).
+  const sql = JSON.parse(py(`
+class Cur:
+    def __init__(self, log): self.log = log
+    def execute(self, query, params=None):
+        self.log.append(query % tuple("'" + p + "'" for p in params) if params is not None else query)
+class Conn:
+    def __init__(self): self.log = []
+    def cursor(self): return Cur(self.log)
+    def close(self): pass
+conn = Conn()
+df.snowflake_connect = lambda cfg, key: conn
+cfg = {"snowflake_table": "DONEDEAL", "snowflake_account": "org-acct", "snowflake_database": "VEYORA", "snowflake_schema": "FEEDS"}
+print(json.dumps([df.deliver_snowflake(cfg, None, "/tmp/x/listings.jsonl", "donedeal", "2026-11-22"), conn.log]))`));
+  const [target, statements] = sql;
+  assert.equal(target, 'snowflake://org-acct/VEYORA.FEEDS.DONEDEAL');
+  assert.match(statements[0], /^CREATE TABLE IF NOT EXISTS "DONEDEAL"/);
+  assert.equal(statements[1], `PUT 'file:///tmp/x/listings.jsonl' @%"DONEDEAL" AUTO_COMPRESS=TRUE OVERWRITE=TRUE`);
+  assert.equal(statements[2], `COPY INTO "DONEDEAL" (record, feed_id, snapshot_date) FROM (SELECT $1, 'donedeal', '2026-11-22' FROM @%"DONEDEAL"/listings.jsonl.gz) FILE_FORMAT = (TYPE = JSON) PURGE = TRUE`);
+});
+
 test('download links signed by the script verify in Node', { skip }, () => {
   const key = crypto.randomBytes(32);
   const link = py(`u, e = df.download_link("https://veyora.pro/", bytes.fromhex(${JSON.stringify(key.toString('hex'))}), "sub-1", "log-2")\nprint(u)`);
