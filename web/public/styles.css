@@ -972,3 +972,10 @@ svg { display: block; }
   .js .cir .tr { stroke-dashoffset: 0 !important; }
   .cir .pl, .cir .sp { display: none; }
 }
+
+/* Product pages (Web Unlocker, Residential Proxies): calls to action and note under the ink hero. */
+.hero-band .hero-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+.hero-band .hero-note { margin-top: 18px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--vy-paper); opacity: .7; }
+.hero-band .vy-btn--secondary.on-ink { background: transparent; color: var(--vy-paper); border-color: rgba(255, 255, 255, .45); }
+.hero-band .vy-btn--secondary.on-ink:hover { border-color: var(--vy-paper); }
+@media (max-width: 640px) { .hero-band .hero-ctas .vy-btn { flex: 1 1 100%; justify-content: center; } }

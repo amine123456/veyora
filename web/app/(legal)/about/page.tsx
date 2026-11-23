@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <main>
+      <main id="main">
         <article className="legal">
           <div className="container">
             <p className="eyebrow">About Veyora</p>

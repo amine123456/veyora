@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function SupportPage() {
   return (
     <>
-      <main>
+      <main id="main">
         <article className="legal">
           <div className="container">
             <p className="eyebrow">Contact & support</p>

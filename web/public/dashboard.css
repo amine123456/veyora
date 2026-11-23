@@ -236,8 +236,8 @@ code, pre { font-family: var(--font-mono); }
 
 /* ---------- 6. Page sections (CLAUDE-PROMPT.md §5.2, same reference) ---------- */
 /* balance card */
-.balance-card { background: var(--vy-white); border: 1px solid var(--vy-ink); display: grid; grid-template-columns: 1fr 310px; height: 204px; }
-.bal-left { padding: 20px 24px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+.balance-card { background: var(--vy-white); border: 1px solid var(--vy-ink); display: grid; grid-template-columns: 1fr 310px; min-height: 204px; }
+.bal-left { padding: 20px 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; position: relative; min-width: 0; }
 .bal-top { display: flex; align-items: center; justify-content: space-between; }
 .bal-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: .07em; }
 .bal-tag .sq { width: 18px; height: 18px; background: var(--vy-yellow); border: 1px solid var(--vy-ink); display: inline-flex; align-items: center; justify-content: center; }
@@ -431,9 +431,9 @@ code, pre { font-family: var(--font-mono); }
 
 /* ---------- Multi-page dashboard: back link, product cards ---------- */
 .page-back { display: inline-flex; align-items: center; gap: 6px; font: 500 12.5px/1 var(--vy-font-mono); letter-spacing: .04em; color: inherit; text-decoration: none; transition: color .2s; }
-.cards-grid { display: grid; grid-template-columns: repeat(4, minmax(200px, 1fr)); gap: 16px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 .cards-grid[hidden] { display: none; }
-.pcard { background: var(--vy-white); border: 1px solid var(--vy-ink); display: flex; flex-direction: column; justify-content: space-between; height: 214px; text-decoration: none; color: inherit; }
+.pcard { background: var(--vy-white); border: 1px solid var(--vy-ink); display: flex; flex-direction: column; justify-content: space-between; min-height: 214px; text-decoration: none; color: inherit; }
 .pcard[hidden] { display: none; }
 .pcard-top { height: 30px; padding: 0 14px; border-bottom: 1px solid var(--vy-line); background: var(--vy-paper); display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .07em; }
 .pcard-top .idx { opacity: .72; }
@@ -486,4 +486,13 @@ code, pre { font-family: var(--font-mono); }
   .dmethod { padding: 12px 12px 12px 46px; }
   .dmethod__ic { left: 10px; top: 12px; }
   .dactions .btn { flex: 1 1 100%; }
+}
+
+/* Balance card: grows with its content (prepaid traffic adds a meter and a usage line)
+   and stacks the wallet panel under the balance on narrower screens. */
+.bal-figure { margin-top: 4px; }
+@media (max-width: 1100px) { .balance-card { grid-template-columns: 1fr 260px; } }
+@media (max-width: 900px) {
+  .balance-card { grid-template-columns: 1fr; }
+  .bal-right { border-left: 0; border-top: 1px solid var(--vy-ink); min-height: 180px; }
 }

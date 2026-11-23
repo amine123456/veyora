@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function AcceptableUsePage() {
   return (
     <>
-      <main>
+      <main id="main">
         <article className="legal">
           <div className="container">
             <p className="eyebrow">Legal</p>
