@@ -111,7 +111,8 @@ const PILLUS = { feeds: PillusFeeds, unlocker: PillusUnlocker, proxies: PillusPr
 export function HomePaths() {
   return (
     <section className="tiers-sec vy-type-display" id="products" aria-labelledby="paths-title">
-      <div className="wrap">
+      <img className="tiers-bg" src="/design/05-backgrounds/sections/home-tiers-bg-1440x1114.svg" alt="" aria-hidden="true" />
+      <div className="vy-wrap">
         <div className="vy-specbar">
           <span>
             <i />

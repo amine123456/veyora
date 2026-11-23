@@ -208,6 +208,7 @@ svg { display: block; }
 .head--center { align-items: center; text-align: center; }
 /* ---------- how it works (CLAUDE-PROMPT.md §4.5, reference 04-how-veyora-works-section-a.html) ---------- */
 .how-sec { position: relative; background: var(--vy-paper); padding: 34px 0 58px; overflow: hidden; }
+.how-sec-bg { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; width: 100%; height: auto; }
 .how-head { text-align: center; margin-top: 26px; }
 .how-head h2 { margin-top: 18px; }
 .how-head .sub { margin-top: 14px; font-size: 17px; line-height: 1.48; opacity: .76; }
@@ -267,6 +268,7 @@ svg { display: block; }
 
 /* ---------- web unlocker (CLAUDE-PROMPT.md §4.6, reference 03-web-unlocker-section-a.html) ---------- */
 .unlocker-sec { position: relative; background: var(--vy-paper); padding: 34px 0 64px; overflow: hidden; }
+.unl-bg { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; width: 100%; height: auto; }
 .unl-grid { display: grid; grid-template-columns: 1fr 620px; gap: 56px; align-items: stretch; margin-top: 34px; }
 .unl-left { display: flex; flex-direction: column; }
 .unl-left h2 { margin-top: 20px; font-weight: 400; font-size: 56px; line-height: 1.05; letter-spacing: -.042em; }
@@ -780,6 +782,7 @@ svg { display: block; }
 
 /* ---------- products / tiers (CLAUDE-PROMPT.md §4.2, reference 09-home-tiers-and-samples.html) ---------- */
 .tiers-sec { position: relative; background: var(--vy-paper); padding: var(--vy-sec-pad-a); overflow: hidden; }
+.tiers-bg { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; width: 100%; height: auto; }
 .tiers-grid { margin-top: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
 
 .tcard { display: flex; flex-direction: column; border: 1px solid var(--vy-ink); position: relative; }

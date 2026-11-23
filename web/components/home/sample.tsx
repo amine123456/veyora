@@ -16,7 +16,7 @@ export function HomeSample() {
     <section className="samples-sec vy-type-display" id="sample" aria-labelledby="sample-title">
       <div className="samples-top">
         <img className="samples-top-bg" src="/design/05-backgrounds/sections/home-samples-top-bg-1440x331.svg" alt="" aria-hidden="true" />
-        <div className="wrap">
+        <div className="vy-wrap">
           <div className="vy-specbar">
             <span>
               <i />

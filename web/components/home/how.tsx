@@ -83,6 +83,7 @@ function MiniPanel({ title, badge, children, sub }: { title: string; badge: stri
 export function HomeHow() {
   return (
     <section className="how-sec vy-type-text" id="how" aria-labelledby="how-title">
+      <img className="how-sec-bg" src="/design/05-backgrounds/sections/how-veyora-works-bg-1440x807.svg" alt="" aria-hidden="true" />
       <div className="vy-wrap">
         <div className="vy-specbar vy-specbar--plain">
           <span>

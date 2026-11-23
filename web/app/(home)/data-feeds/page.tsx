@@ -133,7 +133,7 @@ export default function DataFeedsPage() {
       <main id="main" className="feeds-page vy-type-display">
         <section className="hero-band" aria-labelledby="feeds-title">
           <img className="hero-svg" src="/design/05-backgrounds/sections/feeds-hero-ink-horizon-1440x430.svg" alt="" aria-hidden="true" />
-          <div className="wrap">
+          <div className="vy-wrap">
             <div className="hero-spec mono">
               <span className="l">
                 <i />
@@ -159,7 +159,7 @@ export default function DataFeedsPage() {
 
         <section className="catalog-stage" id="catalog">
           <img className="stage-bg" src="/design/05-backgrounds/sections/feeds-catalog-lilac-stage-1440x1927.svg" alt="" aria-hidden="true" />
-          <div className="wrap">
+          <div className="vy-wrap">
             <div className="stage-spec mono">
               <span>
                 <i />
@@ -296,7 +296,7 @@ export default function DataFeedsPage() {
 
         <section className="custom-band" id="custom">
           <img className="custom-bg" src="/design/05-backgrounds/sections/feeds-custom-sla-ink-brick-bars-1440x440.svg" alt="" aria-hidden="true" />
-          <div className="wrap">
+          <div className="vy-wrap">
             <div className="custom-spec mono">
               <span>
                 <i />
@@ -340,7 +340,7 @@ export default function DataFeedsPage() {
 
         <section className="how-band" id="how">
           <img className="how-bg" src="/design/05-backgrounds/sections/feeds-how-it-works-bg-1440x470.svg" alt="" aria-hidden="true" />
-          <div className="wrap">
+          <div className="vy-wrap">
             <div className="how-spec mono">
               <span>
                 <i />

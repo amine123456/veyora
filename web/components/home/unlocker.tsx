@@ -28,6 +28,7 @@ const FEATURES = [
 export function HomeUnlocker() {
   return (
     <section className="unlocker-sec vy-type-text" id="unlocker" aria-labelledby="unlocker-title">
+      <img className="unl-bg" src="/design/05-backgrounds/sections/unlocker-section-bg-1440x907.svg" alt="" aria-hidden="true" />
       <div className="vy-wrap">
         <div className="vy-specbar">
           <span>
