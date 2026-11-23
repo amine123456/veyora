@@ -114,7 +114,7 @@ const publicFiles = new Map([
   ['/acceptable-use', { file: 'acceptable-use.html', type: html }],
   ['/refund-policy', { file: 'refund-policy.html', type: html }],
   ['/favicon.svg', { file: 'favicon.svg', type: 'image/svg+xml' }],
-  ['/favicon.ico', { file: 'favicon.svg', type: 'image/svg+xml' }],
+  ['/favicon.ico', { file: 'favicon.ico', type: 'image/x-icon' }],
   ['/docs', { file: 'docs.html', type: html }],
   ['/data-feeds', { file: 'data-feeds.html', type: html }],
   ['/residential-proxies', { file: 'residential-proxies.html', type: html }],
@@ -235,7 +235,8 @@ const SITE_FOLDER_TYPES = new Map([
 async function siteFolderAsset(response, site, pathname, headOnly) {
   const relative = pathname.slice(1);
   const type = SITE_FOLDER_TYPES.get(path.posix.extname(relative).toLowerCase());
-  const safe = /^[A-Za-z0-9_~-][A-Za-z0-9._~-]*(\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*)*$/.test(relative) && !relative.includes('..');
+  // '@' is allowed after a name's first character for retina variants such as logo@2x.png.
+  const safe = /^[A-Za-z0-9_~-][A-Za-z0-9._~@-]*(\/[A-Za-z0-9_~-][A-Za-z0-9._~@-]*)*$/.test(relative) && !relative.includes('..');
   if (!type || !safe) return json(response, 404, { error: 'Not found' });
   let body;
   try {

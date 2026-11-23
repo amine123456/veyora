@@ -108,6 +108,7 @@ test('design artwork, self-hosted fonts and the new top-level files are served, 
   await mkdir(path.join(directory, 'design', 'icons'), { recursive: true });
   await mkdir(path.join(directory, 'fonts', 'inter'), { recursive: true });
   await writeFile(path.join(directory, 'design', 'icons', 'cube.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
+  await writeFile(path.join(directory, 'design', 'icons', 'logo@2x.png'), 'PNG');
   await writeFile(path.join(directory, 'design', 'icons', 'notes.md'), 'not a servable type');
   await writeFile(path.join(directory, 'fonts', 'inter', 'inter.woff2'), 'wOF2');
   await writeFile(path.join(directory, 'tokens.css'), ':root{}');
@@ -119,6 +120,11 @@ test('design artwork, self-hosted fonts and the new top-level files are served, 
     assert.equal(svg.headers['x-content-type-options'], 'nosniff');
     assert.match(svg.headers['content-security-policy'], /^default-src 'none'/);
     assert.doesNotMatch(svg.headers['content-security-policy'], /script-src/);
+
+    const retina = await get(port, '/design/icons/logo@2x.png');
+    assert.equal(retina.status, 200);
+    assert.equal(retina.headers['content-type'], 'image/png');
+    assert.equal((await get(port, '/design/icons/@2x.png')).status, 404);
 
     const font = await get(port, '/fonts/inter/inter.woff2');
     assert.equal(font.status, 200);
