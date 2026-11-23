@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Veyora pixel-engraved system — design tokens (CSS custom properties)
+   Source of truth: the 9 approved screens (07-screens/html/*.html).
+   Every value below is taken from those files; nothing is eyeballed.
+   ========================================================================== */
+
+/* ---- Fonts (self-host the files in 02-fonts; see 02-fonts/fonts.css) ---- */
+:root {
+  --vy-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --vy-font-display: 'Inter Display', 'Inter', system-ui, sans-serif;   /* opsz 32 cut */
+  --vy-font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  /* Typographic modes (see CLAUDE-PROMPT.md §2.3). */
+  --vy-features-on: "ss01", "cv11";   /* open digits + single-storey a */
+  --vy-features-off: normal;
+}
+
+:root {
+  /* ---- Core palette (strict 4-colour system + neutrals) ---- */
+  --vy-ink: #161616;          /* primary text, borders, dark surfaces */
+  --vy-paper: #F2F2F2;        /* page background (off-white) */
+  --vy-white: #FFFFFF;        /* cards, chips, inputs-on-white, tables */
+  --vy-yellow: #FAE401;       /* signal: active, highlight, primary on dark */
+  --vy-lilac: #DC9AFF;        /* secondary accent: fields, badges, mats */
+
+  /* ---- Ink-side neutrals (dark surfaces) ---- */
+  --vy-ink-2: #1D1D1D;        /* code panel header / code box surround */
+  --vy-ink-2-alt: #1F1F1F;    /* raised panel on ink (feeds + tiers files) */
+  --vy-ink-3: #242424;        /* rarely: deeper raised panel */
+  --vy-ink-tile: #1B1B1B;     /* illustration tile on ink tier card */
+  --vy-line-dark: #2E2E2E;    /* 1px dividers on ink */
+  --vy-brick-dark: #2C2C2C;   /* brick grid lines on ink (at 28% group opacity) */
+  --vy-grid-dark: #262626;    /* inner grid lines in pixel charts on ink */
+  --vy-chip-border-dark: #444444; /* chips on ink */
+  --vy-text-on-ink-dim: #D4D4D4;  /* mono field lists on ink */
+
+  /* ---- Paper-side neutrals (light surfaces) ---- */
+  --vy-line: #CFCFCF;         /* hairline dividers on light */
+  --vy-line-strong: #BDBDBD;  /* footer divider in app, stronger hairline */
+  --vy-row-alt: #FAFAFA;      /* zebra row in sample table */
+
+  /* ---- Alpha colours actually used ---- */
+  --vy-paper-a25: rgba(242, 242, 242, .25); /* hairlines on ink (footer) */
+  --vy-paper-a35: rgba(242, 242, 242, .35); /* dashed column-head rule on ink */
+  --vy-ink-a32: rgba(22, 22, 22, .32);      /* dashed card-foot rule on light */
+  --vy-ink-a52: rgba(22, 22, 22, .52);      /* input placeholder */
+
+  /* ---- Text opacity scale (applied with opacity on ink/paper text) ---- */
+  --vy-o-strong: .88;  /* nav links on ink */
+  --vy-o-body: .82;    /* lead paragraphs on light & dark */
+  --vy-o-body-2: .78;  /* card body, section sub */
+  --vy-o-muted: .72;   /* sub-heads, dashboard sub, footer links */
+  --vy-o-meta: .68;    /* spec bars, corner labels */
+  --vy-o-faint: .62;   /* stat labels, minor meta */
+  --vy-o-ghost: .52;   /* sidebar group labels */
+
+  /* ---- Type scale (px at 1440 design width; fluid values in §responsive) ---- */
+  --vy-fs-display-xl: 124px;  --vy-lh-display-xl: .93;  --vy-ls-display-xl: -.055em; /* home hero h1 */
+  --vy-fs-display-l: 78px;    --vy-lh-display-l: .96;   --vy-ls-display-l: -.045em;  /* feeds hero h1 */
+  --vy-fs-stat-xl: 94px;      --vy-lh-stat-xl: .9;      --vy-ls-stat-xl: -.055em;    /* auth "5M" */
+  --vy-fs-h2-xl: 62px;        --vy-lh-h2-xl: 1;         --vy-ls-h2-xl: -.045em;      /* tiers / samples h2 */
+  --vy-fs-h2-cta: 60px;       --vy-lh-h2-cta: 1;        --vy-ls-h2-cta: -.045em;     /* footer CTA */
+  --vy-fs-h2: 56px;           --vy-lh-h2: 1.05;         --vy-ls-h2: -.042em;         /* unlocker / how A */
+  --vy-fs-h2-s: 52px;         --vy-lh-h2-s: 1.02;       --vy-ls-h2-s: -.04em;        /* feeds "How it works" */
+  --vy-fs-h2-band: 50px;      --vy-lh-h2-band: 1.04;    --vy-ls-h2-band: -.04em;     /* custom SLA band */
+  --vy-fs-stat-l: 64px;       --vy-lh-stat-l: .96;      --vy-ls-stat-l: -.045em;     /* balance figure */
+  --vy-fs-stat-m: 52px;       --vy-lh-stat-m: .95;      --vy-ls-stat-m: -.045em;     /* flagship tile count */
+  --vy-fs-h1-app: 40px;       --vy-lh-h1-app: 1.04;     --vy-ls-h1-app: -.04em;      /* dashboard / auth h1 */
+  --vy-fs-price: 38px;        --vy-lh-price: 1;         --vy-ls-price: -.04em;       /* tier price, stat-val */
+  --vy-fs-h3-l: 28px;         --vy-lh-h3-l: 1.05;       --vy-ls-h3-l: -.035em;       /* tier card title */
+  --vy-fs-vol: 28px;          --vy-lh-vol: 1;           --vy-ls-vol: -.04em;         /* catalog table records */
+  --vy-fs-h3: 25px;           --vy-lh-h3: 1.12;         --vy-ls-h3: -.03em;          /* step card h3 (24–26) */
+  --vy-fs-tier-cell: 24px;    --vy-lh-tier-cell: 1;     --vy-ls-tier-cell: -.03em;   /* hero tier cell name */
+  --vy-fs-h4: 18px;           --vy-lh-h4: 1.15;         --vy-ls-h4: -.025em;         /* dashboard product card */
+  --vy-fs-lead: 18px;         --vy-lh-lead: 1.5;        --vy-ls-lead: -.01em;
+  --vy-fs-lead-s: 17px;       --vy-lh-lead-s: 1.5;
+  --vy-fs-body-l: 16.5px;     --vy-lh-body-l: 1.56;     --vy-ls-body-l: -.01em;
+  --vy-fs-body: 15px;         --vy-lh-body: 1.5;        --vy-ls-body: -.01em;
+  --vy-fs-body-s: 14.5px;     --vy-lh-body-s: 1.52;
+  --vy-fs-small: 13.5px;      --vy-lh-small: 1.45;
+  --vy-fs-xs: 13px;           --vy-lh-xs: 1.44;
+  --vy-fs-ui: 12.5px;                                   /* sidebar footer, chips with sans text */
+  --vy-fs-nav-item: 13.5px;                             /* sidebar item */
+  /* Mono roles (always uppercase except code/domains/field names) */
+  --vy-fs-mono-btn-lg: 13px;  --vy-fs-mono-btn: 12px;  --vy-fs-mono-btn-s: 11.5px;
+  --vy-fs-mono-nav: 12px;     --vy-fs-mono-label: 11px; --vy-fs-mono-label-s: 10.5px;
+  --vy-fs-mono-meta: 10px;    --vy-fs-mono-chip: 9.5px; --vy-fs-mono-micro: 9px;
+  --vy-fs-code: 12.2px;       --vy-lh-code: 1.72;
+  --vy-fs-table: 12.5px;      --vy-fs-table-head: 11px;
+  --vy-ls-mono: .06em;        --vy-ls-mono-label: .07em; --vy-ls-mono-wide: .08em; --vy-ls-mono-tight: .05em;
+  --vy-fw-regular: 400;       --vy-fw-medium: 500;     /* nothing heavier is used */
+
+  /* ---- Layout ---- */
+  --vy-page-w: 1440px;        /* design canvas */
+  --vy-container: 1328px;     /* .wrap = 1440 - 2 × 56 */
+  --vy-side: 56px;            /* page side margin (--m) */
+  --vy-gutter: 24px;          /* 12-col grid column gap */
+  --vy-grid-cols: 12;
+  --vy-nav-h: 76px;           /* marketing nav */
+  --vy-topbar-h: 68px;        /* auth top bar, dashboard sidebar brand row */
+  --vy-ticker-h: 48px;
+  --vy-sidebar-w: 248px;
+  --vy-app-pad: 32px 44px 26px; /* dashboard main padding */
+
+  /* ---- Spacing scale (all values that appear in the screens) ---- */
+  --vy-s-1: 4px;  --vy-s-2: 6px;  --vy-s-3: 8px;  --vy-s-4: 10px; --vy-s-5: 12px;
+  --vy-s-6: 14px; --vy-s-7: 16px; --vy-s-8: 18px; --vy-s-9: 20px; --vy-s-10: 22px;
+  --vy-s-11: 24px; --vy-s-12: 28px; --vy-s-13: 32px; --vy-s-14: 34px; --vy-s-15: 44px;
+  --vy-s-16: 48px; --vy-s-17: 56px; --vy-s-18: 64px; --vy-s-19: 72px;
+  /* Section vertical padding presets */
+  --vy-sec-pad-a: 56px 0 72px;  /* tiers */
+  --vy-sec-pad-b: 34px 0 64px;  /* unlocker (spec-bar sections) */
+  --vy-sec-pad-c: 44px 0 64px;  /* feeds stage */
+  --vy-sec-pad-d: 34px 0 58px;  /* how veyora works */
+
+  /* ---- Lines, radii, depth ---- */
+  --vy-bw: 1px;               /* every border */
+  --vy-bw-accent: 2px;        /* only the bottom rule under yellow highlight blocks */
+  --vy-radius: 0;             /* square corners everywhere, no exceptions */
+  --vy-shadow: none;          /* no shadows, glows, blurs or gradients */
+  --vy-z-bg: 1;               /* decorative SVG layers */
+  --vy-z-content: 2;
+  --vy-z-nav: 5;
+
+  /* ---- Component sizes ---- */
+  --vy-btn-h-sm: 40px;  --vy-btn-h: 46px;  --vy-btn-h-lg: 56px;  --vy-btn-h-xl: 48px; /* xl = full-width form / tier CTA */
+  --vy-chip-h: 28px;    --vy-chip-h-s: 22px; --vy-tab-h: 34px;  --vy-tab-h-l: 38px;
+  --vy-input-h: 46px;   --vy-verify-h: 54px; --vy-nav-item-h: 34px;
+
+  /* ---- Motion ---- */
+  --vy-ease: linear;          /* state changes are near-instant; no bouncy easing */
+  --vy-dur-fast: 120ms;
+  --vy-ticker-speed: 40;      /* px per second */
+}
+
+/* ---- Step 2: global flatten (CLAUDE-PROMPT.md §12.2) ----
+   Square corners and no shadow/blur/glow anywhere. The only gradients allowed
+   anywhere in the system are the hard-stop ones added per-component in later
+   steps (footer stripe, auth "5M" highlighter, dashed-bar snippets) — never a
+   soft/blurred one. This is intentionally global and ahead of the page-by-page
+   restyle: pages will look transitional (flat, old spacing/colour) until their
+   own step lands; see DESIGN-MIGRATION.md. */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html,
+body {
+  background: var(--vy-paper);
+  color: var(--vy-ink);
+}

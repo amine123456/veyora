@@ -1,0 +1,173 @@
+/* ==========================================================================
+   Veyora pixel-engraved system: reference primitives (plain CSS).
+   Values are copied from the approved screens (see reference-css/). Port these
+   to the repo's styling layer (Tailwind @layer components, CSS modules, etc.).
+   Requires 01-tokens/tokens.css and 02-fonts/fonts.css.
+   ========================================================================== */
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; border-radius: 0; }
+html, body { background: var(--vy-paper); color: var(--vy-ink); }
+body { font-family: var(--vy-font-sans); -webkit-font-smoothing: antialiased; }
+img, svg { display: block; }
+
+/* Typographic modes, applied on a page/section wrapper (see CLAUDE-PROMPT §2.3) */
+.vy-type-app     { font-family: 'Inter', system-ui, sans-serif;           font-optical-sizing: auto; font-feature-settings: var(--vy-features-on); }
+.vy-type-text    { font-family: 'Inter Text', 'Inter', system-ui, sans-serif;    font-feature-settings: var(--vy-features-off); }
+.vy-type-display { font-family: 'Inter Display', 'Inter', system-ui, sans-serif; font-feature-settings: var(--vy-features-on); }
+.vy-mono, .mono  { font-family: var(--vy-font-mono); text-transform: uppercase; letter-spacing: var(--vy-ls-mono); }
+
+/* ---------- Layout ---------- */
+.vy-wrap { width: 100%; max-width: var(--vy-container); margin-inline: auto; position: relative; z-index: var(--vy-z-content); }
+.vy-section { position: relative; overflow: hidden; }
+.vy-section > .vy-bg { position: absolute; inset: 0; pointer-events: none; z-index: var(--vy-z-bg); }
+
+/* Spec bar: the mono corner labels at the top of every section ("UNLOCKER / 03" ... "SINGLE REQUEST · ...") */
+.vy-specbar { display: flex; justify-content: space-between; align-items: center; font: 400 10px/1 var(--vy-font-mono);
+  text-transform: uppercase; letter-spacing: var(--vy-ls-mono); opacity: .68; padding-bottom: 22px; border-bottom: 1px solid var(--vy-line); }
+.vy-specbar span { display: inline-flex; align-items: center; gap: 8px; }
+.vy-specbar i { width: 7px; height: 7px; background: var(--vy-ink); display: inline-block; }
+.vy-specbar--plain { border-bottom: 0; }                        /* how-veyora-works, tiers, feeds-how */
+.vy-specbar--dark { color: var(--vy-paper); opacity: .7; border-bottom-color: var(--vy-line-dark); }
+.vy-specbar--dark i { background: var(--vy-lilac); }
+
+/* Section label chip: [■] LABEL  (yellow square + white mono label) */
+.vy-label-chip { display: inline-flex; align-items: stretch; }
+.vy-label-chip__sq { width: 28px; height: 28px; background: var(--vy-yellow); border: 1px solid var(--vy-ink); display: flex; align-items: center; justify-content: center; }
+.vy-label-chip__sq i { width: 7px; height: 7px; background: var(--vy-ink); display: block; }
+.vy-label-chip__sq--lilac { background: var(--vy-lilac); }
+.vy-label-chip__txt { height: 28px; padding: 0 12px; border: 1px solid var(--vy-ink); border-left: 0; background: var(--vy-white);
+  display: flex; align-items: center; font: 400 11px/1 var(--vy-font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--vy-ink); }
+.vy-label-chip--dark .vy-label-chip__txt { background: var(--vy-ink-2-alt); color: var(--vy-paper); border-color: #4A4A4A; }
+.vy-label-chip--s .vy-label-chip__sq { width: 26px; height: 26px; }      /* auth "NEW ACCOUNT" */
+.vy-label-chip--s .vy-label-chip__sq i { width: 6px; height: 6px; }
+.vy-label-chip--s .vy-label-chip__txt { height: 26px; padding: 0 10px; font-size: 10px; background: var(--vy-paper); }
+
+/* Yellow highlight bar technique */
+.vy-hl-block { background: var(--vy-yellow); display: inline-block; padding: 1px 10px 4px; margin-top: 4px; border-bottom: 2px solid var(--vy-ink); }   /* own line (Unlocker) */
+.vy-hl-inline { background: var(--vy-yellow); display: inline-block; padding: 0 10px 3px; border-bottom: 2px solid var(--vy-ink); }               /* inline (How Veyora works) */
+.vy-hl-under { position: relative; display: inline-block; isolation: isolate; }                                                                                     /* auth "5M": 12px bar behind the baseline */
+.vy-hl-under::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: var(--vy-yellow); z-index: -1; }
+
+/* ---------- Buttons (square, mono, uppercase, arrow glyph on the right) ---------- */
+.vy-btn { display: inline-flex; align-items: center; justify-content: space-between; gap: 16px; height: 46px; padding: 0 18px;
+  font: 400 11.5px/1 var(--vy-font-mono); letter-spacing: .07em; text-transform: uppercase; text-decoration: none;
+  border: 1px solid var(--vy-ink); cursor: pointer; transition: background-color var(--vy-dur-fast) var(--vy-ease), color var(--vy-dur-fast) var(--vy-ease); }
+.vy-btn--sm { height: 40px; padding: 0 16px; font-size: 12px; letter-spacing: .06em; gap: 18px; }   /* nav CTA */
+.vy-btn--lg { height: 56px; padding: 0 22px; font-size: 13px; letter-spacing: .06em; gap: 18px; }  /* hero + footer CTAs */
+.vy-btn--block { width: 100%; height: 48px; padding: 0 18px; font-size: 12px; }                    /* form submit, tier card CTA */
+.vy-btn .ar { font-size: 13px; }
+.vy-btn--primary { background: var(--vy-ink); color: var(--vy-paper); }
+.vy-btn--primary .ar { color: var(--vy-yellow); }
+.vy-btn--secondary { background: var(--vy-white); color: var(--vy-ink); }          /* on paper: --line variant uses paper fill */
+.vy-btn--secondary.on-paper { background: var(--vy-paper); }
+.vy-btn--secondary.on-yellow { background: var(--vy-yellow); }
+.vy-btn--yellow { background: var(--vy-yellow); color: var(--vy-ink); border-color: var(--vy-yellow); }   /* on ink */
+.vy-btn--yellow-xl { height: 50px; padding: 0 24px; font-size: 12.5px; font-weight: 500; }               /* custom SLA CTA */
+/* States (defined for the system; not visible in static screens) */
+.vy-btn--primary:hover { background: var(--vy-yellow); color: var(--vy-ink); }
+.vy-btn--primary:hover .ar { color: var(--vy-ink); }
+.vy-btn--secondary:hover { background: var(--vy-yellow); }
+.vy-btn--yellow:hover { background: var(--vy-white); border-color: var(--vy-white); }
+.vy-btn:active { transform: translateY(1px); }
+.vy-btn:focus-visible { outline: 2px solid var(--vy-ink); outline-offset: 2px; }
+.vy-on-ink .vy-btn:focus-visible, .vy-btn--yellow:focus-visible { outline-color: var(--vy-yellow); }
+.vy-btn:disabled, .vy-btn[aria-disabled="true"] { opacity: .4; cursor: not-allowed; transform: none; }
+.vy-btn--primary:disabled:hover { background: var(--vy-ink); color: var(--vy-paper); }
+
+/* ---------- Chips ---------- */
+.vy-chip { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; border: 1px solid var(--vy-ink); background: var(--vy-paper);
+  font: 400 11px/1 var(--vy-font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--vy-ink); }
+.vy-chip--active { background: var(--vy-yellow); }
+.vy-chip .sq { width: 7px; height: 7px; background: var(--vy-ink); display: inline-block; }
+.vy-chip-row { display: flex; }
+.vy-chip-row > .vy-chip + .vy-chip { margin-left: -1px; }            /* joined strip: shared 1px borders */
+.vy-chip--meta { height: 22px; padding: 0 7px; gap: 6px; font-size: 9.5px; letter-spacing: .05em; background: var(--vy-white); }
+.vy-chip--meta .dot { width: 6px; height: 6px; display: inline-block; background: var(--vy-yellow); border: 1px solid var(--vy-ink); }
+.vy-chip--table { height: 21px; padding: 0 7px; gap: 5px; font-size: 9.5px; letter-spacing: .05em; background: var(--vy-white); }
+.vy-badge { font: 400 10px/1 var(--vy-font-mono); letter-spacing: .07em; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--vy-ink); display: inline-flex; align-items: center; gap: 6px; }
+.vy-badge--lilac { background: var(--vy-lilac); } .vy-badge--yellow { background: var(--vy-yellow); } .vy-badge--white { background: var(--vy-white); }
+
+/* ---------- Tabs (joined, square) ---------- */
+.vy-tabs { display: inline-flex; align-items: stretch; }
+.vy-tab { height: 34px; padding: 0 16px; border: 1px solid var(--vy-ink); margin-left: -1px; background: var(--vy-white); display: inline-flex; align-items: center; gap: 8px;
+  font: 400 11px/1 var(--vy-font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--vy-ink); white-space: nowrap; cursor: pointer; }
+.vy-tab:first-child { margin-left: 0; }
+.vy-tab[aria-selected="true"], .vy-tab.active { background: var(--vy-yellow); position: relative; z-index: 2; }
+.vy-tab:hover:not(.active):not([aria-selected="true"]) { background: var(--vy-paper); }
+.vy-tab:focus-visible { outline: 2px solid var(--vy-ink); outline-offset: 2px; z-index: 3; }
+.vy-tab--l { height: 38px; padding: 0 18px; }   /* How Veyora works product tabs */
+
+/* ---------- Cards ---------- */
+.vy-card { background: var(--vy-white); border: 1px solid var(--vy-ink); display: flex; flex-direction: column; }
+.vy-card__top { height: 44px; padding: 0 16px; background: var(--vy-paper); border-bottom: 1px solid var(--vy-ink); display: flex; align-items: center; justify-content: space-between;
+  font: 400 10.5px/1 var(--vy-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.vy-card__body { padding: 22px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+.vy-card__foot { height: 36px; padding: 0 14px; border-top: 1px solid var(--vy-ink); display: flex; align-items: center; justify-content: space-between; font: 400 10.5px/1 var(--vy-font-mono); letter-spacing: .05em; }
+.vy-card--ink { background: var(--vy-ink); color: var(--vy-paper); }
+.vy-card--ink .vy-card__top, .vy-card--ink .vy-card__foot { border-color: var(--vy-line-dark); }
+.vy-card--yellow { background: var(--vy-yellow); }
+a.vy-card:hover, .vy-card--link:hover { outline: 1px solid var(--vy-ink); outline-offset: -1px; }  /* doubles the border: 2px feel, no shadow */
+a.vy-card:focus-visible { outline: 2px solid var(--vy-ink); outline-offset: 2px; }
+
+/* Step number squares */
+.vy-snum { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--vy-ink); font: 500 11px/1 var(--vy-font-mono); }
+.vy-snum--1 { background: var(--vy-yellow); } .vy-snum--2 { background: var(--vy-lilac); } .vy-snum--3 { background: var(--vy-ink); color: var(--vy-paper); }
+
+/* Square bullets for lists */
+.vy-li { display: grid; grid-template-columns: 16px 1fr; gap: 10px; align-items: start; font-size: 13.5px; line-height: 1.4; }
+.vy-li .sq { width: 12px; height: 12px; margin-top: 3px; border: 1px solid currentColor; position: relative; display: block; }
+.vy-li .sq::after { content: ""; position: absolute; inset: 2px; background: currentColor; }
+
+/* ---------- Form fields (auth) ---------- */
+.vy-field { margin-bottom: 18px; }
+.vy-field label { display: block; font: 400 10px/1 var(--vy-font-mono); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 7px; }
+.vy-input { width: 100%; height: 46px; border: 1px solid var(--vy-ink); background: var(--vy-paper); padding: 0 14px; font: 400 14px/1 var(--vy-font-sans); color: var(--vy-ink); }
+.vy-input::placeholder { color: var(--vy-ink-a52); opacity: 1; }
+.vy-input:hover { background: var(--vy-white); }
+.vy-input:focus, .vy-input:focus-visible { background: var(--vy-white); outline: 2px solid var(--vy-ink); outline-offset: -2px; }
+.vy-input[aria-invalid="true"] { outline: 2px solid var(--vy-ink); outline-offset: -2px; background: var(--vy-white); }
+.vy-input:disabled { opacity: .5; cursor: not-allowed; }
+.vy-helper { margin-top: 6px; font-size: 12.5px; opacity: .64; }
+.vy-error { margin-top: 6px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--vy-ink); }
+.vy-error::before { content: ""; width: 8px; height: 8px; background: var(--vy-lilac); border: 1px solid var(--vy-ink); flex: none; }
+/* Verification box: frames the REAL Cloudflare Turnstile widget */
+.vy-verify { margin-top: 6px; min-height: 54px; border: 1px solid var(--vy-ink); background: var(--vy-paper); padding: 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.vy-verify__l { display: flex; align-items: center; gap: 12px; font: 400 11px/1 var(--vy-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.vy-verify__tag { background: var(--vy-white); border: 1px solid var(--vy-ink); padding: 3px 8px; font: 400 9px/1 var(--vy-font-mono); letter-spacing: .07em; text-transform: uppercase; opacity: .8; }
+
+/* ---------- Tables ---------- */
+.vy-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.vy-table thead tr { background: var(--vy-ink); color: var(--vy-paper); }
+.vy-table th { font: 500 11px/1 var(--vy-font-mono); letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 13px 20px; }
+.vy-table td { font: 400 12.5px/1.4 var(--vy-font-mono); padding: 14px 20px; border-bottom: 1px solid var(--vy-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.vy-table tbody tr:nth-child(even) { background: var(--vy-row-alt); }
+.vy-table tbody tr:hover { background: var(--vy-paper); }
+.vy-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ---------- Code block (palette syntax colours only) ---------- */
+.vy-code { padding: 14px 16px; border: 1px solid var(--vy-line-dark); background: var(--vy-ink); color: var(--vy-paper); font: 400 12.2px/1.72 var(--vy-font-mono); white-space: pre; overflow-x: auto; }
+.vy-code .tk-cmd, .vy-code .tk-key { color: var(--vy-yellow); }
+.vy-code .tk-flag { color: var(--vy-lilac); }
+.vy-code .tk-url { color: var(--vy-paper); }
+.vy-code .tk-str { color: var(--vy-paper); opacity: .92; }
+.vy-code .tk-dim { color: var(--vy-paper); opacity: .48; }
+
+/* ---------- Ticker ---------- */
+.vy-ticker { height: 48px; background: var(--vy-ink); color: var(--vy-paper); display: flex; align-items: center; white-space: nowrap; overflow: hidden;
+  font: 400 12px/1 var(--vy-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.vy-ticker__lab { background: var(--vy-yellow); color: var(--vy-ink); height: 100%; display: flex; align-items: center; padding: 0 18px 0 56px; border-right: 1px solid var(--vy-ink); flex: none; position: relative; z-index: 2; }
+.vy-ticker__track { display: flex; gap: 26px; padding-left: 28px; animation: vy-ticker var(--vy-ticker-duration, 60s) linear infinite; }
+.vy-ticker__track i { display: inline-block; width: 6px; height: 6px; background: var(--vy-lilac); margin-left: 26px; position: relative; top: -1px; }
+.vy-ticker:hover .vy-ticker__track { animation-play-state: paused; }
+@keyframes vy-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .vy-ticker__track { animation: none; } }
+
+/* ---------- Links ---------- */
+.vy-link { color: inherit; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+.vy-link:hover { background: var(--vy-yellow); color: var(--vy-ink); }
+.vy-link:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* ---------- Pixel spinner ---------- */
+.vy-spinner { width: 18px; height: 18px; } /* use 04-illustrations/spinner/pixel-spinner-animated.svg inline */
+/* prefers-reduced-motion: swap the animated SVG for pixel-spinner-static.svg (SMIL ignores CSS). */

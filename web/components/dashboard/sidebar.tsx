@@ -1,84 +1,100 @@
+// Dashboard sidebar (CLAUDE-PROMPT.md §5.1, reference 01-dashboard-overview-a.html).
+// Markup/classes restyled; behaviour (active route, data-unlocker-nav group hide/show,
+// data-logout handler in public/auth.js) is unchanged.
 export type DashboardPage =
   | 'overview' | 'feeds' | 'deliveries' | 'api-keys' | 'playground' | 'proxies' | 'usage' | 'billing';
 
 type NavItem = { page: DashboardPage; href: string; icon: string; label: string; unlocker?: boolean };
 
 const GROUPS: { label: string; items: NavItem[] }[] = [
-  { label: 'Workspace', items: [{ page: 'overview', href: '/account', icon: 'dash', label: 'Overview' }] },
+  { label: 'Workspace', items: [{ page: 'overview', href: '/account', icon: 'nav-overview', label: 'Overview' }] },
   {
     label: 'Data Feeds',
     items: [
-      { page: 'feeds', href: '/account/feeds', icon: 'database', label: 'My feeds' },
-      { page: 'deliveries', href: '/account/feeds/deliveries', icon: 'timer', label: 'Deliveries' },
+      { page: 'feeds', href: '/account/feeds', icon: 'nav-my-feeds', label: 'My feeds' },
+      { page: 'deliveries', href: '/account/feeds/deliveries', icon: 'nav-deliveries', label: 'Deliveries' },
     ],
   },
   {
     label: 'Web Unlocker',
     items: [
-      { page: 'api-keys', href: '/account/api-keys', icon: 'key', label: 'API keys', unlocker: true },
-      { page: 'playground', href: '/account/playground', icon: 'terminal', label: 'Playground', unlocker: true },
+      { page: 'api-keys', href: '/account/api-keys', icon: 'nav-api-keys', label: 'API keys', unlocker: true },
+      { page: 'playground', href: '/account/playground', icon: 'nav-playground', label: 'Playground', unlocker: true },
     ],
   },
-  { label: 'Proxies', items: [{ page: 'proxies', href: '/account/proxies', icon: 'router', label: 'Proxy setup' }] },
+  { label: 'Proxies', items: [{ page: 'proxies', href: '/account/proxies', icon: 'nav-proxy-setup', label: 'Proxy setup' }] },
   {
     label: 'Account',
     items: [
-      { page: 'usage', href: '/account/usage', icon: 'chart', label: 'Usage' },
-      { page: 'billing', href: '/account/billing', icon: 'coins', label: 'Billing' },
+      { page: 'usage', href: '/account/usage', icon: 'nav-usage', label: 'Usage' },
+      { page: 'billing', href: '/account/billing', icon: 'nav-billing', label: 'Billing' },
     ],
   },
 ];
 
+const ICON = (name: string) => `/design/04-illustrations/icons/dashboard-nav/${name}.svg`;
+
 export function DashboardSidebar({ active }: { active: DashboardPage }) {
   return (
     <aside className="side">
-      <a className="brand" href="/" aria-label="Veyora home">
-        <svg className="brand__mark" aria-hidden="true">
-          <use href="#i-logo" />
-        </svg>
-        <span>veyora</span>
-      </a>{' '}
-      <nav className="snav" aria-label="Dashboard">
-        {GROUPS.map((group) => (
-          <div className="snav__group" key={group.label} data-unlocker-nav={group.items.every((i) => i.unlocker) ? '' : undefined} hidden={group.items.every((i) => i.unlocker) || undefined}>
-            <p className="snav__label">{group.label}</p>
-            {group.items.map((item) => (
-              <a
-                key={item.page}
-                className={`snav__a${item.page === active ? ' is-active' : ''}`}
-                href={item.href}
-                aria-current={item.page === active ? 'page' : undefined}
-              >
-                <svg className="ic" aria-hidden="true">
-                  <use href={`#i-${item.icon}`} />
-                </svg>
-                {item.label}
-              </a>
-            ))}
-          </div>
-        ))}
-      </nav>
+      <div>
+        <div className="sb-brand">
+          <a href="/" aria-label="Veyora home">
+            <img
+              src="/design/03-logo/3d/veyora-logo-3d-ink-24h@1x.png"
+              srcSet="/design/03-logo/3d/veyora-logo-3d-ink-24h@1x.png 1x, /design/03-logo/3d/veyora-logo-3d-ink-24h@2x.png 2x"
+              height={24}
+              alt="Veyora"
+            />
+          </a>
+          <span className="sb-ver mono">V1</span>
+        </div>
+        <nav className="snav" aria-label="Dashboard">
+          {GROUPS.map((group) => (
+            <div
+              className="snav__group"
+              key={group.label}
+              data-unlocker-nav={group.items.every((i) => i.unlocker) ? '' : undefined}
+              hidden={group.items.every((i) => i.unlocker) || undefined}
+            >
+              <p className="snav__label mono">{group.label}</p>
+              {group.items.map((item) => (
+                <a
+                  key={item.page}
+                  className={`snav__a${item.page === active ? ' is-active' : ''}`}
+                  href={item.href}
+                  aria-current={item.page === active ? 'page' : undefined}
+                >
+                  <span className="ni-l">
+                    <img className="ic" src={ICON(item.icon)} alt="" aria-hidden="true" />
+                    {item.label}
+                  </span>
+                  {item.page === active && <span className="ni-ar">↗</span>}
+                </a>
+              ))}
+            </div>
+          ))}
+        </nav>
+      </div>
       <div className="side__foot">
         <a className="snav__a" href="/support">
-          <svg className="ic" aria-hidden="true">
-            <use href="#i-support" />
-          </svg>
-          Support
-        </a>{' '}
-        <div className="me">
-          <span className="me__av" data-field="initial" aria-hidden="true">
-            V
-          </span>{' '}
-          <span className="me__txt">
-            <small>Signed in as</small>
-            <span className="me__mail" data-field="email" />
+          <span className="ni-l">
+            <img className="ic" src={ICON('nav-support')} alt="" aria-hidden="true" />
+            Support
           </span>
-        </div>{' '}
-        <button className="btn btn--ghost btn--block" type="button" data-logout="">
-          <svg className="ic" aria-hidden="true">
-            <use href="#i-logout" />
-          </svg>
-          <span className="lbl">Log out</span>
+        </a>
+        <div className="user-box">
+          <span className="user-sq mono" data-field="initial" aria-hidden="true">
+            V
+          </span>
+          <span className="user-meta">
+            <span className="user-lbl mono">Signed in as</span>
+            <span className="user-email" data-field="email" />
+          </span>
+        </div>
+        <button className="logout-btn" type="button" data-logout="">
+          <span>Log out</span>
+          <img className="ic" src={ICON('nav-log-out')} alt="" aria-hidden="true" />
         </button>
       </div>
     </aside>

@@ -1,3 +1,7 @@
+// Second FAQ block (CLAUDE-PROMPT.md §4.8 — no approved screen; the accordion style from
+// §4.8, shared "FAQ / 07" section number per spec). No `id="faq"` here — `pricing.tsx`'s
+// FAQ section already holds that id, and two elements must not share one HTML id; `#faq`
+// still resolves exactly where it always did.
 export const HOME_FAQ = [
   {
     q: 'Which product should I choose?',
@@ -12,30 +16,6 @@ export const HOME_FAQ = [
     a: 'Choose SFTP, Amazon S3, Google Cloud Storage, Snowflake, a webhook or the API, in JSON, CSV, Parquet or JSONL. Each delivery is a full snapshot and is logged in your dashboard.',
   },
   {
-    q: 'How does billing work?',
-    a: 'Data feeds are monthly subscriptions, priced per feed. The Web Unlocker and proxies draw from one prepaid balance: proxy plans load a monthly traffic allowance (8 GB or 40 GB), and you can buy one-off top-ups from $10 in the dashboard.',
-  },
-  {
-    q: 'Does my traffic expire?',
-    a: 'No. Unused traffic rolls over indefinitely. Your balance stays until you use it, whether it came from a plan or a top-up.',
-  },
-  {
-    q: 'What payment methods do you accept?',
-    a: 'Visa, Mastercard, and American Express via Stripe, or USDT on BNB Smart Chain (BEP-20). All payments are prepaid.',
-  },
-  {
-    q: 'Can I cancel or change plans anytime?',
-    a: 'Yes. Upgrade, downgrade, or cancel from the dashboard. No contracts, no lock-in. Any remaining balance stays in your account.',
-  },
-  {
-    q: 'How do I get support?',
-    a: 'Email support is included on every plan. Pro and Enterprise customers get priority response. We typically respond within a few hours during business days.',
-  },
-  {
-    q: 'What happens after I create an account?',
-    a: 'You get $1.00 free credit immediately, enough for 5,000 Web Unlocker requests. No card needed. Your API credentials and proxy gateway details appear in the dashboard.',
-  },
-  {
     q: 'Can you build a feed for a site you do not cover?',
     a: 'Yes. Tell us the site and the fields you need, and we set up a dedicated pipeline with the schedule and format you want. New sources are added every month.',
   },
@@ -43,27 +23,41 @@ export const HOME_FAQ = [
 
 export function HomeFaq() {
   return (
-    <section className="faq container" id="faq" aria-labelledby="faq-title">
-      <p className="faq__eyebrow">
-        <span className="pill">
-          <span className="dot" />
-          Data feeds, Web Unlocker &amp; proxy FAQ
-        </span>
-      </p>
-      <h2 className="h2" id="faq-title" data-split="">
-        Questions, <em className="serif">answered.</em>
-      </h2>
-      <div className="faq__list">
-        {HOME_FAQ.map((item) => (
-          <details className="faq__item" key={item.q}>
-            <summary>{item.q}</summary>
-            <p>{item.a}</p>
-          </details>
-        ))}
+    <section className="faq-sec vy-type-text" aria-labelledby="faq2-title">
+      <div className="vy-wrap">
+        <div className="vy-specbar">
+          <span>
+            <i />
+            FAQ / 07
+          </span>
+          <span>Data feeds, Web Unlocker &amp; proxy FAQ</span>
+        </div>
+        <header className="sec-head">
+          <h2 id="faq2-title">Questions, answered.</h2>
+        </header>
+        <div className="faq__list">
+          {HOME_FAQ.map((item) => (
+            <details className="faq__item" key={item.q}>
+              <summary>
+                {item.q}
+                <span className="faq__toggle" aria-hidden="true" />
+              </summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </div>
+        <p className="faq__more">
+          Still unsure?{' '}
+          <a className="vy-link" href="/support">
+            Ask us anything
+          </a>{' '}
+          or read the{' '}
+          <a className="vy-link" href="/docs">
+            documentation
+          </a>
+          .
+        </p>
       </div>
-      <p className="faq__more">
-        Still unsure? <a href="/support">Ask us anything</a> or read the <a href="/docs">documentation</a>.
-      </p>
     </section>
   );
 }

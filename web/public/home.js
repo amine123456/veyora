@@ -82,7 +82,9 @@ if (root) {
     table.classList.remove('is-swap');
     void table.offsetWidth;
     table.classList.add('is-swap');
-    fieldList.textContent = `All fields: ${d.fields.map(label).join(' · ')}`;
+    const strong = Object.assign(document.createElement('strong'), { textContent: 'All fields' });
+    const rest = Object.assign(document.createElement('span'), { textContent: d.fields.map(label).join(' · ') });
+    fieldList.replaceChildren(strong, rest);
   }
 
   // The server exposes samples through the feeds API; the static copy covers local dev.

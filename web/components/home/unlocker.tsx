@@ -1,124 +1,223 @@
+// Web Unlocker (CLAUDE-PROMPT.md §4.6, reference 03-web-unlocker-section-a.html).
+// Copy, code sample and field descriptions are all live; only markup/classes restyled.
+const CHECK = (
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" shapeRendering="crispEdges" aria-hidden="true">
+    <path d="M2 6L5 9L10 3" stroke="#161616" strokeWidth="1.8" strokeLinecap="square" />
+  </svg>
+);
+
+const FEATURES = [
+  {
+    title: '$0.20 per 1,000 requests',
+    desc: 'A fraction of what most web-scraping APIs charge. CAPTCHA pages add $0.005 each. Paid from your prepaid wallet.',
+  },
+  {
+    title: '5,000 free requests on signup',
+    desc: 'Every account starts with $1.00 free credit. No card, no commitment — just sign up and start scraping.',
+  },
+  {
+    title: 'Blocked? It retries automatically',
+    desc: 'Blocked requests are retried on new residential and mobile IPs until the page comes back.',
+  },
+  {
+    title: 'Sessions keep their cookies',
+    desc: 'Name a session to keep the same exit and cookies across requests.',
+  },
+];
+
 export function HomeUnlocker() {
   return (
-    <>
-      <section className="unlocker container" id="unlocker" aria-labelledby="unlocker-title">
-        <div className="unlocker__grid">
-          <div className="unlocker__copy">
-            <p className="pill">
-              <span className="dot" />
-              Web Unlocker API
-            </p>
-            <h2 className="h2" id="unlocker-title" data-split="">
-              Send a URL. <em className="serif">Get the page back.</em>
+    <section className="unlocker-sec vy-type-text" id="unlocker" aria-labelledby="unlocker-title">
+      <div className="vy-wrap">
+        <div className="vy-specbar">
+          <span>
+            <i />
+            Unlocker / 05
+          </span>
+          <span>Single request · Residential &amp; mobile retries · $0.20 / 1,000 req</span>
+        </div>
+
+        <div className="unl-grid">
+          <div className="unl-left">
+            <span className="vy-label-chip">
+              <span className="vy-label-chip__sq">
+                <i />
+              </span>
+              <span className="vy-label-chip__txt">Web Unlocker API</span>
+            </span>
+
+            <h2 id="unlocker-title">
+              Send a URL.
+              <br />
+              <span className="vy-hl-block">Get the page back.</span>
             </h2>
-            <p className="sub sub--ink sub--left">
-              The Web Unlocker API fetches a public page for you with a single request. Just{' '}
-              <b>$0.20 per 1,000 requests</b> — significantly less than most alternatives. Every new account gets{' '}
-              <b>$1.00 free credit</b>, enough for 5,000 requests with no payment needed.
+
+            <p className="unl-body">
+              The Web Unlocker API fetches a public page for you with a single request. Just <strong>$0.20 per 1,000 requests</strong>{' '}
+              — significantly less than most alternatives. Every new account gets <strong>$1.00 free credit</strong>, enough for
+              5,000 requests with no payment needed.
             </p>
-            <ul className="ufeat">
-              <li data-reveal="">
-                <i>
-                  <svg>
-                    <use href="#i-check" />
-                  </svg>
-                </i>
-                <div>
-                  <b>$0.20 per 1,000 requests</b>
-                  <span>A fraction of what most web-scraping APIs charge. CAPTCHA pages add $0.005 each. Paid from your prepaid wallet.</span>
-                </div>
-              </li>
-              <li data-reveal="" style={{ ['--d' as string]: '70ms' }}>
-                <i>
-                  <svg>
-                    <use href="#i-check" />
-                  </svg>
-                </i>
-                <div>
-                  <b>5,000 free requests on signup</b>
-                  <span>
-                    Every account starts with $1.00 free credit. No card, no commitment — just sign up and start
-                    scraping.
+
+            <div className="feat-list">
+              {FEATURES.map((f) => (
+                <div className="feat-row" key={f.title}>
+                  <span className="chk-sq" aria-hidden="true">
+                    {CHECK}
                   </span>
+                  <div>
+                    <div className="feat-title">{f.title}</div>
+                    <div className="feat-desc">{f.desc}</div>
+                  </div>
                 </div>
-              </li>
-              <li data-reveal="" style={{ ['--d' as string]: '140ms' }}>
-                <i>
-                  <svg>
-                    <use href="#i-check" />
-                  </svg>
-                </i>
-                <div>
-                  <b>Blocked? It retries automatically</b>
-                  <span>Blocked requests are retried on new residential and mobile IPs until the page comes back.</span>
-                </div>
-              </li>
-              <li data-reveal="" style={{ ['--d' as string]: '210ms' }}>
-                <i>
-                  <svg>
-                    <use href="#i-check" />
-                  </svg>
-                </i>
-                <div>
-                  <b>Sessions keep their cookies</b>
-                  <span>Name a session to keep the same exit and cookies across requests.</span>
-                </div>
-              </li>
-            </ul>
-            <div className="cta-row cta-row--left">
-              <a className="btn btn--ink btn--lg" href="/signup">
-                Get an API key
-              </a>{' '}
-              <a className="btn btn--outline btn--lg" href="/docs#unlocker">
-                Read the docs
+              ))}
+            </div>
+
+            <div className="unl-ctas">
+              <a className="vy-btn vy-btn--primary" href="/signup">
+                Get an API key <span className="ar">↗</span>
+              </a>
+              <a className="vy-btn vy-btn--secondary" href="/docs#unlocker">
+                Read the docs <span className="ar">→</span>
               </a>
             </div>
           </div>
-          <div className="ucode" data-reveal="" style={{ ['--d' as string]: '120ms' }}>
-            <p className="well__h well__h--dark">
-              <span>Request</span>
-              <em className="tagv">Example</em>
-            </p>
-            <pre className="ucode__pre" tabIndex={0} aria-label="Example Web Unlocker request">
-              <code>
-                <span className="k">{'curl'}</span>
-                {' -X POST https://veyora.pro/v1/unlock \\\n  -H '}
-                <span className="s">{'"Authorization: Bearer YOUR_API_KEY"'}</span>
-                {' \\\n  -H '}
-                <span className="s">{'"Content-Type: application/json"'}</span>
-                {' \\\n  -d '}
-                <span className="s">{'\'{"url": "https://example.com/", "country": "fr"}\''}</span>
-              </code>
-            </pre>
-            <p className="ucode__resp">
-              <span>
-                <i className="dot" />
-                <b>200 OK</b>
-              </span>
-              <small>page returned · example</small>
-            </p>
-            <div className="ucode__fields">
-              <p className="well__h well__h--dark">
-                <span>Request fields</span>
-              </p>
-              <ul>
-                <li>
-                  <code>url</code>
-                  <span>The page to fetch</span>
-                </li>
-                <li>
-                  <code>country</code>
-                  <span>Optional exit country</span>
-                </li>
-                <li>
-                  <code>session</code>
-                  <span>Optional name to keep the exit and cookies</span>
-                </li>
-              </ul>
+
+          <div className="unl-right">
+            <div className="code-mat">
+              <img className="mat-bg" src="/design/05-backgrounds/sections/unlocker-code-mat-lilac-bars-620x533.svg" alt="" aria-hidden="true" />
+
+              <div className="mat-top mono">
+                <span className="l">
+                  <i />
+                  POST /v1/unlock
+                </span>
+                <span className="r">Prepaid · No contract</span>
+              </div>
+
+              <div className="code-panel">
+                <div className="cp-head">
+                  <span className="cp-req mono">
+                    <i />
+                    Request
+                  </span>
+                  <span className="cp-ex mono">Example</span>
+                </div>
+
+                <div className="cp-code-box">
+                  <pre className="cp-code" tabIndex={0} aria-label="Example Web Unlocker request">
+                    <span className="tk-cmd">curl</span> <span className="tk-flag">-X POST</span>{' '}
+                    <span className="tk-url">https://veyora.pro/v1/unlock</span> <span className="tk-dim">{'\\'}</span>
+                    {'\n  '}
+                    <span className="tk-flag">-H</span> <span className="tk-str">&quot;Authorization: Bearer YOUR_API_KEY&quot;</span>{' '}
+                    <span className="tk-dim">{'\\'}</span>
+                    {'\n  '}
+                    <span className="tk-flag">-H</span> <span className="tk-str">&quot;Content-Type: application/json&quot;</span>{' '}
+                    <span className="tk-dim">{'\\'}</span>
+                    {'\n  '}
+                    <span className="tk-flag">-d</span>{' '}
+                    <span className="tk-str">
+                      &apos;{'{"'}
+                    </span>
+                    <span className="tk-key">url</span>
+                    <span className="tk-str">{'": "https://example.com/", "'}</span>
+                    <span className="tk-key">country</span>
+                    <span className="tk-str">{'": "fr"}\''}</span>
+                  </pre>
+                </div>
+
+                <div className="cp-status">
+                  <span className="st-l">
+                    <i className="st-sq" />
+                    200 OK
+                  </span>
+                  <span className="st-r">page returned · example</span>
+                </div>
+
+                <div className="cp-fields-wrap">
+                  <div className="cp-fields-lbl mono">Request fields</div>
+                  <div className="cp-fields">
+                    <div className="cp-frow">
+                      <span className="cp-fname">url</span>
+                      <span className="cp-fdesc">The page to fetch</span>
+                    </div>
+                    <div className="cp-frow">
+                      <span className="cp-fname">country</span>
+                      <span className="cp-fdesc">Optional exit country</span>
+                    </div>
+                    <div className="cp-frow">
+                      <span className="cp-fname">session</span>
+                      <span className="cp-fdesc">Optional name to keep the exit and cookies</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mat-foot mono">
+                <div className="mf-stats">
+                  <span>5M+ residential IPs</span>
+                  <span>·</span>
+                  <span>Auto-retry</span>
+                </div>
+                <div className="mf-right">
+                  <img src="/design/04-illustrations/icons/ui/ui-mini-bars-46x18.svg" alt="" aria-hidden="true" width={46} height={18} />
+                  <span className="mf-tag">$1.00 free credit</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="retry-card">
+              <div className="rc-head mono">
+                <span className="l">
+                  <i />
+                  Retry &amp; session engine
+                </span>
+                <span className="r">195 countries · Named sessions</span>
+              </div>
+              <div className="rc-body">
+                <div className="rc-flow">
+                  <div className="rc-node">
+                    <div className="rn-top mono">01 / Call</div>
+                    <div className="rn-val">POST URL</div>
+                  </div>
+                  <span className="rc-ar">→</span>
+                  <div className="rc-node">
+                    <div className="rn-top mono">02 / Rotate</div>
+                    <div className="rn-val">Fresh IP</div>
+                  </div>
+                  <span className="rc-ar">→</span>
+                  <div className="rc-node n-hi">
+                    <div className="rn-top mono">03 / Return</div>
+                    <div className="rn-val">200 HTML</div>
+                  </div>
+                </div>
+
+                <div className="rc-metrics">
+                  <div className="rc-m">
+                    <strong>$0.20</strong>
+                    <span>/ 1K req</span>
+                  </div>
+                  <div className="rc-m">
+                    <strong>+$0.005</strong>
+                    <span>CAPTCHA</span>
+                  </div>
+                  <div className="rc-m">
+                    <strong>5,000</strong>
+                    <span>Free req</span>
+                  </div>
+                </div>
+              </div>
+              <div className="rc-bar mono">
+                <div className="tags">
+                  <span>Residential + mobile</span>
+                  <span>·</span>
+                  <span>Sticky cookies</span>
+                </div>
+                <span>Prepaid wallet</span>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

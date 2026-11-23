@@ -1,0 +1,32 @@
+/* Veyora pixel-engraved system: background snippets.
+   Paths are relative to this file. Copy the SVGs into /public/design/ (or similar) and update the URLs. */
+
+/* 1. Graph grid on paper (40px). Extended asset, not in the approved screens. Use sparingly (e.g. docs code areas). SVG tile: patterns/graph-grid-tile-40.svg */
+.vy-bg-graph {
+  background-color: var(--vy-paper);
+  background-image:
+    linear-gradient(to right, rgba(22,22,22,.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(22,22,22,.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+/* 2. Dot grid on paper. Extended asset, not in the approved screens. SVG tile: patterns/dot-grid-tile-16.svg */
+.vy-bg-dots {
+  background-color: var(--vy-paper);
+  background-image: radial-gradient(rgba(22,22,22,.18) 1px, transparent 1.2px);
+  background-size: 16px 16px;
+}
+/* 3. Dashed bar-column field (the signature texture). The light tile repeats horizontally and sits on the section bottom. */
+.vy-bg-bars-light { background: var(--vy-paper) url('patterns/bars-tile-light-280x240.svg') repeat-x left bottom / 280px 240px; }
+.vy-bg-bars-dark  { background: var(--vy-ink)   url('patterns/bars-tile-dark-288x240.svg')  repeat-x left bottom / 288px 240px; }
+/* 4. Dark ink brick grid (custom SLA band). Tile lines are #1C1C1C, the exact result of the reference's #2C2C2C at 28% over ink. */
+.vy-bg-brick-dark { background: var(--vy-ink) url('patterns/brick-tile-dark-144x72.svg') repeat 0 0 / 144px 72px; }
+/* 5. Lilac frame field: flat lilac + faint ink dashed bars (catalog stage, samples stage, auth visual pane, unlocker code mat). */
+.vy-bg-lilac-field { background: var(--vy-lilac) url('fields/bars-field-lilac-620x520.svg') no-repeat center bottom / cover; }
+/* 6. Yellow CTA band (footer): flat yellow; the clouds come from sections/footer-cta-yellow-band-clouds-1440x340.svg */
+.vy-bg-yellow-band { background: var(--vy-yellow) url('sections/footer-cta-yellow-band-clouds-1440x340.svg') no-repeat center bottom / 1440px 340px; }
+
+/* Full-section backgrounds: place as an absolutely positioned layer (z-index:1) under content (z-index:2). Example: */
+.vy-hero-floor { position: absolute; left: 0; right: 0; top: 76px; height: 776px; pointer-events: none; z-index: 1;
+  background: url('sections/home-hero-horizon-floor-1440x776.svg') no-repeat center top / 1440px 776px; }
+/* For viewports wider than 1440 keep the 1440 artwork centred and extend the paper colour; the horizon line in the SVG
+   spans the full 1440 width, so for wide screens also draw a 1.5px ink rule at the same y across the viewport. */

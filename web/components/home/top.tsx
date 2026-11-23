@@ -1,124 +1,85 @@
+import { LIVE_FEEDS } from '@/components/feeds/live-feeds';
+
+// Home hero (CLAUDE-PROMPT.md §4.1, reference 07-home-hero-b.html). Presentation only:
+// the decorative tiles, Lyon/Tokyo clocks, the live lead paragraph, the pipeline panel
+// and the "Get 5,000 free requests" CTA are dropped per the approved design — none of
+// them were backed by a data hook or an i18n key in this codebase (DESIGN-MIGRATION.md),
+// so there is nothing left to keep wired behind the scenes.
+// The ticker's source list is bound to the real feed catalogue (site_name), not hard-coded.
+const TICKER_SOURCES = LIVE_FEEDS.map((f) => f.site_name);
+
 export function HomeTop() {
   return (
-    <>
-      <section className="panel hero" id="top" aria-labelledby="hero-title">
-        <svg className="hero__lines" id="heroLines" aria-hidden="true" />{' '}
-        <span className="tile tile--orange t1" aria-hidden="true">
-          <svg>
-            <use href="#i-sun" />
-          </svg>
-        </span>{' '}
-        <span className="tile tile--teal t2" aria-hidden="true">
-          <svg>
-            <use href="#i-code" />
-          </svg>
-        </span>{' '}
-        <span className="tile tile--blue t3" aria-hidden="true">
-          <svg>
-            <use href="#i-link" />
-          </svg>
-        </span>{' '}
-        <span className="tile tile--dark t4" aria-hidden="true">
-          <svg>
-            <use href="#i-cube" />
-          </svg>
-        </span>{' '}
-        <span className="tile tile--white t5" aria-hidden="true">
-          <svg>
-            <use href="#i-spark" />
-          </svg>
-        </span>{' '}
-        <span className="tile tile--white t6" aria-hidden="true">
-          <svg>
-            <use href="#i-home" />
-          </svg>
-        </span>{' '}
-        <span className="bubble b-fr" aria-hidden="true">
-          <svg>
-            <use href="#f-fr" />
-          </svg>
-          <em>Lyon</em>
-        </span>{' '}
-        <span className="bubble b-jp" aria-hidden="true">
-          <svg>
-            <use href="#f-jp" />
-          </svg>
-          <em>Tokyo</em>
-        </span>{' '}
-        <div className="hero__copy">
-          <p className="chip">
-            <span className="dot" />Data Feeds · Web Unlocker · Residential Proxies
-          </p>
-          <h1 className="h1" id="hero-title" data-split="">
-            Get the web data.{' '}
-            <br className="br-d" />
-            <span className="y">
-              <em className="serif">Skip the scraping.</em>
+    <section className="hero vy-type-text" id="top" aria-labelledby="hero-title">
+      <img
+        className="hero__bg"
+        src="/design/05-backgrounds/sections/home-hero-horizon-floor-1440x776.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <div className="hero__copy">
+        <div className="vy-chip-row live">
+          <span className="vy-chip vy-chip--active">
+            <i className="sq" />
+            Live
+          </span>
+          <span className="vy-chip">2.4M records collected daily</span>
+          <span className="vy-chip">26 live sources</span>
+          <span className="vy-chip">99.8% delivery success</span>
+        </div>
+        <h1 id="hero-title">
+          Get the web data.
+          <br />
+          Skip the scraping.
+        </h1>
+        <div className="tiers">
+          <a className="tier on" href="/data-feeds">
+            <div className="top mono">
+              <span>We do all of it</span>
+              <span>↗</span>
+            </div>
+            <div className="nm">Data Feeds</div>
+            <div className="pr mono">From €100 / month per feed</div>
+          </a>
+          <a className="tier" href="/web-unlocker">
+            <div className="top mono">
+              <span>We handle the blocks</span>
+              <span>↗</span>
+            </div>
+            <div className="nm">Web Unlocker</div>
+            <div className="pr mono">$0.20 per 1,000 requests</div>
+          </a>
+          <a className="tier" href="/residential-proxies">
+            <div className="top mono">
+              <span>You run the scraper</span>
+              <span>↗</span>
+            </div>
+            <div className="nm">Residential Proxies</div>
+            <div className="pr mono">$29 / month for 8 GB</div>
+          </a>
+        </div>
+        <div className="ctas">
+          <a className="vy-btn vy-btn--primary vy-btn--lg" href="/data-feeds">
+            Browse data feeds <span className="ar">↗</span>
+          </a>
+          <a className="vy-btn vy-btn--secondary vy-btn--lg" href="/signup">
+            Start free
+          </a>
+        </div>
+        <p className="note mono">$1.00 free credit on signup · No credit card required</p>
+      </div>
+      <div className="vy-ticker">
+        <span className="vy-ticker__lab">Live sources</span>
+        <div className="vy-ticker__track" aria-hidden="true">
+          {[...TICKER_SOURCES, ...TICKER_SOURCES].map((name, i) => (
+            <span key={i} style={{ display: 'contents' }}>
+              {i > 0 && <i />}
+              <span>{name}</span>
             </span>
-          </h1>
-          <p className="sub">
-            Ready-made datasets from sites that block scrapers, delivered to your pipeline every
-            morning. Need something custom? Use our Web Unlocker API or 5 million residential IPs.
-          </p>
-          <div className="cta-row">
-            <a className="btn btn--yellow btn--lg" href="/data-feeds">
-              Browse data feeds
-            </a>{' '}
-            <a className="btn btn--ghost-dark btn--lg" href="/signup">
-              Get 5,000 free requests
-            </a>
-          </div>
-          <p className="hero__pill">
-            2.4 million records collected daily · 26 live sources · delivered to your pipeline every morning.
-          </p>
+          ))}
         </div>
-        <div
-          className="dash-wrap"
-          role="img"
-          aria-label="Data pipeline: sources like mobile.de, LaCentrale, car.gr feed into Veyora and deliver structured data via SFTP, S3, Snowflake, and API."
-        >
-          <div className="dash dash--pipeline" aria-hidden="true">
-            <div className="pipe__col pipe__sources">
-              <div className="dash__h"><b>Sources</b><span>12+ live</span></div>
-              <ul className="pipe__logos">
-                <li className="is-on"><span className="pipe__dot pipe__dot--green" />mobile.de<span>1.2M</span></li>
-                <li><span className="pipe__dot pipe__dot--green" />LaCentrale<span>782K</span></li>
-                <li><span className="pipe__dot pipe__dot--green" />car.gr<span>245K</span></li>
-                <li><span className="pipe__dot pipe__dot--green" />Milanuncios<span>198K</span></li>
-                <li><span className="pipe__dot pipe__dot--blue" />QuintoAndar<span>44K</span></li>
-                <li><span className="pipe__dot pipe__dot--amber" />Capterra<span>8K</span></li>
-              </ul>
-            </div>
-            <div className="pipe__col pipe__center">
-              <div className="dash__h"><b>Veyora Pipeline</b><span>today</span></div>
-              <div className="pipe__stats">
-                <div><small>Records collected</small><b>2.4M</b></div>
-                <div><small>Sources crawled</small><b>26</b></div>
-                <div><small>Delivery success</small><b>99.8%</b></div>
-              </div>
-              <div className="pipe__flow">
-                <span className="pipe__step">Crawl</span>
-                <span className="pipe__arrow">→</span>
-                <span className="pipe__step">Clean</span>
-                <span className="pipe__arrow">→</span>
-                <span className="pipe__step">Deliver</span>
-                <span className="pipe__packets">
-                  <i /><i /><i />
-                </span>
-              </div>
-            </div>
-            <div className="pipe__col pipe__output">
-              <div className="dash__h"><b>Delivery</b><span>daily</span></div>
-              <ul className="pipe__methods">
-                <li className="is-on"><span className="pipe__dot pipe__dot--green" />SFTP<small>pushed 06:00</small></li>
-                <li><span className="pipe__dot pipe__dot--green" />Amazon S3<small>pushed 06:02</small></li>
-                <li><span className="pipe__dot pipe__dot--blue" />Snowflake<small>loaded 06:05</small></li>
-                <li><span className="pipe__dot pipe__dot--amber" />API<small>ready</small></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
+        <span className="sr-only">Live sources: {TICKER_SOURCES.join(', ')}.</span>
+      </div>
+    </section>
   );
 }

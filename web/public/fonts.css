@@ -1,0 +1,36 @@
+/* Veyora pixel-engraved system — self-hosted fonts (SIL OFL 1.1, licences in
+   /fonts/inter/OFL.txt and /fonts/jetbrains-mono/OFL.txt). Ported from the design
+   kit's 02-fonts/fonts.css with paths adjusted to this project's /public/fonts/. */
+
+/* Inter, full variable font (opsz 14–32, wght 100–900). Optical size follows font-size automatically. */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter/inter-variable-opsz-wght.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* Inter "text" cut pinned at opsz 14 (the look of marketing screens 03/04/05/07/08). */
+@font-face {
+  font-family: 'Inter Text';
+  src: url('/fonts/inter/inter-text-opsz14-wght.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* Inter Display cut pinned at opsz 32 (the look of feeds catalog 06 and tiers+samples 09). */
+@font-face {
+  font-family: 'Inter Display';
+  src: url('/fonts/inter/inter-display-opsz32-wght.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* JetBrains Mono variable (wght 100–800). */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono/jetbrains-mono-variable-wght.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}

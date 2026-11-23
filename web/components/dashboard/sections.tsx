@@ -1,72 +1,78 @@
 // Dashboard sections, one per job. Pages compose these; auth.js wires whichever are present.
+// BalanceSection/ProductsSection/DashboardFooter restyled to screen 01
+// (CLAUDE-PROMPT.md §5.2); every data-field/data-* hook auth.js depends on is unchanged.
 
 export function BalanceSection() {
   return (
     <>
-  <section className="hero-card" id="overview" aria-labelledby="balance-title">
-    <div className="hero-card__top">
-      <h2 className="hero-card__label" id="balance-title">
-        <svg className="ic" aria-hidden="true">
-          <use href="#i-wallet" />
-        </svg>
-        Balance
-      </h2>{' '}
-      <span className="status">
-        <i className="dot" />
-        Prepaid balance
-      </span>
-    </div>
-    <p className="balance" data-field="wallet">
-      …
-    </p>
-    <ul className="prices" aria-label="Pricing">
-      <li>
-        <svg className="ic" aria-hidden="true">
-          <use href="#i-internet" />
-        </svg>
-        <span>Residential</span>
-        <b data-field="price-res">…</b>
-      </li>
-      <li data-chip-mobile="" hidden>
-        <svg className="ic" aria-hidden="true">
-          <use href="#i-phone" />
-        </svg>
-        <span>Mobile</span>
-        <b data-field="price-mob">…</b>
-      </li>
-      <li data-chip-unlocker="" hidden>
-        <svg className="ic" aria-hidden="true">
-          <use href="#i-api" />
-        </svg>
-        <span>Web Unlocker</span>
-        <b data-field="price-unl">…</b>
-      </li>
-    </ul>
-    <div className="prepaid" data-prepaid="" hidden>
-      <div className="prepaid__row">
-        <span>Prepaid residential traffic, used before your balance</span>
-        <b data-field="remaining" />
-      </div>
-      <div
-        className="meter"
-        role="progressbar"
-        aria-label="Prepaid traffic used"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={0}
-        data-meter=""
-      >
-        <span className="meter__fill" data-meter-fill="" />
-      </div>
-      <p className="prepaid__note" data-field="usage" />
-    </div>
-    <p className="empty" data-empty="" hidden>
-      <svg className="ic" aria-hidden="true">
-        <use href="#i-alert" />
-      </svg>
-      Your balance is empty. Add funds to start using proxies and the Web Unlocker.
-    </p>
-  </section>{' '}
+      <section className="balance-card" id="overview" aria-labelledby="balance-title">
+        <div className="bal-left">
+          <div className="bal-top">
+            <h2 className="bal-tag mono" id="balance-title">
+              <span className="sq">
+                <img src="/design/04-illustrations/icons/dashboard-product/balance-wallet.svg" alt="" aria-hidden="true" />
+              </span>
+              Balance
+            </h2>
+            <span className="status-chip mono">
+              <i />
+              Prepaid balance
+            </span>
+          </div>
+          <p className="bal-figure" data-field="wallet">
+            …
+          </p>
+          <ul className="rate-row" aria-label="Pricing">
+            <li className="rate-chip">
+              <span className="rc-dot y" />
+              Residential <strong data-field="price-res">…</strong>
+            </li>
+            <li className="rate-chip" data-chip-mobile="" hidden>
+              <span className="rc-dot l" />
+              Mobile <strong data-field="price-mob">…</strong>
+            </li>
+            <li className="rate-chip" data-chip-unlocker="" hidden>
+              <span className="rc-dot" />
+              Web Unlocker <strong data-field="price-unl">…</strong>
+            </li>
+          </ul>
+          <div className="prepaid" data-prepaid="" hidden>
+            <div className="prepaid__row">
+              <span>Prepaid residential traffic, used before your balance</span>
+              <b data-field="remaining" />
+            </div>
+            <div
+              className="meter"
+              role="progressbar"
+              aria-label="Prepaid traffic used"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={0}
+              data-meter=""
+            >
+              <span className="meter__fill" data-meter-fill="" />
+            </div>
+            <p className="prepaid__note" data-field="usage" />
+          </div>
+          <p className="empty" data-empty="" hidden>
+            <svg className="ic" aria-hidden="true">
+              <use href="#i-alert" />
+            </svg>
+            Your balance is empty. Add funds to start using proxies and the Web Unlocker.
+          </p>
+        </div>
+        <div className="bal-right">
+          <img className="mat-art" src="/design/05-backgrounds/sections/dashboard-balance-lilac-mat-310x204.svg" alt="" aria-hidden="true" />
+          <div className="mat-top-row mono">
+            <span className="mat-badge">Wallet / Prepaid</span>
+            <span className="mat-badge yel">Active</span>
+          </div>
+          <div className="mat-bottom-box mono">
+            <span>No monthly lock-in</span>
+            <span>Pay per use</span>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
@@ -670,51 +676,81 @@ export function DeliveriesSection() {
   );
 }
 
+const PRODUCT_ICON = (name: string) => `/design/04-illustrations/icons/dashboard-product/${name}.svg`;
+
 export function ProductsSection() {
   return (
     <>
-    <section className="ov-grid" aria-label="Your products">
-      <a className="ov-card" href="/account/feeds">
-        <span className="chip-ic chip-ic--accent">
-          <svg className="ic" aria-hidden="true">
-            <use href="#i-database" />
-          </svg>
-        </span>
-        <b>Data Feeds</b>
-        <span className="ov-card__stat" data-field="ov-feeds">Structured datasets delivered on schedule</span>
-        <span className="ov-card__go">Manage feeds →</span>
-      </a>
-      <a className="ov-card" href="/account/api-keys" data-unlocker-nav="" hidden>
-        <span className="chip-ic">
-          <svg className="ic" aria-hidden="true">
-            <use href="#i-api" />
-          </svg>
-        </span>
-        <b>Web Unlocker</b>
-        <span className="ov-card__stat" data-field="ov-keys">Send a URL, get the page back</span>
-        <span className="ov-card__go">API keys →</span>
-      </a>
-      <a className="ov-card" href="/account/proxies">
-        <span className="chip-ic">
-          <svg className="ic" aria-hidden="true">
-            <use href="#i-router" />
-          </svg>
-        </span>
-        <b>Proxies</b>
-        <span className="ov-card__stat" data-field="ov-proxy">Residential and mobile IPs</span>
-        <span className="ov-card__go">Proxy setup →</span>
-      </a>
-      <a className="ov-card" href="/account/usage">
-        <span className="chip-ic">
-          <svg className="ic" aria-hidden="true">
-            <use href="#i-chart" />
-          </svg>
-        </span>
-        <b>Usage</b>
-        <span className="ov-card__stat">Requests and spend, last 30 days</span>
-        <span className="ov-card__go">View usage →</span>
-      </a>
-    </section>
+      <section className="cards-grid" aria-label="Your products">
+        <a className="pcard" href="/account/feeds">
+          <div className="pcard-top mono">
+            <span className="idx">01 / Feeds</span>
+            <i style={{ background: 'var(--vy-yellow)' }} />
+          </div>
+          <div className="pcard-body">
+            <span className="picon-box yel">
+              <img src={PRODUCT_ICON('product-data-feeds')} alt="" aria-hidden="true" />
+            </span>
+            <h3>Data Feeds</h3>
+            <p data-field="ov-feeds">Structured datasets delivered on schedule</p>
+          </div>
+          <div className="pcard-foot mono">
+            <span>Manage feeds</span>
+            <span>→</span>
+          </div>
+        </a>
+        <a className="pcard" href="/account/api-keys" data-unlocker-nav="" hidden>
+          <div className="pcard-top mono">
+            <span className="idx">02 / Unlocker</span>
+            <i style={{ background: 'var(--vy-lilac)' }} />
+          </div>
+          <div className="pcard-body">
+            <span className="picon-box lil">
+              <img src={PRODUCT_ICON('product-web-unlocker')} alt="" aria-hidden="true" />
+            </span>
+            <h3>Web Unlocker</h3>
+            <p data-field="ov-keys">Send a URL, get the page back</p>
+          </div>
+          <div className="pcard-foot mono">
+            <span>API keys</span>
+            <span>→</span>
+          </div>
+        </a>
+        <a className="pcard" href="/account/proxies">
+          <div className="pcard-top mono">
+            <span className="idx">03 / Proxies</span>
+            <i style={{ background: 'var(--vy-ink)' }} />
+          </div>
+          <div className="pcard-body">
+            <span className="picon-box">
+              <img src={PRODUCT_ICON('product-proxies')} alt="" aria-hidden="true" />
+            </span>
+            <h3>Proxies</h3>
+            <p data-field="ov-proxy">Residential and mobile IPs</p>
+          </div>
+          <div className="pcard-foot mono">
+            <span>Proxy setup</span>
+            <span>→</span>
+          </div>
+        </a>
+        <a className="pcard" href="/account/usage">
+          <div className="pcard-top mono">
+            <span className="idx">04 / Telemetry</span>
+            <i style={{ background: 'var(--vy-white)' }} />
+          </div>
+          <div className="pcard-body">
+            <span className="picon-box">
+              <img src={PRODUCT_ICON('product-usage')} alt="" aria-hidden="true" />
+            </span>
+            <h3>Usage</h3>
+            <p>Requests and spend, last 30 days</p>
+          </div>
+          <div className="pcard-foot mono">
+            <span>View usage</span>
+            <span>→</span>
+          </div>
+        </a>
+      </section>
     </>
   );
 }
@@ -806,14 +842,18 @@ export function PaymentsSection() {
 
 export function DashboardFooter() {
   return (
-    <>
-  <footer className="foot">
-    <a href="/support">Support</a>
-    <a href="/privacy">Privacy</a>
-    <a href="/terms">Terms</a>
-    <a href="/acceptable-use">Acceptable use</a>
-    <a href="/refund-policy">Refund policy</a>
-  </footer>
-    </>
+    <footer className="foot">
+      <div className="footer-links">
+        <a href="/support">Support</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/acceptable-use">Acceptable use</a>
+        <a href="/refund-policy">Refund policy</a>
+      </div>
+      <div className="footer-right mono">
+        <i />
+        Veyora.pro · Prepaid workspace
+      </div>
+    </footer>
   );
 }

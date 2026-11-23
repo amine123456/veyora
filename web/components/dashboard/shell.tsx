@@ -26,22 +26,28 @@ export function DashboardShell({ page, eyebrow, title, sub, back, action, childr
       <div className="app" data-dashboard="" data-page={page}>
         <DashboardSidebar active={page} />
         <main className="main" id="main">
-          <header className="page-head">
-            <div>
-              {back ? (
-                <a className="page-back" href={back.href}>
-                  ← {back.label}
-                </a>
-              ) : (
-                <p className="eyebrow">{eyebrow}</p>
-              )}
-              <h1>{title}</h1>
-              <p className="page-head__sub">{sub}</p>
-            </div>
-            {action}
-          </header>
-          {children}
-          <DashboardFooter />
+          <img className="main-bg" src="/design/05-backgrounds/sections/dashboard-main-bars-1192x900.svg" alt="" aria-hidden="true" />
+          <div className="main-inner">
+            <header className="page-head">
+              <div>
+                {back ? (
+                  <a className="page-back" href={back.href}>
+                    ← {back.label}
+                  </a>
+                ) : (
+                  <p className="eyebrow mono">
+                    <i />
+                    {eyebrow}
+                  </p>
+                )}
+                <h1>{title}</h1>
+                <p className="page-head__sub">{sub}</p>
+              </div>
+              {action}
+            </header>
+            {children}
+            <DashboardFooter />
+          </div>
         </main>
       </div>
       <LegacyScripts sources={SCRIPTS} />
