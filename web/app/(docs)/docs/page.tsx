@@ -148,7 +148,7 @@ export default function DocsPage() {
               <h3>Your first request in 30 seconds</h3>
               <pre>
                 {
-                  'curl -x gate.veyora.pro:8443 \\\n     -U "your-username:your-password" \\\n     https://httpbin.org/ip'
+                  'curl -x https://gate.veyora.pro:8443 \\\n     -U "your-username:your-password" \\\n     https://httpbin.org/ip'
                 }
               </pre>
               <p>
@@ -188,39 +188,47 @@ export default function DocsPage() {
                   <td>Auth</td>
                   <td>Basic (username:password)</td>
                 </tr>
+                <tr>
+                  <td>Proxy URL</td>
+                  <td>
+                    <code>https://USER:PASS@gate.veyora.pro:8443</code>. Port 8443 is a TLS proxy: write the scheme as{' '}
+                    <code>https://</code>. A plain <code>http://</code> proxy URL on 8443 gets no answer (curl reports
+                    &ldquo;Empty reply from server&rdquo; or &ldquo;Proxy CONNECT aborted&rdquo;).
+                  </td>
+                </tr>
               </tbody>
             </table></div>
             <h3>cURL</h3>
-            <pre>{'curl -x gate.veyora.pro:8443 \\\n     -U "USER:PASS" \\\n     https://example.com'}</pre>
+            <pre>{'curl -x https://gate.veyora.pro:8443 \\\n     -U "USER:PASS" \\\n     https://example.com'}</pre>
             <h3>Python (requests)</h3>
             <pre>
               {
-                'import requests\n\nproxies = {\n    "http":  "http://USER:PASS@gate.veyora.pro:8443",\n    "https": "http://USER:PASS@gate.veyora.pro:8443",\n}\n\nr = requests.get("https://example.com", proxies=proxies)\nprint(r.text)'
+                'import requests\n\nproxies = {\n    "http":  "https://USER:PASS@gate.veyora.pro:8443",\n    "https": "https://USER:PASS@gate.veyora.pro:8443",\n}\n\nr = requests.get("https://example.com", proxies=proxies)\nprint(r.text)'
               }
             </pre>
             <h3>Node.js (undici)</h3>
             <pre>
               {
-                "import { ProxyAgent, fetch } from 'undici';\n\nconst agent = new ProxyAgent('http://USER:PASS@gate.veyora.pro:8443');\nconst res = await fetch('https://example.com', { dispatcher: agent });\nconsole.log(await res.text());"
+                "import { ProxyAgent, fetch } from 'undici';\n\nconst agent = new ProxyAgent('https://USER:PASS@gate.veyora.pro:8443');\nconst res = await fetch('https://example.com', { dispatcher: agent });\nconsole.log(await res.text());"
               }
             </pre>
             <h3>Playwright</h3>
             <pre>
               {
-                "const browser = await chromium.launch({\n  proxy: {\n    server: 'http://gate.veyora.pro:8443',\n    username: 'USER',\n    password: 'PASS',\n  },\n});"
+                "const browser = await chromium.launch({\n  proxy: {\n    server: 'https://gate.veyora.pro:8443',\n    username: 'USER',\n    password: 'PASS',\n  },\n});"
               }
             </pre>
             <h3>Puppeteer</h3>
             <pre>
               {
-                "const browser = await puppeteer.launch({\n  args: ['--proxy-server=http://gate.veyora.pro:8443'],\n});\nconst page = await browser.newPage();\nawait page.authenticate({ username: 'USER', password: 'PASS' });\nawait page.goto('https://example.com');"
+                "const browser = await puppeteer.launch({\n  args: ['--proxy-server=https://gate.veyora.pro:8443'],\n});\nconst page = await browser.newPage();\nawait page.authenticate({ username: 'USER', password: 'PASS' });\nawait page.goto('https://example.com');"
               }
             </pre>
             <h3>Scrapy</h3>
             <pre>
               <span className="cmt">{'# settings.py'}</span>
               {
-                '\nDOWNLOADER_MIDDLEWARES = {\n    "scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware": 1,\n}\nHTTP_PROXY = "http://USER:PASS@gate.veyora.pro:8443"'
+                '\nDOWNLOADER_MIDDLEWARES = {\n    "scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware": 1,\n}\nHTTP_PROXY = "https://USER:PASS@gate.veyora.pro:8443"'
               }
             </pre>{' '}
             <h2 id="targeting">Targeting options</h2>

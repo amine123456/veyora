@@ -76,7 +76,7 @@
 
     <div class="card">
       <h3>Your first request in 30 seconds</h3>
-      <pre>curl -x gate.veyora.pro:8443 \
+      <pre>curl -x https://gate.veyora.pro:8443 \
      -U "your-username:your-password" \
      https://httpbin.org/ip</pre>
       <p>Replace <code>your-username</code> and <code>your-password</code> with the credentials from your dashboard.</p>
@@ -93,10 +93,11 @@
       <tr><td>Port</td><td><code>8443</code></td></tr>
       <tr><td>Protocol</td><td>HTTP / HTTPS (CONNECT) / SOCKS5</td></tr>
       <tr><td>Auth</td><td>Basic (username:password)</td></tr>
+      <tr><td>Proxy URL</td><td><code>https://USER:PASS@gate.veyora.pro:8443</code>. Port 8443 is a TLS proxy: write the scheme as <code>https://</code>. A plain <code>http://</code> proxy URL on 8443 gets no answer (curl reports &ldquo;Empty reply from server&rdquo; or &ldquo;Proxy CONNECT aborted&rdquo;).</td></tr>
     </table>
 
     <h3>cURL</h3>
-    <pre>curl -x gate.veyora.pro:8443 \
+    <pre>curl -x https://gate.veyora.pro:8443 \
      -U "USER:PASS" \
      https://example.com</pre>
 
@@ -104,8 +105,8 @@
     <pre>import requests
 
 proxies = {
-    "http":  "http://USER:PASS@gate.veyora.pro:8443",
-    "https": "http://USER:PASS@gate.veyora.pro:8443",
+    "http":  "https://USER:PASS@gate.veyora.pro:8443",
+    "https": "https://USER:PASS@gate.veyora.pro:8443",
 }
 
 r = requests.get("https://example.com", proxies=proxies)
@@ -114,14 +115,14 @@ print(r.text)</pre>
     <h3>Node.js (undici)</h3>
     <pre>import { ProxyAgent, fetch } from 'undici';
 
-const agent = new ProxyAgent('http://USER:PASS@gate.veyora.pro:8443');
+const agent = new ProxyAgent('https://USER:PASS@gate.veyora.pro:8443');
 const res = await fetch('https://example.com', { dispatcher: agent });
 console.log(await res.text());</pre>
 
     <h3>Playwright</h3>
     <pre>const browser = await chromium.launch({
   proxy: {
-    server: 'http://gate.veyora.pro:8443',
+    server: 'https://gate.veyora.pro:8443',
     username: 'USER',
     password: 'PASS',
   },
@@ -129,7 +130,7 @@ console.log(await res.text());</pre>
 
     <h3>Puppeteer</h3>
     <pre>const browser = await puppeteer.launch({
-  args: ['--proxy-server=http://gate.veyora.pro:8443'],
+  args: ['--proxy-server=https://gate.veyora.pro:8443'],
 });
 const page = await browser.newPage();
 await page.authenticate({ username: 'USER', password: 'PASS' });
@@ -140,7 +141,7 @@ await page.goto('https://example.com');</pre>
 DOWNLOADER_MIDDLEWARES = {
     "scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware": 1,
 }
-HTTP_PROXY = "http://USER:PASS@gate.veyora.pro:8443"</pre>
+HTTP_PROXY = "https://USER:PASS@gate.veyora.pro:8443"</pre>
 
     <!-- ====== TARGETING ====== -->
     <h2 id="targeting">Targeting options</h2>
