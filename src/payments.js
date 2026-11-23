@@ -125,6 +125,13 @@ const publicFiles = new Map([
   ['/verify-email.js', { file: 'verify-email.js', type: 'text/javascript; charset=utf-8' }],
   ['/nav.js', { file: 'nav.js', type: 'text/javascript; charset=utf-8' }],
   ['/docs.css', { file: 'docs.css', type: 'text/css; charset=utf-8' }],
+  ['/tokens.css', { file: 'tokens.css', type: 'text/css; charset=utf-8' }],
+  ['/primitives.css', { file: 'primitives.css', type: 'text/css; charset=utf-8' }],
+  ['/fonts.css', { file: 'fonts.css', type: 'text/css; charset=utf-8' }],
+  ['/site.webmanifest', { file: 'site.webmanifest', type: 'application/manifest+json; charset=utf-8' }],
+  ['/apple-touch-icon-180.png', { file: 'apple-touch-icon-180.png', type: 'image/png' }],
+  ['/android-chrome-192.png', { file: 'android-chrome-192.png', type: 'image/png' }],
+  ['/android-chrome-512.png', { file: 'android-chrome-512.png', type: 'image/png' }],
   ['/robots.txt', { file: 'robots.txt', type: 'text/plain; charset=utf-8' }],
   ['/sitemap.xml', { file: 'sitemap.xml', type: 'application/xml; charset=utf-8' }],
   ['/logo.png', { file: 'logo.png', type: 'image/png' }],
@@ -138,7 +145,7 @@ const publicFiles = new Map([
 // scripts, so that page's policy also lists their exact hashes (from csp-hashes.json).
 function contentSecurityPolicy(scriptHashes = []) {
   const hashes = scriptHashes.map((hash) => ` '${hash}'`).join('');
-  return `default-src 'none'; style-src 'self' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src https://fonts.gstatic.com; script-src 'self'${hashes} https://challenges.cloudflare.com; img-src 'self' data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`;
+  return `default-src 'none'; style-src 'self' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; manifest-src 'self'; script-src 'self'${hashes} https://challenges.cloudflare.com; img-src 'self' data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`;
 }
 
 // The site is the static pages in public/, or a Next.js export (web/out) when SITE_DIR is set.
@@ -205,6 +212,46 @@ async function nextAsset(response, site, pathname, headOnly) {
     'Content-Length': body.length,
     'Cache-Control': 'public, max-age=31536000, immutable',
     'X-Content-Type-Options': 'nosniff',
+  });
+  response.end(headOnly ? undefined : body);
+}
+
+// Design-system files from the site export: artwork under /design/ and self-hosted fonts
+// under /fonts/. Only these types, plain path segments, and nothing outside the folder.
+const SITE_FOLDERS = ['/design/', '/fonts/'];
+const SITE_FOLDER_TYPES = new Map([
+  ['.svg', 'image/svg+xml'],
+  ['.png', 'image/png'],
+  ['.webp', 'image/webp'],
+  ['.jpg', 'image/jpeg'],
+  ['.ico', 'image/x-icon'],
+  ['.woff2', 'font/woff2'],
+  ['.woff', 'font/woff'],
+  ['.css', 'text/css; charset=utf-8'],
+  ['.webmanifest', 'application/manifest+json; charset=utf-8'],
+  ['.txt', 'text/plain; charset=utf-8'],
+]);
+
+async function siteFolderAsset(response, site, pathname, headOnly) {
+  const relative = pathname.slice(1);
+  const type = SITE_FOLDER_TYPES.get(path.posix.extname(relative).toLowerCase());
+  const safe = /^[A-Za-z0-9_~-][A-Za-z0-9._~-]*(\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*)*$/.test(relative) && !relative.includes('..');
+  if (!type || !safe) return json(response, 404, { error: 'Not found' });
+  let body;
+  try {
+    body = await readFile(path.join(site.directory, ...relative.split('/')));
+  } catch (error) {
+    if (error.code === 'ENOENT' || error.code === 'EISDIR') return json(response, 404, { error: 'Not found' });
+    throw error;
+  }
+  response.writeHead(200, {
+    'Content-Type': type,
+    'Content-Length': body.length,
+    // Not fingerprinted, so cached for a day rather than forever.
+    'Cache-Control': 'public, max-age=86400',
+    'X-Content-Type-Options': 'nosniff',
+    // An SVG opened on its own must not be able to run script.
+    'Content-Security-Policy': "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; font-src 'self'",
   });
   response.end(headOnly ? undefined : body);
 }
@@ -529,6 +576,9 @@ export function createPaymentServer(config, { fetchImpl = globalThis.fetch, unlo
       // Pages are looked up by path alone, so /account?paid=1 and /?utm_source=x still resolve.
       const { pathname } = new URL(request.url, 'http://local');
       const asset = publicFiles.get(pathname);
+      if ((request.method === 'GET' || request.method === 'HEAD') && site.exported && SITE_FOLDERS.some((prefix) => pathname.startsWith(prefix))) {
+        return await siteFolderAsset(response, site, pathname, request.method === 'HEAD');
+      }
       if ((request.method === 'GET' || request.method === 'HEAD') && site.exported && pathname.startsWith('/_next/static/')) {
         return await nextAsset(response, site, pathname, request.method === 'HEAD');
       }

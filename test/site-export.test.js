@@ -103,3 +103,39 @@ test('without SITE_DIR the static pages are served and /_next is not', async () 
 test('a SITE_DIR without a built site refuses to start', () => {
   assert.throws(() => createPaymentServer({ ...baseConfig, siteDirectory: path.join(directory, 'nope') }), /build the site first/);
 });
+
+test('design artwork, self-hosted fonts and the new top-level files are served, and nothing else', async () => {
+  await mkdir(path.join(directory, 'design', 'icons'), { recursive: true });
+  await mkdir(path.join(directory, 'fonts', 'inter'), { recursive: true });
+  await writeFile(path.join(directory, 'design', 'icons', 'cube.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
+  await writeFile(path.join(directory, 'design', 'icons', 'notes.md'), 'not a servable type');
+  await writeFile(path.join(directory, 'fonts', 'inter', 'inter.woff2'), 'wOF2');
+  await writeFile(path.join(directory, 'tokens.css'), ':root{}');
+  await writeFile(path.join(directory, 'site.webmanifest'), '{"name":"Veyora"}');
+  await withServer({ ...baseConfig, siteDirectory: directory }, async (port) => {
+    const svg = await get(port, '/design/icons/cube.svg');
+    assert.equal(svg.status, 200);
+    assert.equal(svg.headers['content-type'], 'image/svg+xml');
+    assert.equal(svg.headers['x-content-type-options'], 'nosniff');
+    assert.match(svg.headers['content-security-policy'], /^default-src 'none'/);
+    assert.doesNotMatch(svg.headers['content-security-policy'], /script-src/);
+
+    const font = await get(port, '/fonts/inter/inter.woff2');
+    assert.equal(font.status, 200);
+    assert.equal(font.headers['content-type'], 'font/woff2');
+
+    assert.match((await get(port, '/tokens.css')).headers['content-type'], /^text\/css/);
+    assert.match((await get(port, '/site.webmanifest')).headers['content-type'], /^application\/manifest\+json/);
+
+    assert.equal((await get(port, '/design/icons/notes.md')).status, 404);
+    assert.equal((await get(port, '/design/icons/missing.svg')).status, 404);
+    for (const attempt of ['/design/../csp-hashes.json', '/fonts/%2e%2e/csp-hashes.json', '/design/icons/..%2f..%2fcsp-hashes.json', '/fonts/inter/..\..\index.html']) {
+      assert.equal((await get(port, attempt)).status, 404, attempt);
+    }
+
+    // Pages allow the site's own fonts and manifest.
+    const page = await get(port, '/');
+    assert.match(page.headers['content-security-policy'], /font-src 'self'/);
+    assert.match(page.headers['content-security-policy'], /manifest-src 'self'/);
+  });
+});
