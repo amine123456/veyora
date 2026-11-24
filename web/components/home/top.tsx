@@ -24,7 +24,7 @@ export function HomeTop() {
             Live
           </span>
           <span className="vy-chip">2.4M records collected daily</span>
-          <span className="vy-chip">26 live sources</span>
+          <span className="vy-chip">19 live sources</span>
           <span className="vy-chip">99.8% delivery success</span>
         </div>
         <h1 id="hero-title">

@@ -164,11 +164,21 @@ a.vy-card:focus-visible { outline: 2px solid var(--vy-ink); outline-offset: 2px;
 @media (prefers-reduced-motion: reduce) { .vy-ticker__track { animation: none; } }
 
 /* ---------- Mobile responsiveness ---------- */
+@media (max-width: 1023px) {
+  .vy-wrap { padding-inline: 32px; }
+  .vy-ticker__lab { padding-left: 32px; }
+}
 @media (max-width: 767px) {
   .vy-wrap { padding-inline: 20px; }
   .vy-chip-row { flex-wrap: wrap; }
   .vy-chip-row > .vy-chip + .vy-chip { margin-top: -1px; margin-left: 0; }
-  .vy-ticker__lab { padding-left: 20px; }
+  .vy-ticker { height: 42px; font-size: 11px; }
+  .vy-ticker__lab { padding-left: 16px; padding-right: 14px; font-size: 11px; }
+  .vy-btn--lg { height: 50px; padding: 0 20px; font-size: 12px; }
+}
+@media (max-width: 374px) {
+  .vy-wrap { padding-inline: 16px; }
+  .vy-chip { font-size: 10px; padding: 0 8px; height: 24px; }
 }
 
 /* ---------- Links ---------- */
