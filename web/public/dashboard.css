@@ -347,16 +347,22 @@ code, pre { font-family: var(--font-mono); }
     position: sticky; top: 0; z-index: 30; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 16px 0;
     border-right: 0; border-bottom: 1px solid var(--line); overflow: visible;
   }
-  .brand { padding: 0; }
+  .sb-brand { height: auto; border-bottom: 0; padding: 0; }
   .side__foot { display: contents; }
-  .side__foot .snav__a, .side__foot .me { display: none; }
+  .side__foot .snav__a { display: none; }
+  .side__foot .user-box { display: none; }
+  .side__foot .logout-btn { display: none; }
   .side__foot .btn { width: auto; margin-left: auto; min-height: 38px; padding: 0 14px; }
-  .snav { order: 3; display: flex; flex: 1 0 100%; gap: 6px; padding: 8px 0 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding-inline: 16px; }
+  .snav { order: 3; display: flex; flex-direction: row; flex: 1 0 100%; gap: 6px; padding: 8px 0 10px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding-inline: 16px; -webkit-overflow-scrolling: touch; }
   .snav::-webkit-scrollbar { display: none; }
   .snav__label { display: none; }
-  .snav__a { flex: none; min-height: 38px; padding: 0 14px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface-2); }
-  .snav__a.is-active { border-color: var(--ink); }
+  .snav__group { display: contents; }
+  .snav__a { flex: none; height: 38px; min-height: 38px; padding: 0 14px; border: 1px solid var(--line); background: var(--surface-2); margin-bottom: 0; white-space: nowrap; }
+  .snav__a .ni-ar { display: none; }
+  .snav__a.is-active { border-color: var(--ink); background: var(--accent); }
   .main { padding-top: 24px; }
+  .main-bg { left: 0; }
+  .main-inner { padding: 20px 16px; }
 }
 @media (max-width: 640px) {
   .page-head .btn { width: 100%; }
@@ -450,10 +456,7 @@ code, pre { font-family: var(--font-mono); }
 @media (max-width: 1023px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 599px) { .cards-grid { grid-template-columns: 1fr; } }
 .delivery-current { padding: 12px 14px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); font-size: 14px; }
-@media (max-width: 900px) {
-  .snav__group { display: contents; }
-  .snav__group[hidden] { display: none; }
-}
+/* snav__group mobile rules consolidated into the main 900px block above */
 @media (prefers-reduced-motion: reduce) { .ov-card { transition: none; } .ov-card:hover { transform: none; } }
 
 /* ---------- Delivery setup: method cards, field grid ---------- */

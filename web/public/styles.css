@@ -370,13 +370,24 @@ svg { display: block; }
 
 @media (max-width: 1279px) { .unl-grid { grid-template-columns: 1fr 520px; gap: 40px; } }
 @media (max-width: 1023px) {
-  .unl-grid { grid-template-columns: 1fr; }
+  .unl-grid { grid-template-columns: 1fr; overflow: hidden; }
+  .unl-right { min-width: 0; }
   .rc-body { grid-template-columns: 1fr; }
   .rc-flow { grid-template-columns: 1fr; }
 }
 @media (max-width: 767px) {
   .unl-left h2 { font-size: clamp(34px, 8vw, 44px); }
-  .cp-code { white-space: pre; overflow-x: auto; }
+  .code-mat { padding: 14px; overflow: hidden; }
+  .cp-code { white-space: pre-wrap; word-break: break-all; overflow-x: auto; font-size: 11px; }
+  .cp-frow { grid-template-columns: 80px 1fr; gap: 8px; padding: 10px 12px; }
+  .cp-fname { font-size: 11px; }
+  .cp-fdesc { font-size: 12px; }
+  .mat-foot { flex-wrap: wrap; gap: 8px; font-size: 9px; }
+  .mat-foot .mf-right { gap: 6px; }
+  .mat-foot .mf-tag { font-size: 8px; padding: 2px 5px; }
+  .mat-top { font-size: 9px; flex-wrap: wrap; gap: 6px; }
+  .rc-node .rn-val { font-size: 11px; }
+  .rc-bar { flex-wrap: wrap; gap: 6px; padding: 8px 12px; font-size: 9px; }
 }
 
 /* Still used by /web-unlocker (not yet restyled, step 7.5) */
@@ -1076,4 +1087,11 @@ svg { display: block; }
 .hero-band .hero-note { margin-top: 18px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--vy-paper); opacity: .7; }
 .hero-band .vy-btn--secondary.on-ink { background: transparent; color: var(--vy-paper); border-color: rgba(255, 255, 255, .45); }
 .hero-band .vy-btn--secondary.on-ink:hover { border-color: var(--vy-paper); }
-@media (max-width: 640px) { .hero-band .hero-ctas .vy-btn { flex: 1 1 100%; justify-content: center; } }
+@media (max-width: 767px) {
+  .hero-band { padding-bottom: 36px; }
+  .hero-band h1 { font-size: clamp(28px, 8vw, 44px); }
+  .hero-band .sub { font-size: 15px; padding-inline: 0; }
+  .hero-band .hero-ctas { flex-direction: column; align-items: stretch; gap: 10px; margin-top: 24px; }
+  .hero-band .hero-ctas .vy-btn { justify-content: center; }
+  .hero-band .hero-note { font-size: 10px; text-align: center; }
+}
